@@ -1,0 +1,35 @@
+{
+  "name": "multi-agent-code-review",
+  "version": "1.0.0",
+  "description": "Automated multi-agent code review system. Orchestrates 5 specialized AI reviewers (security, frontend, backend, performance, testing) running in parallel to provide comprehensive code analysis.",
+  "author": {
+    "name": "wvl-kairos",
+    "email": "plugins@wvl-kairos.com"
+  },
+  "homepage": "https://github.com/wvl-kairos/multi-agent-code-review",
+  "repository": "https://github.com/wvl-kairos/multi-agent-code-review",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "multi-agent",
+    "security",
+    "frontend",
+    "backend",
+    "performance",
+    "testing",
+    "linting",
+    "static-analysis",
+    "owasp",
+    "accessibility"
+  ],
+  "commands": "./commands/",
+  "agents": [
+    "./agents/review-orchestrator.md",
+    "./agents/security-reviewer.md",
+    "./agents/frontend-reviewer.md",
+    "./agents/backend-reviewer.md",
+    "./agents/performance-reviewer.md",
+    "./agents/testing-reviewer.md"
+  ],
+  "skills": "./skills/"
+}

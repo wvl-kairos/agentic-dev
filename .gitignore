@@ -1,0 +1,19 @@
+# Test files
+test-project/
+
+# Local claude config (not part of plugin distribution)
+.claude/
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Auto-generated (by claude-mem plugin, ignore except root)
+**/CLAUDE.md
+!/CLAUDE.md
