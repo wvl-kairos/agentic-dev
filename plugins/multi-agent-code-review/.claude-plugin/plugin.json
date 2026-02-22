@@ -6,8 +6,8 @@
     "name": "wvl-kairos",
     "email": "plugins@wvl-kairos.com"
   },
-  "homepage": "https://github.com/wvl-kairos/multi-agent-code-review",
-  "repository": "https://github.com/wvl-kairos/multi-agent-code-review",
+  "homepage": "https://github.com/wvl-kairos/agentic-dev/tree/main/plugins/multi-agent-code-review",
+  "repository": "https://github.com/wvl-kairos/agentic-dev",
   "license": "MIT",
   "keywords": [
     "code-review",

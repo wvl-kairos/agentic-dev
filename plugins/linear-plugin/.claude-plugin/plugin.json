@@ -6,8 +6,8 @@
     "name": "wvl-kairos",
     "email": "plugins@wvl-kairos.com"
   },
-  "homepage": "https://github.com/wvl-kairos/linear-plugin",
-  "repository": "https://github.com/wvl-kairos/linear-plugin",
+  "homepage": "https://github.com/wvl-kairos/agentic-dev/tree/main/plugins/linear-plugin",
+  "repository": "https://github.com/wvl-kairos/agentic-dev",
   "license": "MIT",
   "keywords": [
     "linear",
