@@ -4,6 +4,7 @@ File tracking utilities for the multi-agent code review system.
 
 import os
 import json
+import fnmatch
 from pathlib import Path
 from datetime import datetime
 from typing import List, Set
@@ -48,21 +49,22 @@ IGNORE_PATTERNS = [
 def should_ignore(filepath: str) -> bool:
     """Check if a file should be ignored for review."""
     filepath_lower = filepath.lower()
-    
+    filename = Path(filepath_lower).name
+
     for pattern in IGNORE_PATTERNS:
         if pattern.endswith('/'):
             # Directory pattern
             if pattern[:-1] in filepath_lower:
                 return True
-        elif pattern.startswith('*'):
-            # Extension pattern
-            if filepath_lower.endswith(pattern[1:]):
+        elif '*' in pattern:
+            # Glob pattern (e.g., *.min.js, .env*)
+            if fnmatch.fnmatch(filename, pattern):
                 return True
         else:
             # Exact match
             if pattern in filepath_lower:
                 return True
-    
+
     return False
 
 

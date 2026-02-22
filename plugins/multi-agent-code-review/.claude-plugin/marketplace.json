@@ -8,9 +8,9 @@
     {
       "name": "multi-agent-code-review",
       "source": {
-        "source": "url",
+        "type": "url",
         "url": "https://github.com/wvl-kairos/agentic-dev.git",
-          "path": "plugins/multi-agent-code-review"
+        "path": "plugins/multi-agent-code-review"
       },
       "description": "Automated multi-agent code review system with 5 specialized AI reviewers (security, frontend, backend, performance, testing) running in parallel.",
       "version": "1.0.0"
@@ -18,9 +18,9 @@
     {
       "name": "linear-plugin",
       "source": {
-        "source": "url",
+        "type": "url",
         "url": "https://github.com/wvl-kairos/agentic-dev.git",
-          "path": "plugins/linear-plugin"
+        "path": "plugins/linear-plugin"
       },
       "description": "Linear integration for Claude Code. Read issues and sync SpecKit phases as sub-issues.",
       "version": "1.0.0"
