@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 PLUGIN_ROOT = Path(__file__).parent.parent.parent  # multi-agent-code-review/
+MONOREPO_ROOT = PLUGIN_ROOT.parent.parent  # agentic-dev/
 
 
 class TestPluginManifest:
@@ -35,7 +36,7 @@ class TestMarketplaceManifest:
 
     def setup_method(self):
         self.marketplace = json.loads(
-            (PLUGIN_ROOT / '.claude-plugin' / 'marketplace.json').read_text()
+            (MONOREPO_ROOT / '.claude-plugin' / 'marketplace.json').read_text()
         )
         self.plugin = json.loads(
             (PLUGIN_ROOT / '.claude-plugin' / 'plugin.json').read_text()
@@ -54,10 +55,23 @@ class TestMarketplaceManifest:
             f"Version mismatch: marketplace={entry['version']}, plugin={self.plugin['version']}"
         )
 
-    def test_source_type_field_exists(self):
-        """Verify the discriminator field is 'type', not 'source'."""
+    def test_source_is_relative_path(self):
+        """Verify sources use relative paths for monorepo layout."""
         for plugin in self.marketplace['plugins']:
-            assert 'type' in plugin['source'], (
-                f"Plugin {plugin['name']} source missing 'type' field"
+            source = plugin['source']
+            assert isinstance(source, str), (
+                f"Plugin {plugin['name']} source should be a relative path string"
             )
-            assert plugin['source']['type'] == 'url'
+            assert source.startswith('./'), (
+                f"Plugin {plugin['name']} source should start with './'"
+            )
+
+    def test_source_paths_resolve_to_plugin_dirs(self):
+        """Verify each source path actually contains a plugin.json."""
+        for plugin in self.marketplace['plugins']:
+            plugin_dir = MONOREPO_ROOT / plugin['source']
+            manifest = plugin_dir / '.claude-plugin' / 'plugin.json'
+            assert manifest.exists(), (
+                f"Plugin {plugin['name']} source path {plugin['source']} "
+                f"does not contain .claude-plugin/plugin.json"
+            )

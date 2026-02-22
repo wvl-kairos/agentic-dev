@@ -7,7 +7,7 @@ Linear integration plugin that provides slash commands for the Linear-SpecKit wo
 ### Prerequisites
 
 1. [Claude Code](https://claude.ai/code) CLI installed
-2. Access to the `wvl-kairos` GitHub organization (this is a private repo)
+2. Access to the `wvl-kairos` GitHub organization
 3. `gh` CLI authenticated (recommended): `brew install gh && gh auth login`
 
 ### Step 1: Configure the marketplace (first time only)
@@ -15,10 +15,10 @@ Linear integration plugin that provides slash commands for the Linear-SpecKit wo
 All wvl-kairos plugins are registered in the `wvl-kairos-plugins` marketplace. If you already have it configured (e.g., you installed `multi-agent-code-review` before), skip to Step 2.
 
 ```bash
-claude plugin marketplace add wvl-kairos/multi-agent-code-review
+claude plugin marketplace add wvl-kairos/agentic-dev
 ```
 
-> The marketplace registry lives in the `wvl-kairos/multi-agent-code-review` repo. All wvl-kairos plugins are listed there, regardless of which repo they live in.
+> The marketplace registry lives in the `wvl-kairos/agentic-dev` monorepo. All wvl-kairos plugins are listed there.
 
 ### Step 2: Install the plugin
 
@@ -118,7 +118,7 @@ If a new version is available:
 
 ```bash
 # Update marketplace cache
-cd ~/.claude/plugins/marketplaces/wvl-kairos-plugins && git pull origin main
+cd ~/.claude/plugins/marketplaces/wvl-kairos-plugins && git pull
 
 # Reinstall
 claude plugin uninstall linear-plugin@wvl-kairos-plugins
@@ -130,6 +130,7 @@ claude plugin install linear-plugin@wvl-kairos-plugins
 | Issue | Solution |
 |-------|----------|
 | `not found in any configured marketplace` | Run Step 1 above, or update cache: `cd ~/.claude/plugins/marketplaces/wvl-kairos-plugins && git pull` |
+| Old marketplace still points to `multi-agent-code-review` repo | Remove old marketplace and re-add: `claude plugin marketplace remove wvl-kairos-plugins && claude plugin marketplace add wvl-kairos/agentic-dev` |
 | `Permission denied` during install | Ensure you have access to `wvl-kairos` GitHub org and run `gh auth login` |
 | Commands don't appear after install | Start a **new** Claude Code session |
 | Wrong install syntax | Use `@` not `/`: `linear-plugin@wvl-kairos-plugins` |

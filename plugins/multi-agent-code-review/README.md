@@ -23,7 +23,7 @@ An automated multi-agent code review system for Claude Code. Orchestrates 5 spec
 
 ```bash
 # Step 1: Add the wvl-kairos marketplace (one-time setup)
-claude plugin marketplace add wvl-kairos/multi-agent-code-review
+claude plugin marketplace add wvl-kairos/agentic-dev
 
 # Step 2: Install the plugin
 claude plugin install multi-agent-code-review@wvl-kairos-plugins
@@ -259,7 +259,7 @@ const result = await db.query(query, [userId]);
 
 | Issue | Solution |
 |-------|----------|
-| `not found in any configured marketplace` | Update marketplace cache: `cd ~/.claude/plugins/marketplaces/wvl-kairos-plugins && git pull` |
+| `not found in any configured marketplace` | Update marketplace cache: `cd ~/.claude/plugins/marketplaces/wvl-kairos-plugins && git pull`. If still fails, re-add: `claude plugin marketplace remove wvl-kairos-plugins && claude plugin marketplace add wvl-kairos/agentic-dev` |
 | Commands don't appear after install | Start a **new** Claude Code session |
 | Wrong install syntax error | Use `@` not `/`: `multi-agent-code-review@wvl-kairos-plugins` |
 
