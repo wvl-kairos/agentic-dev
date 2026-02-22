@@ -1,0 +1,22 @@
+{
+  "name": "linear-plugin",
+  "version": "1.0.0",
+  "description": "Linear integration plugin for Claude Code. Read Linear issues and sync SpecKit phases back as sub-issues. Provides /linear.read and /linear.sync commands for the Linear-SpecKit workflow.",
+  "author": {
+    "name": "wvl-kairos",
+    "email": "plugins@wvl-kairos.com"
+  },
+  "homepage": "https://github.com/wvl-kairos/linear-plugin",
+  "repository": "https://github.com/wvl-kairos/linear-plugin",
+  "license": "MIT",
+  "keywords": [
+    "linear",
+    "project-management",
+    "speckit",
+    "issue-tracking",
+    "sub-issues",
+    "workflow-automation"
+  ],
+  "commands": "./commands/",
+  "skills": "./skills/"
+}
