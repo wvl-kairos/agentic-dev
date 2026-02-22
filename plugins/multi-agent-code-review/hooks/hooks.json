@@ -1,0 +1,31 @@
+{
+  "$schema": "https://claude.ai/schemas/hooks.json",
+  "description": "Hooks for multi-agent code review system",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/track-modified-files.py",
+            "timeout": 5,
+            "description": "Track modified files for code review"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/scripts/auto-review.py",
+            "timeout": 30,
+            "description": "Trigger automatic code review if files were modified"
+          }
+        ]
+      }
+    ]
+  }
+}
