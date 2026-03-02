@@ -1,0 +1,38 @@
+SAFETY INCIDENT REPORT
+Document ID: DOC-SAFE-001
+Incident Date: 2026-01-28
+Location: Production Line 3 — Assembly Area (line-assembly-1)
+Reported by: Carlos Mendez, Shift Supervisor
+Classification: Near-Miss (Severity Level 2)
+
+1. INCIDENT DESCRIPTION
+At approximately 14:35 on January 28, 2026, operator Lisa Zhang (person-lzhang) was performing a routine assembly operation on the Aerospace Component Kit (prod-aerospace-kit) workstation. During the pneumatic press operation, the safety interlock on Press Station #3 failed to engage, allowing the press cycle to initiate while the operator's hands were still in the work zone.
+
+The operator withdrew her hands before the press completed its stroke. No injury occurred.
+
+2. EQUIPMENT INVOLVED
+- Press Station #3 on Assembly Line 1 (line-assembly-1)
+- Pneumatic press model: AP-500 (associated with equip-press-ap500)
+- Safety interlock: Dual palm button system + light curtain
+
+3. ROOT CAUSE ANALYSIS
+- Primary cause: Light curtain sensor misalignment due to vibration from adjacent equipment.
+- Contributing factor: Preventive maintenance on light curtain was overdue by 2 weeks.
+- Contributing factor: Recent relocation of adjacent hydraulic unit increased vibration levels.
+
+4. IMMEDIATE ACTIONS TAKEN
+- Press Station #3 immediately locked out and tagged out.
+- Light curtain realigned and tested — passed all functional checks.
+- All operators on Line 1 notified of incident.
+- Additional inspection of all light curtains on Assembly Lines 1 and 2.
+
+5. CORRECTIVE ACTIONS
+- CA-001: Add light curtain alignment to weekly PM checklist (Owner: Maria Chen, Due: 2026-02-05)
+- CA-002: Install vibration dampening mounts on hydraulic unit (Owner: Maintenance, Due: 2026-02-15)
+- CA-003: Review and update PM schedule for all safety-critical devices (Owner: David Park, Due: 2026-02-28)
+- CA-004: Conduct safety stand-down meeting with all production staff (Owner: Carlos Mendez, Due: 2026-02-01)
+
+6. LESSONS LEARNED
+- Safety device maintenance must be prioritized over production schedules.
+- Equipment relocation assessments must include impact analysis on adjacent safety systems.
+- Near-miss reporting is critical — this incident prevented a potential crush injury.

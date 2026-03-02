@@ -1,0 +1,60 @@
+VENDOR QUALITY AGREEMENT
+Document ID: DOC-VQA-001
+Effective Date: 2026-01-01
+Between: Cerebro Manufacturing Inc. and Key Suppliers
+
+1. PARTIES AND SCOPE
+
+This agreement applies to the following approved suppliers:
+- Precision Steel Co (supp-precision-steel) — Steel billets, bar stock, forgings
+- Advanced Polymers Inc (supp-advanced-polymers) — Nylon 66, PPS resin compounds
+- Global Components Ltd (supp-global-components) — Bearings, seals, inserts, fasteners
+- ChemTech Solutions (supp-chemtech) — Coatings, lubricants, chemical compounds
+- TitanParts Inc (supp-titanparts) — Titanium hardware, specialty alloys
+
+2. QUALITY REQUIREMENTS
+
+2.1 Incoming Material Specifications
+- All materials must conform to purchase order specifications and referenced standards.
+- Certificate of Conformance (CoC) required with every shipment.
+- Material test reports (MTR) required for all metal raw materials.
+- Shelf-life materials: Minimum 75% remaining life at time of delivery.
+
+2.2 Defect Rate Limits
+| Supplier | Current PPM | Target PPM | Max Acceptable |
+|----------|-------------|------------|----------------|
+| Precision Steel Co | 850 | 500 | 1,000 |
+| Advanced Polymers Inc | 1,200 | 800 | 1,500 |
+| Global Components Ltd | 320 | 250 | 500 |
+| ChemTech Solutions | 150 | 100 | 300 |
+| TitanParts Inc | 95 | 50 | 200 |
+
+2.3 Delivery Requirements
+- On-time delivery target: 97%
+- Advance Ship Notice (ASN) required 48 hours before delivery.
+- No partial shipments without prior approval.
+- Emergency orders: 72-hour expedite capability required.
+
+3. AUDIT AND ASSESSMENT
+- Annual quality audit for Tier 1 suppliers (spend > $500K/year).
+- Biennial audit for Tier 2 suppliers.
+- Right-of-access clause: Cerebro may audit supplier facilities with 5 business days notice.
+- Supplier scorecard reviewed quarterly: Quality (40%), Delivery (30%), Cost (20%), Service (10%).
+
+4. CORRECTIVE ACTION PROCESS
+- Supplier NCR response required within 5 business days.
+- 8D report required for critical defects or recurring issues.
+- Corrective action verification within 30 days.
+- Three unresolved CARs within 12 months triggers supplier review and potential disqualification.
+
+5. CONTINUOUS IMPROVEMENT
+- Annual cost reduction target: 2-3% through process improvements.
+- Joint Kaizen events: Minimum 1 per year for Tier 1 suppliers.
+- Technology sharing: Quarterly business reviews to discuss new capabilities.
+
+6. SUPPLIER RATINGS (CURRENT)
+- Precision Steel Co: 4.2/5.0 (Good — capacity concerns)
+- Advanced Polymers Inc: 3.8/5.0 (Acceptable — material consistency issues)
+- Global Components Ltd: 4.5/5.0 (Excellent)
+- ChemTech Solutions: 4.7/5.0 (Excellent)
+- TitanParts Inc: 4.6/5.0 (Excellent)

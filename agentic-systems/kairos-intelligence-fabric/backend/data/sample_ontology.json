@@ -1,0 +1,913 @@
+{
+  "nodes": [
+    {
+      "id": "equip-cnc-a7",
+      "type": "equipment",
+      "label": "CNC Mill A-7",
+      "properties": {
+        "status": "operational",
+        "department": "machining",
+        "utilization": 0.87,
+        "last_maintenance": "2026-01-15",
+        "mtbf_hours": 2400,
+        "oee": 0.82
+      }
+    },
+    {
+      "id": "equip-cnc-b3",
+      "type": "equipment",
+      "label": "CNC Mill B-3",
+      "properties": {
+        "status": "operational",
+        "department": "machining",
+        "utilization": 0.72,
+        "last_maintenance": "2026-02-01",
+        "mtbf_hours": 1800,
+        "oee": 0.76
+      }
+    },
+    {
+      "id": "equip-lathe-l1",
+      "type": "equipment",
+      "label": "Lathe L-1",
+      "properties": {
+        "status": "operational",
+        "department": "machining",
+        "utilization": 0.91,
+        "last_maintenance": "2026-01-20",
+        "mtbf_hours": 3200,
+        "oee": 0.88
+      }
+    },
+    {
+      "id": "equip-lathe-l2",
+      "type": "equipment",
+      "label": "Lathe L-2",
+      "properties": {
+        "status": "maintenance",
+        "department": "machining",
+        "utilization": 0.65,
+        "last_maintenance": "2026-02-10",
+        "mtbf_hours": 1500,
+        "oee": 0.61
+      }
+    },
+    {
+      "id": "equip-press-p1",
+      "type": "equipment",
+      "label": "Hydraulic Press P-1",
+      "properties": {
+        "status": "operational",
+        "department": "forming",
+        "utilization": 0.78,
+        "last_maintenance": "2026-01-28",
+        "mtbf_hours": 2800,
+        "oee": 0.74
+      }
+    },
+    {
+      "id": "equip-weld-w1",
+      "type": "equipment",
+      "label": "Robotic Welder W-1",
+      "properties": {
+        "status": "operational",
+        "department": "assembly",
+        "utilization": 0.83,
+        "last_maintenance": "2026-02-05",
+        "mtbf_hours": 2100,
+        "oee": 0.79
+      }
+    },
+    {
+      "id": "equip-asm-as1",
+      "type": "equipment",
+      "label": "Assembly Station AS-1",
+      "properties": {
+        "status": "operational",
+        "department": "assembly",
+        "utilization": 0.90,
+        "last_maintenance": "2026-01-10",
+        "mtbf_hours": 4000,
+        "oee": 0.86
+      }
+    },
+    {
+      "id": "equip-asm-as2",
+      "type": "equipment",
+      "label": "Assembly Station AS-2",
+      "properties": {
+        "status": "idle",
+        "department": "assembly",
+        "utilization": 0.55,
+        "last_maintenance": "2026-02-12",
+        "mtbf_hours": 3800,
+        "oee": 0.52
+      }
+    },
+    {
+      "id": "equip-paint-pb1",
+      "type": "equipment",
+      "label": "Paint Booth PB-1",
+      "properties": {
+        "status": "operational",
+        "department": "finishing",
+        "utilization": 0.76,
+        "last_maintenance": "2026-01-22",
+        "mtbf_hours": 2600,
+        "oee": 0.71
+      }
+    },
+    {
+      "id": "equip-insp-is1",
+      "type": "equipment",
+      "label": "CMM Inspection IS-1",
+      "properties": {
+        "status": "operational",
+        "department": "quality",
+        "utilization": 0.88,
+        "last_maintenance": "2026-02-08",
+        "mtbf_hours": 5000,
+        "oee": 0.85
+      }
+    },
+    {
+      "id": "equip-pack-pk1",
+      "type": "equipment",
+      "label": "Packaging Station PK-1",
+      "properties": {
+        "status": "operational",
+        "department": "packaging",
+        "utilization": 0.62,
+        "last_maintenance": "2026-01-30",
+        "mtbf_hours": 4500,
+        "oee": 0.59
+      }
+    },
+    {
+      "id": "equip-robot-rc1",
+      "type": "equipment",
+      "label": "Robot Cell RC-1",
+      "properties": {
+        "status": "operational",
+        "department": "machining",
+        "utilization": 0.94,
+        "last_maintenance": "2026-02-14",
+        "mtbf_hours": 3500,
+        "oee": 0.91
+      }
+    },
+
+    {
+      "id": "prod-hc100",
+      "type": "products",
+      "label": "Hydraulic Cylinder HC-100",
+      "properties": {
+        "sku": "HC-100",
+        "unit_cost": 245.50,
+        "cycle_time_minutes": 45,
+        "current_inventory": 128,
+        "reorder_point": 50
+      }
+    },
+    {
+      "id": "prod-mb200",
+      "type": "products",
+      "label": "Mounting Bracket MB-200",
+      "properties": {
+        "sku": "MB-200",
+        "unit_cost": 18.75,
+        "cycle_time_minutes": 8,
+        "current_inventory": 540,
+        "reorder_point": 200
+      }
+    },
+    {
+      "id": "prod-ds300",
+      "type": "products",
+      "label": "Drive Shaft DS-300",
+      "properties": {
+        "sku": "DS-300",
+        "unit_cost": 189.00,
+        "cycle_time_minutes": 35,
+        "current_inventory": 76,
+        "reorder_point": 30
+      }
+    },
+    {
+      "id": "prod-ga400",
+      "type": "products",
+      "label": "Gear Assembly GA-400",
+      "properties": {
+        "sku": "GA-400",
+        "unit_cost": 312.00,
+        "cycle_time_minutes": 60,
+        "current_inventory": 42,
+        "reorder_point": 20
+      }
+    },
+    {
+      "id": "prod-hu500",
+      "type": "products",
+      "label": "Housing Unit HU-500",
+      "properties": {
+        "sku": "HU-500",
+        "unit_cost": 156.25,
+        "cycle_time_minutes": 28,
+        "current_inventory": 95,
+        "reorder_point": 40
+      }
+    },
+    {
+      "id": "prod-sk600",
+      "type": "products",
+      "label": "Seal Kit SK-600",
+      "properties": {
+        "sku": "SK-600",
+        "unit_cost": 34.50,
+        "cycle_time_minutes": 12,
+        "current_inventory": 320,
+        "reorder_point": 150
+      }
+    },
+    {
+      "id": "prod-ba700",
+      "type": "products",
+      "label": "Bearing Assembly BA-700",
+      "properties": {
+        "sku": "BA-700",
+        "unit_cost": 87.00,
+        "cycle_time_minutes": 20,
+        "current_inventory": 165,
+        "reorder_point": 75
+      }
+    },
+    {
+      "id": "prod-cv800",
+      "type": "products",
+      "label": "Control Valve CV-800",
+      "properties": {
+        "sku": "CV-800",
+        "unit_cost": 428.00,
+        "cycle_time_minutes": 55,
+        "current_inventory": 31,
+        "reorder_point": 15
+      }
+    },
+    {
+      "id": "prod-ph900",
+      "type": "products",
+      "label": "Pump Housing PH-900",
+      "properties": {
+        "sku": "PH-900",
+        "unit_cost": 267.50,
+        "cycle_time_minutes": 40,
+        "current_inventory": 58,
+        "reorder_point": 25
+      }
+    },
+    {
+      "id": "prod-ar1000",
+      "type": "products",
+      "label": "Actuator Rod AR-1000",
+      "properties": {
+        "sku": "AR-1000",
+        "unit_cost": 145.00,
+        "cycle_time_minutes": 22,
+        "current_inventory": 112,
+        "reorder_point": 60
+      }
+    },
+
+    {
+      "id": "order-wo-001",
+      "type": "orders",
+      "label": "WO-2026-001",
+      "properties": {
+        "customer": "Caterpillar Inc.",
+        "priority": "high",
+        "due_date": "2026-03-01",
+        "quantity": 500,
+        "status": "in-progress",
+        "completion_pct": 0.72
+      }
+    },
+    {
+      "id": "order-wo-002",
+      "type": "orders",
+      "label": "WO-2026-002",
+      "properties": {
+        "customer": "John Deere",
+        "priority": "medium",
+        "due_date": "2026-03-15",
+        "quantity": 250,
+        "status": "in-progress",
+        "completion_pct": 0.45
+      }
+    },
+    {
+      "id": "order-wo-003",
+      "type": "orders",
+      "label": "WO-2026-003",
+      "properties": {
+        "customer": "Parker Hannifin",
+        "priority": "high",
+        "due_date": "2026-02-28",
+        "quantity": 1000,
+        "status": "in-progress",
+        "completion_pct": 0.88
+      }
+    },
+    {
+      "id": "order-wo-004",
+      "type": "orders",
+      "label": "WO-2026-004",
+      "properties": {
+        "customer": "Eaton Corporation",
+        "priority": "low",
+        "due_date": "2026-04-10",
+        "quantity": 150,
+        "status": "pending",
+        "completion_pct": 0.0
+      }
+    },
+    {
+      "id": "order-wo-005",
+      "type": "orders",
+      "label": "WO-2026-005",
+      "properties": {
+        "customer": "Bosch Rexroth",
+        "priority": "high",
+        "due_date": "2026-02-25",
+        "quantity": 800,
+        "status": "in-progress",
+        "completion_pct": 0.93
+      }
+    },
+    {
+      "id": "order-wo-006",
+      "type": "orders",
+      "label": "WO-2026-006",
+      "properties": {
+        "customer": "Danfoss",
+        "priority": "medium",
+        "due_date": "2026-03-20",
+        "quantity": 300,
+        "status": "pending",
+        "completion_pct": 0.0
+      }
+    },
+    {
+      "id": "order-wo-007",
+      "type": "orders",
+      "label": "WO-2026-007",
+      "properties": {
+        "customer": "Caterpillar Inc.",
+        "priority": "medium",
+        "due_date": "2026-03-10",
+        "quantity": 200,
+        "status": "in-progress",
+        "completion_pct": 0.31
+      }
+    },
+    {
+      "id": "order-wo-008",
+      "type": "orders",
+      "label": "WO-2026-008",
+      "properties": {
+        "customer": "Komatsu",
+        "priority": "high",
+        "due_date": "2026-02-22",
+        "quantity": 600,
+        "status": "complete",
+        "completion_pct": 1.0
+      }
+    },
+    {
+      "id": "order-wo-009",
+      "type": "orders",
+      "label": "WO-2026-009",
+      "properties": {
+        "customer": "Volvo CE",
+        "priority": "low",
+        "due_date": "2026-04-01",
+        "quantity": 100,
+        "status": "on-hold",
+        "completion_pct": 0.15
+      }
+    },
+    {
+      "id": "order-wo-010",
+      "type": "orders",
+      "label": "WO-2026-010",
+      "properties": {
+        "customer": "Liebherr",
+        "priority": "medium",
+        "due_date": "2026-03-25",
+        "quantity": 450,
+        "status": "pending",
+        "completion_pct": 0.0
+      }
+    },
+
+    {
+      "id": "qual-spc-001",
+      "type": "quality",
+      "label": "SPC-001 Bore Diameter",
+      "properties": {
+        "measurement_type": "SPC",
+        "parameter": "bore_diameter_mm",
+        "value": 50.02,
+        "upper_control_limit": 50.05,
+        "lower_control_limit": 49.95,
+        "sigma_level": 4.2,
+        "pass_fail": "pass"
+      }
+    },
+    {
+      "id": "qual-spc-002",
+      "type": "quality",
+      "label": "SPC-002 Surface Finish",
+      "properties": {
+        "measurement_type": "SPC",
+        "parameter": "surface_roughness_ra",
+        "value": 0.8,
+        "upper_control_limit": 1.6,
+        "lower_control_limit": 0.4,
+        "sigma_level": 3.8,
+        "pass_fail": "pass"
+      }
+    },
+    {
+      "id": "qual-spc-003",
+      "type": "quality",
+      "label": "SPC-003 Weld Strength",
+      "properties": {
+        "measurement_type": "SPC",
+        "parameter": "tensile_strength_mpa",
+        "value": 485,
+        "upper_control_limit": 520,
+        "lower_control_limit": 450,
+        "sigma_level": 3.5,
+        "pass_fail": "pass"
+      }
+    },
+    {
+      "id": "qual-spc-004",
+      "type": "quality",
+      "label": "SPC-004 Shaft Runout",
+      "properties": {
+        "measurement_type": "SPC",
+        "parameter": "total_runout_mm",
+        "value": 0.025,
+        "upper_control_limit": 0.03,
+        "lower_control_limit": 0.0,
+        "sigma_level": 2.8,
+        "pass_fail": "warning"
+      }
+    },
+    {
+      "id": "qual-oee-001",
+      "type": "quality",
+      "label": "OEE-001 Line Alpha",
+      "properties": {
+        "measurement_type": "OEE",
+        "availability": 0.92,
+        "performance": 0.88,
+        "quality_rate": 0.97,
+        "oee_score": 0.785,
+        "period": "2026-02-W3"
+      }
+    },
+    {
+      "id": "qual-oee-002",
+      "type": "quality",
+      "label": "OEE-002 Line Beta",
+      "properties": {
+        "measurement_type": "OEE",
+        "availability": 0.85,
+        "performance": 0.91,
+        "quality_rate": 0.94,
+        "oee_score": 0.727,
+        "period": "2026-02-W3"
+      }
+    },
+    {
+      "id": "qual-def-001",
+      "type": "quality",
+      "label": "DEF-001 Weld Porosity",
+      "properties": {
+        "measurement_type": "defect",
+        "defect_type": "porosity",
+        "severity": "minor",
+        "count": 3,
+        "batch_size": 500,
+        "defect_rate": 0.006
+      }
+    },
+    {
+      "id": "qual-def-002",
+      "type": "quality",
+      "label": "DEF-002 Dim Out-of-Spec",
+      "properties": {
+        "measurement_type": "defect",
+        "defect_type": "dimensional_deviation",
+        "severity": "major",
+        "count": 1,
+        "batch_size": 200,
+        "defect_rate": 0.005
+      }
+    },
+
+    {
+      "id": "person-op-001",
+      "type": "people",
+      "label": "Mike Torres",
+      "properties": {
+        "role": "CNC Operator",
+        "department": "machining",
+        "shift": "A",
+        "certifications": ["CNC Level 3", "GD&T"],
+        "years_experience": 12
+      }
+    },
+    {
+      "id": "person-op-002",
+      "type": "people",
+      "label": "Sarah Chen",
+      "properties": {
+        "role": "Assembly Technician",
+        "department": "assembly",
+        "shift": "A",
+        "certifications": ["IPC-A-610", "Torque Certification"],
+        "years_experience": 8
+      }
+    },
+    {
+      "id": "person-op-003",
+      "type": "people",
+      "label": "James Wilson",
+      "properties": {
+        "role": "Welder",
+        "department": "assembly",
+        "shift": "B",
+        "certifications": ["AWS D1.1", "6G Pipe"],
+        "years_experience": 15
+      }
+    },
+    {
+      "id": "person-op-004",
+      "type": "people",
+      "label": "Ana Rodriguez",
+      "properties": {
+        "role": "Paint Operator",
+        "department": "finishing",
+        "shift": "A",
+        "certifications": ["NACE Level 2", "EPA RRP"],
+        "years_experience": 6
+      }
+    },
+    {
+      "id": "person-sup-001",
+      "type": "people",
+      "label": "David Park",
+      "properties": {
+        "role": "Shift Supervisor",
+        "department": "machining",
+        "shift": "A",
+        "certifications": ["Lean Six Sigma Green Belt", "OSHA 30"],
+        "years_experience": 18
+      }
+    },
+    {
+      "id": "person-sup-002",
+      "type": "people",
+      "label": "Lisa Martinez",
+      "properties": {
+        "role": "Shift Supervisor",
+        "department": "assembly",
+        "shift": "B",
+        "certifications": ["Lean Six Sigma Black Belt", "PMP"],
+        "years_experience": 14
+      }
+    },
+    {
+      "id": "person-qm-001",
+      "type": "people",
+      "label": "Robert Kim",
+      "properties": {
+        "role": "Quality Manager",
+        "department": "quality",
+        "shift": "A",
+        "certifications": ["ASQ CQE", "ISO 9001 Lead Auditor"],
+        "years_experience": 20
+      }
+    },
+    {
+      "id": "person-ml-001",
+      "type": "people",
+      "label": "Kevin O'Brien",
+      "properties": {
+        "role": "Maintenance Lead",
+        "department": "maintenance",
+        "shift": "A",
+        "certifications": ["CMRP", "Electrical Journeyman"],
+        "years_experience": 16
+      }
+    },
+
+    {
+      "id": "supplier-steel",
+      "type": "suppliers",
+      "label": "Nucor Steel",
+      "properties": {
+        "material_type": "carbon_steel",
+        "lead_time_days": 14,
+        "quality_rating": 4.5,
+        "location": "Charlotte, NC",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-alum",
+      "type": "suppliers",
+      "label": "Alcoa Aluminum",
+      "properties": {
+        "material_type": "aluminum_alloy",
+        "lead_time_days": 10,
+        "quality_rating": 4.8,
+        "location": "Pittsburgh, PA",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-seals",
+      "type": "suppliers",
+      "label": "Trelleborg Sealing",
+      "properties": {
+        "material_type": "seals_gaskets",
+        "lead_time_days": 21,
+        "quality_rating": 4.2,
+        "location": "Fort Wayne, IN",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-elec",
+      "type": "suppliers",
+      "label": "Molex Electronics",
+      "properties": {
+        "material_type": "electronic_components",
+        "lead_time_days": 28,
+        "quality_rating": 4.6,
+        "location": "Lisle, IL",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-fast",
+      "type": "suppliers",
+      "label": "Fastenal Co.",
+      "properties": {
+        "material_type": "fasteners",
+        "lead_time_days": 3,
+        "quality_rating": 4.0,
+        "location": "Winona, MN",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-lube",
+      "type": "suppliers",
+      "label": "Castrol Industrial",
+      "properties": {
+        "material_type": "lubricants_coolants",
+        "lead_time_days": 7,
+        "quality_rating": 4.3,
+        "location": "Naperville, IL",
+        "contract_status": "active"
+      }
+    },
+    {
+      "id": "supplier-pack",
+      "type": "suppliers",
+      "label": "Sealed Air Corp",
+      "properties": {
+        "material_type": "packaging_materials",
+        "lead_time_days": 5,
+        "quality_rating": 3.9,
+        "location": "Charlotte, NC",
+        "contract_status": "active"
+      }
+    },
+
+    {
+      "id": "line-alpha",
+      "type": "production_lines",
+      "label": "Line Alpha - Machining",
+      "properties": {
+        "capacity_units_per_hour": 45,
+        "current_throughput": 38,
+        "status": "running",
+        "product_types": ["shafts", "housings", "cylinders"],
+        "shift_pattern": "3-shift"
+      }
+    },
+    {
+      "id": "line-beta",
+      "type": "production_lines",
+      "label": "Line Beta - Assembly",
+      "properties": {
+        "capacity_units_per_hour": 30,
+        "current_throughput": 26,
+        "status": "running",
+        "product_types": ["gear_assemblies", "valve_assemblies"],
+        "shift_pattern": "2-shift"
+      }
+    },
+    {
+      "id": "line-gamma",
+      "type": "production_lines",
+      "label": "Line Gamma - Finishing",
+      "properties": {
+        "capacity_units_per_hour": 60,
+        "current_throughput": 45,
+        "status": "running",
+        "product_types": ["all_painted_parts"],
+        "shift_pattern": "2-shift"
+      }
+    },
+    {
+      "id": "line-delta",
+      "type": "production_lines",
+      "label": "Line Delta - Packaging",
+      "properties": {
+        "capacity_units_per_hour": 80,
+        "current_throughput": 52,
+        "status": "running",
+        "product_types": ["all_finished_goods"],
+        "shift_pattern": "1-shift"
+      }
+    },
+    {
+      "id": "line-epsilon",
+      "type": "production_lines",
+      "label": "Line Epsilon - Testing",
+      "properties": {
+        "capacity_units_per_hour": 20,
+        "current_throughput": 18,
+        "status": "running",
+        "product_types": ["hydraulic_components", "high_precision"],
+        "shift_pattern": "2-shift"
+      }
+    }
+  ],
+
+  "edges": [
+    {"source": "equip-cnc-a7", "target": "prod-hc100", "type": "PRODUCES", "properties": {"rate": "12 units/hr", "quality_score": 0.98}},
+    {"source": "equip-cnc-a7", "target": "prod-ds300", "type": "PRODUCES", "properties": {"rate": "8 units/hr", "quality_score": 0.97}},
+    {"source": "equip-cnc-b3", "target": "prod-hu500", "type": "PRODUCES", "properties": {"rate": "15 units/hr", "quality_score": 0.96}},
+    {"source": "equip-cnc-b3", "target": "prod-ph900", "type": "PRODUCES", "properties": {"rate": "10 units/hr", "quality_score": 0.95}},
+    {"source": "equip-lathe-l1", "target": "prod-ds300", "type": "PRODUCES", "properties": {"rate": "18 units/hr", "quality_score": 0.99}},
+    {"source": "equip-lathe-l1", "target": "prod-ar1000", "type": "PRODUCES", "properties": {"rate": "22 units/hr", "quality_score": 0.97}},
+    {"source": "equip-lathe-l2", "target": "prod-ba700", "type": "PRODUCES", "properties": {"rate": "14 units/hr", "quality_score": 0.94}},
+    {"source": "equip-press-p1", "target": "prod-mb200", "type": "PRODUCES", "properties": {"rate": "45 units/hr", "quality_score": 0.96}},
+    {"source": "equip-press-p1", "target": "prod-hu500", "type": "PRODUCES", "properties": {"rate": "20 units/hr", "quality_score": 0.93}},
+    {"source": "equip-weld-w1", "target": "prod-hc100", "type": "PRODUCES", "properties": {"rate": "8 units/hr", "quality_score": 0.95}},
+    {"source": "equip-weld-w1", "target": "prod-ga400", "type": "PRODUCES", "properties": {"rate": "6 units/hr", "quality_score": 0.92}},
+    {"source": "equip-asm-as1", "target": "prod-ga400", "type": "PRODUCES", "properties": {"rate": "10 units/hr", "quality_score": 0.97}},
+    {"source": "equip-asm-as1", "target": "prod-cv800", "type": "PRODUCES", "properties": {"rate": "7 units/hr", "quality_score": 0.98}},
+    {"source": "equip-asm-as2", "target": "prod-sk600", "type": "PRODUCES", "properties": {"rate": "30 units/hr", "quality_score": 0.96}},
+    {"source": "equip-paint-pb1", "target": "prod-hu500", "type": "PRODUCES", "properties": {"rate": "25 units/hr", "quality_score": 0.91}},
+    {"source": "equip-paint-pb1", "target": "prod-ph900", "type": "PRODUCES", "properties": {"rate": "20 units/hr", "quality_score": 0.90}},
+    {"source": "equip-robot-rc1", "target": "prod-mb200", "type": "PRODUCES", "properties": {"rate": "50 units/hr", "quality_score": 0.99}},
+    {"source": "equip-robot-rc1", "target": "prod-ar1000", "type": "PRODUCES", "properties": {"rate": "35 units/hr", "quality_score": 0.98}},
+    {"source": "line-alpha", "target": "prod-hc100", "type": "PRODUCES", "properties": {"rate": "38 units/hr"}},
+    {"source": "line-alpha", "target": "prod-ds300", "type": "PRODUCES", "properties": {"rate": "38 units/hr"}},
+    {"source": "line-alpha", "target": "prod-hu500", "type": "PRODUCES", "properties": {"rate": "38 units/hr"}},
+    {"source": "line-beta", "target": "prod-ga400", "type": "PRODUCES", "properties": {"rate": "26 units/hr"}},
+    {"source": "line-beta", "target": "prod-cv800", "type": "PRODUCES", "properties": {"rate": "26 units/hr"}},
+
+    {"source": "prod-hc100", "target": "prod-sk600", "type": "REQUIRES", "properties": {"quantity_per": 2, "bom_level": 1}},
+    {"source": "prod-hc100", "target": "prod-ba700", "type": "REQUIRES", "properties": {"quantity_per": 4, "bom_level": 1}},
+    {"source": "prod-hc100", "target": "prod-ar1000", "type": "REQUIRES", "properties": {"quantity_per": 1, "bom_level": 1}},
+    {"source": "prod-ga400", "target": "prod-ba700", "type": "REQUIRES", "properties": {"quantity_per": 6, "bom_level": 1}},
+    {"source": "prod-ga400", "target": "prod-ds300", "type": "REQUIRES", "properties": {"quantity_per": 2, "bom_level": 1}},
+    {"source": "prod-cv800", "target": "prod-sk600", "type": "REQUIRES", "properties": {"quantity_per": 3, "bom_level": 1}},
+    {"source": "prod-cv800", "target": "prod-hu500", "type": "REQUIRES", "properties": {"quantity_per": 1, "bom_level": 1}},
+    {"source": "prod-cv800", "target": "prod-ar1000", "type": "REQUIRES", "properties": {"quantity_per": 1, "bom_level": 1}},
+    {"source": "prod-ph900", "target": "prod-sk600", "type": "REQUIRES", "properties": {"quantity_per": 4, "bom_level": 1}},
+    {"source": "prod-ph900", "target": "prod-ba700", "type": "REQUIRES", "properties": {"quantity_per": 2, "bom_level": 1}},
+    {"source": "order-wo-001", "target": "prod-hc100", "type": "REQUIRES", "properties": {"quantity": 500}},
+    {"source": "order-wo-002", "target": "prod-ga400", "type": "REQUIRES", "properties": {"quantity": 250}},
+    {"source": "order-wo-003", "target": "prod-mb200", "type": "REQUIRES", "properties": {"quantity": 1000}},
+    {"source": "order-wo-004", "target": "prod-cv800", "type": "REQUIRES", "properties": {"quantity": 150}},
+    {"source": "order-wo-005", "target": "prod-ds300", "type": "REQUIRES", "properties": {"quantity": 800}},
+    {"source": "order-wo-006", "target": "prod-hu500", "type": "REQUIRES", "properties": {"quantity": 300}},
+    {"source": "order-wo-007", "target": "prod-ph900", "type": "REQUIRES", "properties": {"quantity": 200}},
+    {"source": "order-wo-008", "target": "prod-ar1000", "type": "REQUIRES", "properties": {"quantity": 600}},
+    {"source": "order-wo-009", "target": "prod-sk600", "type": "REQUIRES", "properties": {"quantity": 100}},
+    {"source": "order-wo-010", "target": "prod-ba700", "type": "REQUIRES", "properties": {"quantity": 450}},
+    {"source": "equip-cnc-a7", "target": "supplier-steel", "type": "REQUIRES", "properties": {"material": "4140 steel bar"}},
+    {"source": "equip-cnc-b3", "target": "supplier-steel", "type": "REQUIRES", "properties": {"material": "1045 steel plate"}},
+    {"source": "equip-lathe-l1", "target": "supplier-steel", "type": "REQUIRES", "properties": {"material": "4340 steel round"}},
+    {"source": "equip-press-p1", "target": "supplier-alum", "type": "REQUIRES", "properties": {"material": "6061-T6 sheet"}},
+    {"source": "equip-weld-w1", "target": "supplier-fast", "type": "REQUIRES", "properties": {"material": "welding wire ER70S-6"}},
+    {"source": "equip-robot-rc1", "target": "supplier-lube", "type": "REQUIRES", "properties": {"material": "cutting fluid"}},
+    {"source": "equip-cnc-a7", "target": "supplier-lube", "type": "REQUIRES", "properties": {"material": "coolant concentrate"}},
+    {"source": "equip-asm-as1", "target": "supplier-fast", "type": "REQUIRES", "properties": {"material": "M8 bolts, lock washers"}},
+    {"source": "equip-asm-as2", "target": "supplier-seals", "type": "REQUIRES", "properties": {"material": "O-rings, gasket sheets"}},
+
+    {"source": "prod-hc100", "target": "qual-spc-001", "type": "INSPECTED_BY", "properties": {"frequency": "every_50_units"}},
+    {"source": "prod-ds300", "target": "qual-spc-002", "type": "INSPECTED_BY", "properties": {"frequency": "every_100_units"}},
+    {"source": "prod-ga400", "target": "qual-spc-003", "type": "INSPECTED_BY", "properties": {"frequency": "every_batch"}},
+    {"source": "prod-ds300", "target": "qual-spc-004", "type": "INSPECTED_BY", "properties": {"frequency": "every_25_units"}},
+    {"source": "prod-hc100", "target": "qual-def-001", "type": "INSPECTED_BY", "properties": {"inspection_date": "2026-02-18"}},
+    {"source": "prod-hu500", "target": "qual-def-002", "type": "INSPECTED_BY", "properties": {"inspection_date": "2026-02-17"}},
+    {"source": "equip-cnc-a7", "target": "qual-spc-001", "type": "INSPECTED_BY", "properties": {"type": "machine_capability"}},
+    {"source": "equip-lathe-l1", "target": "qual-spc-004", "type": "INSPECTED_BY", "properties": {"type": "machine_capability"}},
+    {"source": "equip-weld-w1", "target": "qual-spc-003", "type": "INSPECTED_BY", "properties": {"type": "process_capability"}},
+    {"source": "equip-weld-w1", "target": "qual-def-001", "type": "INSPECTED_BY", "properties": {"type": "defect_source"}},
+    {"source": "equip-cnc-b3", "target": "qual-def-002", "type": "INSPECTED_BY", "properties": {"type": "defect_source"}},
+    {"source": "line-alpha", "target": "qual-oee-001", "type": "INSPECTED_BY", "properties": {"type": "oee_measurement"}},
+    {"source": "line-beta", "target": "qual-oee-002", "type": "INSPECTED_BY", "properties": {"type": "oee_measurement"}},
+    {"source": "equip-insp-is1", "target": "qual-spc-001", "type": "INSPECTED_BY", "properties": {"type": "measurement_device"}},
+    {"source": "equip-insp-is1", "target": "qual-spc-002", "type": "INSPECTED_BY", "properties": {"type": "measurement_device"}},
+    {"source": "equip-insp-is1", "target": "qual-spc-004", "type": "INSPECTED_BY", "properties": {"type": "measurement_device"}},
+
+    {"source": "prod-hc100", "target": "supplier-steel", "type": "SUPPLIED_BY", "properties": {"material": "4140 chrome-moly steel"}},
+    {"source": "prod-ds300", "target": "supplier-steel", "type": "SUPPLIED_BY", "properties": {"material": "4340 alloy steel"}},
+    {"source": "prod-mb200", "target": "supplier-alum", "type": "SUPPLIED_BY", "properties": {"material": "6061-T6 aluminum"}},
+    {"source": "prod-hu500", "target": "supplier-alum", "type": "SUPPLIED_BY", "properties": {"material": "A356 cast aluminum"}},
+    {"source": "prod-sk600", "target": "supplier-seals", "type": "SUPPLIED_BY", "properties": {"material": "NBR & Viton compounds"}},
+    {"source": "prod-ba700", "target": "supplier-steel", "type": "SUPPLIED_BY", "properties": {"material": "52100 bearing steel"}},
+    {"source": "prod-cv800", "target": "supplier-elec", "type": "SUPPLIED_BY", "properties": {"material": "solenoid assemblies"}},
+    {"source": "prod-cv800", "target": "supplier-seals", "type": "SUPPLIED_BY", "properties": {"material": "PTFE seals"}},
+    {"source": "prod-ga400", "target": "supplier-steel", "type": "SUPPLIED_BY", "properties": {"material": "8620 gear steel"}},
+    {"source": "prod-ph900", "target": "supplier-alum", "type": "SUPPLIED_BY", "properties": {"material": "A380 die cast aluminum"}},
+    {"source": "prod-ar1000", "target": "supplier-steel", "type": "SUPPLIED_BY", "properties": {"material": "induction hardened steel"}},
+    {"source": "equip-pack-pk1", "target": "supplier-pack", "type": "SUPPLIED_BY", "properties": {"material": "corrugated boxes, foam inserts"}},
+    {"source": "equip-cnc-a7", "target": "supplier-lube", "type": "SUPPLIED_BY", "properties": {"material": "Syntilo 9930 coolant"}},
+    {"source": "equip-cnc-b3", "target": "supplier-lube", "type": "SUPPLIED_BY", "properties": {"material": "Hysol MB50 coolant"}},
+    {"source": "equip-robot-rc1", "target": "supplier-lube", "type": "SUPPLIED_BY", "properties": {"material": "Castrol Alusol SL 61 XBB"}},
+    {"source": "equip-asm-as1", "target": "supplier-fast", "type": "SUPPLIED_BY", "properties": {"material": "Grade 8 bolts, Nyloc nuts"}},
+    {"source": "equip-asm-as2", "target": "supplier-fast", "type": "SUPPLIED_BY", "properties": {"material": "socket head cap screws"}},
+    {"source": "equip-weld-w1", "target": "supplier-fast", "type": "SUPPLIED_BY", "properties": {"material": "ER70S-6 wire, CO2/Argon mix"}},
+    {"source": "equip-paint-pb1", "target": "supplier-pack", "type": "SUPPLIED_BY", "properties": {"material": "masking tape, hanging hooks"}},
+
+    {"source": "equip-cnc-a7", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_1"}},
+    {"source": "equip-cnc-b3", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_2"}},
+    {"source": "equip-lathe-l1", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_3"}},
+    {"source": "equip-lathe-l2", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_4"}},
+    {"source": "equip-robot-rc1", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_5"}},
+    {"source": "equip-weld-w1", "target": "line-beta", "type": "BELONGS_TO", "properties": {"position": "station_1"}},
+    {"source": "equip-asm-as1", "target": "line-beta", "type": "BELONGS_TO", "properties": {"position": "station_2"}},
+    {"source": "equip-asm-as2", "target": "line-beta", "type": "BELONGS_TO", "properties": {"position": "station_3"}},
+    {"source": "equip-paint-pb1", "target": "line-gamma", "type": "BELONGS_TO", "properties": {"position": "station_1"}},
+    {"source": "equip-insp-is1", "target": "line-epsilon", "type": "BELONGS_TO", "properties": {"position": "station_1"}},
+    {"source": "equip-pack-pk1", "target": "line-delta", "type": "BELONGS_TO", "properties": {"position": "station_1"}},
+    {"source": "equip-press-p1", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"position": "station_6"}},
+    {"source": "person-op-001", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-op-002", "target": "line-beta", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-op-003", "target": "line-beta", "type": "BELONGS_TO", "properties": {"role": "welder"}},
+    {"source": "person-op-004", "target": "line-gamma", "type": "BELONGS_TO", "properties": {"role": "paint_operator"}},
+    {"source": "person-sup-001", "target": "line-alpha", "type": "BELONGS_TO", "properties": {"role": "supervisor"}},
+    {"source": "person-sup-002", "target": "line-beta", "type": "BELONGS_TO", "properties": {"role": "supervisor"}},
+    {"source": "person-qm-001", "target": "line-epsilon", "type": "BELONGS_TO", "properties": {"role": "quality_oversight"}},
+    {"source": "order-wo-001", "target": "person-sup-001", "type": "BELONGS_TO", "properties": {"role": "responsible_supervisor"}},
+    {"source": "order-wo-002", "target": "person-sup-002", "type": "BELONGS_TO", "properties": {"role": "responsible_supervisor"}},
+    {"source": "order-wo-003", "target": "person-sup-001", "type": "BELONGS_TO", "properties": {"role": "responsible_supervisor"}},
+    {"source": "order-wo-005", "target": "person-sup-001", "type": "BELONGS_TO", "properties": {"role": "responsible_supervisor"}},
+    {"source": "order-wo-007", "target": "person-sup-002", "type": "BELONGS_TO", "properties": {"role": "responsible_supervisor"}},
+    {"source": "person-op-001", "target": "equip-cnc-a7", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-op-001", "target": "equip-cnc-b3", "type": "BELONGS_TO", "properties": {"role": "backup_operator"}},
+    {"source": "person-op-002", "target": "equip-asm-as1", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-op-003", "target": "equip-weld-w1", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-op-004", "target": "equip-paint-pb1", "type": "BELONGS_TO", "properties": {"role": "primary_operator"}},
+    {"source": "person-ml-001", "target": "equip-lathe-l2", "type": "BELONGS_TO", "properties": {"role": "maintenance_assigned"}},
+
+    {"source": "order-wo-001", "target": "order-wo-003", "type": "DEPENDS_ON", "properties": {"dependency_type": "shared_material"}},
+    {"source": "order-wo-002", "target": "order-wo-005", "type": "DEPENDS_ON", "properties": {"dependency_type": "shared_equipment"}},
+    {"source": "order-wo-004", "target": "order-wo-001", "type": "DEPENDS_ON", "properties": {"dependency_type": "prerequisite_product"}},
+    {"source": "order-wo-007", "target": "order-wo-006", "type": "DEPENDS_ON", "properties": {"dependency_type": "shared_material"}},
+    {"source": "prod-hc100", "target": "prod-ds300", "type": "DEPENDS_ON", "properties": {"dependency_type": "assembly_sequence"}},
+    {"source": "prod-cv800", "target": "prod-ga400", "type": "DEPENDS_ON", "properties": {"dependency_type": "assembly_sequence"}},
+    {"source": "prod-ga400", "target": "prod-ba700", "type": "DEPENDS_ON", "properties": {"dependency_type": "subassembly"}},
+    {"source": "prod-ph900", "target": "prod-hu500", "type": "DEPENDS_ON", "properties": {"dependency_type": "design_reference"}},
+    {"source": "equip-asm-as1", "target": "equip-cnc-a7", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "equip-asm-as1", "target": "equip-weld-w1", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "equip-paint-pb1", "target": "equip-asm-as1", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "equip-pack-pk1", "target": "equip-paint-pb1", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "equip-pack-pk1", "target": "equip-insp-is1", "type": "DEPENDS_ON", "properties": {"dependency_type": "quality_gate"}},
+    {"source": "equip-insp-is1", "target": "equip-asm-as1", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "line-beta", "target": "line-alpha", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_line"}},
+    {"source": "line-gamma", "target": "line-beta", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_line"}},
+    {"source": "line-delta", "target": "line-gamma", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_line"}},
+    {"source": "line-delta", "target": "line-epsilon", "type": "DEPENDS_ON", "properties": {"dependency_type": "quality_gate"}},
+    {"source": "line-epsilon", "target": "line-beta", "type": "DEPENDS_ON", "properties": {"dependency_type": "inspection_source"}},
+    {"source": "order-wo-009", "target": "order-wo-008", "type": "DEPENDS_ON", "properties": {"dependency_type": "customer_sequence"}},
+    {"source": "equip-asm-as2", "target": "equip-lathe-l2", "type": "DEPENDS_ON", "properties": {"dependency_type": "upstream_process"}},
+    {"source": "equip-robot-rc1", "target": "equip-cnc-a7", "type": "DEPENDS_ON", "properties": {"dependency_type": "material_feed"}},
+    {"source": "prod-ar1000", "target": "prod-mb200", "type": "DEPENDS_ON", "properties": {"dependency_type": "mounting_interface"}},
+    {"source": "order-wo-010", "target": "order-wo-002", "type": "DEPENDS_ON", "properties": {"dependency_type": "shared_tooling"}}
+  ]
+}

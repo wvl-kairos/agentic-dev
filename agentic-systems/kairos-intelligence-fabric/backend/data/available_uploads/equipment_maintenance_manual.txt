@@ -1,0 +1,62 @@
+ACME Industrial Manufacturing — Equipment Maintenance Manual
+Document: MNT-MAN-001 | Rev C | Effective: 2025-09-01
+
+============================================================
+1. EQUIPMENT REGISTRY
+============================================================
+
+Equipment ID              | Description                        | Location             | Criticality
+(equip-cnc-lathe-01)      | Okuma LB3000 EX CNC Lathe          | (line-cnc-01) Plant 1 | A - Critical
+(equip-cnc-lathe-02)      | Okuma LB3000 EX CNC Lathe #2       | (line-cnc-02) Plant 1 | A - Critical
+(equip-cnc-mill-01)       | DMG MORI CMX 600V Vertical Mill    | (line-cnc-01) Plant 1 | A - Critical
+(equip-cnc-mill-02)       | Haas VF-4SS Vertical Mill           | (line-cnc-02) Plant 1 | B - Important
+(equip-cnc-grind-01)      | Studer S33 Cylindrical Grinder     | (line-cnc-01) Plant 1 | B - Important
+(equip-weld-rob-01)       | Fanuc ARC Mate 120iD Welding Robot | (line-weld-01) Plant 2 | A - Critical
+
+Criticality A: zero tolerance for missed PMs; escalate if overdue >48 hrs.
+
+============================================================
+2. PM SCHEDULES — CNC LATHES (equip-cnc-lathe-01), (equip-cnc-lathe-02)
+============================================================
+
+DAILY: Check coolant level (8-12% concentration), chip conveyor, chuck jaw wear, hydraulic pressure (45-55 bar).
+WEEKLY: Lubricate guideways (Mobil Vactra No. 2, 200 mL), inspect spindle belt tension (max 12 mm deflection), tailstock runout check (max 0.008 mm), coolant filter replacement if ΔP >0.5 bar.
+MONTHLY: Spindle vibration analysis — baseline 2.1 mm/s for (equip-cnc-lathe-01), 1.9 mm/s for (equip-cnc-lathe-02). Alert: 4.0 mm/s. Alarm: 7.0 mm/s (immediate shutdown). Turret bolt torque 85 Nm. Tool setter calibration ±0.002 mm.
+SEMI-ANNUAL: Spindle bearing inspection per Okuma SB-2023-07, geometric accuracy per ISO 230-2, ball screw backlash compensation, electrical cabinet thermal scan.
+
+============================================================
+3. PM SCHEDULES — CNC MILLS (equip-cnc-mill-01), (equip-cnc-mill-02)
+============================================================
+
+DAILY: Spindle warm-up (15 min, 2000 RPM), tool magazine check, coolant flow (15 LPM DMG / 14 LPM Haas).
+WEEKLY: Z-axis ball screw lube (Mobilgrease XHP 222), ATC finger inspection, spindle taper blue test (>80% contact).
+MONTHLY: Vibration baseline 1.5 mm/s for (equip-cnc-mill-01), 1.7 mm/s for (equip-cnc-mill-02). Alert: 3.5 mm/s. Alarm: 6.0 mm/s. Coolant flush and biocide treatment.
+SEMI-ANNUAL: Drawbar force test (min 12 kN BT40), ball bar test per ISO 10791-6.
+
+============================================================
+4. PM SCHEDULES — GRINDER & WELDING ROBOT
+============================================================
+
+(equip-cnc-grind-01) Studer S33:
+DAILY: Dress wheel every 50 parts or on SPC drift. Coolant flow 18 LPM.
+WEEKLY: Hydrostatic oil level, wheel balance (<0.5 μm).
+MONTHLY: Vibration baseline 1.2 mm/s, alert 2.5, alarm 4.5. Roundness test <0.3 μm.
+
+(equip-weld-rob-01) Fanuc ARC Mate 120iD:
+DAILY: Torch tip/nozzle inspection, wire feed tension, gas flow (18-22 L/min MIG), TCP verification.
+WEEKLY: Lubricate 6 axes (Molywhite RE No.00), cable dress inspection, fume extraction check.
+MONTHLY: Vibration baseline 0.8 mm/s, alert 1.5, alarm 2.5. Re-teach 3 reference points (max 0.15 mm deviation). Replace torch liner and contact tip.
+SEMI-ANNUAL: Joint backlash J1-J6, wire feeder roll replacement, servo current analysis.
+
+============================================================
+5. CRITICAL SPARE PARTS
+============================================================
+
+- Okuma spindle bearings (OKU-BRG-7020C) — min 2 on hand, 8-week import lead time
+- DMG MORI coolant pump (DMG-CP-600V) — min 1
+- Haas drawbar spring stack (HAAS-DBS-40) — min 2
+- Fanuc J4 servo motor (FANUC-SVM-A06B) — min 1
+- Welding torch liners 1.2mm (WLD-LINER-12) — min 10
+- Contact tips 1.2mm (WLD-TIP-12) — min 50
+
+Spare parts sourced via (supp-precision-steel) and (supp-allied-fasteners). Automatic PO generation triggers at reorder point. All calibration tools must carry valid stickers per ISO 9001 QMS; out-of-cal tools are tagged and removed. Geometric calibrations witnessed by Quality using CMM (equip-cmm-01).

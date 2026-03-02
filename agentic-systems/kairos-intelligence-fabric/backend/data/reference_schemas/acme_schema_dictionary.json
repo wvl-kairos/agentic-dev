@@ -1,0 +1,485 @@
+{
+  "schema_name": "acme_manufacturing",
+  "version": "2.4.0",
+  "last_updated": "2026-01-15",
+  "description": "ACME Industrial Manufacturing master schema — discrete manufacturing (CNC machining, assembly, coating) across two Ohio plants.",
+  "domains": [
+    {
+      "domain_name": "Sales",
+      "tables": [
+        {
+          "table_name": "customers",
+          "description": "Customer master for aerospace, automotive, and industrial OEM accounts.",
+          "row_estimate": 250,
+          "columns": [
+            {"name": "customer_id", "type": "SERIAL", "is_pk": true},
+            {"name": "customer_code", "type": "VARCHAR(20)", "enum_values": null, "is_fk": false},
+            {"name": "company_name", "type": "VARCHAR(150)", "is_fk": false},
+            {"name": "contact_name", "type": "VARCHAR(120)", "is_fk": false},
+            {"name": "contact_email", "type": "VARCHAR(120)", "is_fk": false},
+            {"name": "payment_terms", "type": "VARCHAR(30)", "enum_values": ["Net 30", "Net 45", "Net 60", "COD"], "is_fk": false},
+            {"name": "credit_limit", "type": "NUMERIC(12,2)", "is_fk": false},
+            {"name": "is_active", "type": "BOOLEAN", "is_fk": false}
+          ],
+          "relationships": []
+        },
+        {
+          "table_name": "sales_orders",
+          "description": "Sales order headers. Each order belongs to one customer and may generate one or more work orders.",
+          "row_estimate": 4500,
+          "columns": [
+            {"name": "order_id", "type": "SERIAL", "is_pk": true},
+            {"name": "order_number", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "customer_id", "type": "INTEGER", "is_fk": true, "references": "customers.customer_id"},
+            {"name": "order_date", "type": "DATE", "is_fk": false},
+            {"name": "required_date", "type": "DATE", "is_fk": false},
+            {"name": "promised_date", "type": "DATE", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Open", "In Production", "Shipped", "Closed", "Cancelled"], "is_fk": false},
+            {"name": "priority", "type": "SMALLINT", "enum_values": [1, 2, 3, 4, 5], "is_fk": false},
+            {"name": "total_amount", "type": "NUMERIC(12,2)", "is_fk": false},
+            {"name": "created_by", "type": "INTEGER", "is_fk": true, "references": "employees.employee_id"}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "customers", "fk": "customer_id", "label": "placed by customer"},
+            {"type": "one_to_many", "target": "order_lines", "fk": "order_id", "label": "contains lines"},
+            {"type": "one_to_many", "target": "shipments", "fk": "order_id", "label": "shipped via"}
+          ]
+        },
+        {
+          "table_name": "order_lines",
+          "description": "Individual line items within a sales order, each referencing a specific product.",
+          "row_estimate": 12000,
+          "columns": [
+            {"name": "line_id", "type": "SERIAL", "is_pk": true},
+            {"name": "order_id", "type": "INTEGER", "is_fk": true, "references": "sales_orders.order_id"},
+            {"name": "line_number", "type": "SMALLINT", "is_fk": false},
+            {"name": "product_id", "type": "INTEGER", "is_fk": true, "references": "products.product_id"},
+            {"name": "quantity", "type": "INTEGER", "is_fk": false},
+            {"name": "unit_price", "type": "NUMERIC(10,2)", "is_fk": false},
+            {"name": "discount_pct", "type": "NUMERIC(5,2)", "is_fk": false},
+            {"name": "line_status", "type": "VARCHAR(20)", "enum_values": ["Pending", "Released", "Complete", "Cancelled"], "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "sales_orders", "fk": "order_id", "label": "belongs to order"},
+            {"type": "many_to_one", "target": "products", "fk": "product_id", "label": "for product"}
+          ]
+        },
+        {
+          "table_name": "shipments",
+          "description": "Outbound shipment records tied to sales orders.",
+          "row_estimate": 3800,
+          "columns": [
+            {"name": "shipment_id", "type": "SERIAL", "is_pk": true},
+            {"name": "shipment_number", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "order_id", "type": "INTEGER", "is_fk": true, "references": "sales_orders.order_id"},
+            {"name": "ship_date", "type": "DATE", "is_fk": false},
+            {"name": "carrier", "type": "VARCHAR(60)", "enum_values": ["UPS", "FedEx", "LTL Carrier", "Customer Pickup"], "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Pending", "Shipped", "In Transit", "Delivered", "Returned"], "is_fk": false},
+            {"name": "delivered_date", "type": "DATE", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "sales_orders", "fk": "order_id", "label": "fulfills order"}
+          ]
+        }
+      ]
+    },
+    {
+      "domain_name": "Engineering_BOM",
+      "tables": [
+        {
+          "table_name": "products",
+          "description": "Finished goods catalog. Main families: Precision Gear Assemblies, Hydraulic Actuator Blocks, Custom Mounting Brackets.",
+          "row_estimate": 85,
+          "columns": [
+            {"name": "product_id", "type": "SERIAL", "is_pk": true},
+            {"name": "product_code", "type": "VARCHAR(30)", "is_fk": false},
+            {"name": "product_name", "type": "VARCHAR(150)", "is_fk": false},
+            {"name": "product_family", "type": "VARCHAR(60)", "enum_values": ["Precision Gears", "Hydraulic Components", "Custom Brackets", "Actuators"], "is_fk": false},
+            {"name": "standard_cost", "type": "NUMERIC(10,2)", "is_fk": false},
+            {"name": "lead_time_days", "type": "INTEGER", "is_fk": false},
+            {"name": "drawing_number", "type": "VARCHAR(40)", "is_fk": false},
+            {"name": "revision", "type": "VARCHAR(10)", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "one_to_many", "target": "bom_headers", "fk": "product_id", "label": "defined by BOM"},
+            {"type": "one_to_many", "target": "order_lines", "fk": "product_id", "label": "ordered in"},
+            {"type": "one_to_many", "target": "work_orders", "fk": "product_id", "label": "manufactured via"}
+          ]
+        },
+        {
+          "table_name": "components",
+          "description": "Raw materials, purchased parts, sub-assemblies, and consumables used in BOMs.",
+          "row_estimate": 420,
+          "columns": [
+            {"name": "component_id", "type": "SERIAL", "is_pk": true},
+            {"name": "component_code", "type": "VARCHAR(30)", "is_fk": false},
+            {"name": "component_name", "type": "VARCHAR(150)", "is_fk": false},
+            {"name": "component_type", "type": "VARCHAR(30)", "enum_values": ["Raw Material", "Purchased Part", "Sub-Assembly", "Consumable"], "is_fk": false},
+            {"name": "material_spec", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "standard_cost", "type": "NUMERIC(10,2)", "is_fk": false},
+            {"name": "reorder_point", "type": "INTEGER", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "one_to_many", "target": "bom_details", "fk": "component_id", "label": "used in BOMs"},
+            {"type": "one_to_many", "target": "purchase_orders", "fk": "component_id", "label": "procured via"},
+            {"type": "one_to_many", "target": "inventory", "fk": "component_id", "label": "stocked in"}
+          ]
+        },
+        {
+          "table_name": "bom_headers",
+          "description": "Bill of Materials header — one active BOM revision per product at a time.",
+          "row_estimate": 95,
+          "columns": [
+            {"name": "bom_id", "type": "SERIAL", "is_pk": true},
+            {"name": "product_id", "type": "INTEGER", "is_fk": true, "references": "products.product_id"},
+            {"name": "bom_revision", "type": "VARCHAR(10)", "is_fk": false},
+            {"name": "effective_date", "type": "DATE", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Draft", "Active", "Obsolete"], "is_fk": false},
+            {"name": "approved_by", "type": "INTEGER", "is_fk": true, "references": "employees.employee_id"}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "products", "fk": "product_id", "label": "BOM for product"},
+            {"type": "one_to_many", "target": "bom_details", "fk": "bom_id", "label": "contains components"}
+          ]
+        },
+        {
+          "table_name": "bom_details",
+          "description": "BOM line items: which components and quantities make up a product.",
+          "row_estimate": 650,
+          "columns": [
+            {"name": "bom_detail_id", "type": "SERIAL", "is_pk": true},
+            {"name": "bom_id", "type": "INTEGER", "is_fk": true, "references": "bom_headers.bom_id"},
+            {"name": "component_id", "type": "INTEGER", "is_fk": true, "references": "components.component_id"},
+            {"name": "quantity_per", "type": "NUMERIC(10,4)", "is_fk": false},
+            {"name": "scrap_factor_pct", "type": "NUMERIC(5,2)", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "bom_headers", "fk": "bom_id", "label": "part of BOM"},
+            {"type": "many_to_one", "target": "components", "fk": "component_id", "label": "uses component"}
+          ]
+        }
+      ]
+    },
+    {
+      "domain_name": "Production",
+      "tables": [
+        {
+          "table_name": "production_lines",
+          "description": "Manufacturing lines across both ACME Ohio plants: CNC cells, assembly lines, welding stations, coating lines.",
+          "row_estimate": 12,
+          "columns": [
+            {"name": "line_id", "type": "SERIAL", "is_pk": true},
+            {"name": "line_code", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "line_name", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "plant", "type": "VARCHAR(20)", "enum_values": ["Plant 1 - Dayton", "Plant 2 - Columbus"], "is_fk": false},
+            {"name": "line_type", "type": "VARCHAR(30)", "enum_values": ["CNC Machining", "Assembly", "Welding", "Coating"], "is_fk": false},
+            {"name": "capacity_per_shift", "type": "INTEGER", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "one_to_many", "target": "work_centers", "fk": "line_id", "label": "contains work centers"},
+            {"type": "one_to_many", "target": "work_orders", "fk": "line_id", "label": "runs work orders"},
+            {"type": "one_to_many", "target": "equipment", "fk": "line_id", "label": "has equipment"}
+          ]
+        },
+        {
+          "table_name": "work_centers",
+          "description": "Individual work centers within a production line (turning, milling, grinding, etc.).",
+          "row_estimate": 35,
+          "columns": [
+            {"name": "work_center_id", "type": "SERIAL", "is_pk": true},
+            {"name": "work_center_code", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "work_center_name", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "line_id", "type": "INTEGER", "is_fk": true, "references": "production_lines.line_id"},
+            {"name": "operation_type", "type": "VARCHAR(40)", "enum_values": ["Turning", "Milling", "Grinding", "Assembly", "Welding", "Coating", "Inspection"], "is_fk": false},
+            {"name": "hourly_rate", "type": "NUMERIC(8,2)", "is_fk": false},
+            {"name": "setup_time_min", "type": "INTEGER", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "production_lines", "fk": "line_id", "label": "located on line"},
+            {"type": "one_to_many", "target": "work_order_operations", "fk": "work_center_id", "label": "performs operations"}
+          ]
+        },
+        {
+          "table_name": "work_orders",
+          "description": "Manufacturing work orders generated from sales order lines. Tracks planned vs actual quantities and scrap.",
+          "row_estimate": 8500,
+          "columns": [
+            {"name": "work_order_id", "type": "SERIAL", "is_pk": true},
+            {"name": "work_order_number", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "order_line_id", "type": "INTEGER", "is_fk": true, "references": "order_lines.line_id"},
+            {"name": "product_id", "type": "INTEGER", "is_fk": true, "references": "products.product_id"},
+            {"name": "line_id", "type": "INTEGER", "is_fk": true, "references": "production_lines.line_id"},
+            {"name": "planned_qty", "type": "INTEGER", "is_fk": false},
+            {"name": "completed_qty", "type": "INTEGER", "is_fk": false},
+            {"name": "scrap_qty", "type": "INTEGER", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Planned", "Released", "In Progress", "Complete", "On Hold", "Cancelled"], "is_fk": false},
+            {"name": "planned_start", "type": "DATE", "is_fk": false},
+            {"name": "actual_start", "type": "DATE", "is_fk": false},
+            {"name": "actual_end", "type": "DATE", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "products", "fk": "product_id", "label": "produces product"},
+            {"type": "many_to_one", "target": "production_lines", "fk": "line_id", "label": "runs on line"},
+            {"type": "many_to_one", "target": "order_lines", "fk": "order_line_id", "label": "fulfills order line"},
+            {"type": "one_to_many", "target": "work_order_operations", "fk": "work_order_id", "label": "has operations"},
+            {"type": "one_to_many", "target": "quality_inspections", "fk": "work_order_id", "label": "inspected by"}
+          ]
+        },
+        {
+          "table_name": "work_order_operations",
+          "description": "Routing steps for each work order: sequence of operations performed at specific work centers.",
+          "row_estimate": 34000,
+          "columns": [
+            {"name": "operation_id", "type": "SERIAL", "is_pk": true},
+            {"name": "work_order_id", "type": "INTEGER", "is_fk": true, "references": "work_orders.work_order_id"},
+            {"name": "operation_seq", "type": "SMALLINT", "is_fk": false},
+            {"name": "work_center_id", "type": "INTEGER", "is_fk": true, "references": "work_centers.work_center_id"},
+            {"name": "operation_name", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "setup_time_min", "type": "INTEGER", "is_fk": false},
+            {"name": "run_time_min", "type": "INTEGER", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Pending", "In Progress", "Complete", "Skipped"], "is_fk": false},
+            {"name": "operator_id", "type": "INTEGER", "is_fk": true, "references": "employees.employee_id"}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "work_orders", "fk": "work_order_id", "label": "step in work order"},
+            {"type": "many_to_one", "target": "work_centers", "fk": "work_center_id", "label": "performed at"}
+          ]
+        }
+      ]
+    },
+    {
+      "domain_name": "Equipment_Maintenance",
+      "tables": [
+        {
+          "table_name": "equipment",
+          "description": "Equipment registry: CNC lathes, CNC mills, welding robots, coating lines, CMMs across both plants.",
+          "row_estimate": 48,
+          "columns": [
+            {"name": "equipment_id", "type": "SERIAL", "is_pk": true},
+            {"name": "equipment_code", "type": "VARCHAR(30)", "is_fk": false},
+            {"name": "equipment_name", "type": "VARCHAR(100)", "is_fk": false},
+            {"name": "equipment_type", "type": "VARCHAR(40)", "enum_values": ["CNC Lathe", "CNC Mill", "Welding Robot", "Coating Line", "CMM"], "is_fk": false},
+            {"name": "manufacturer", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "model_number", "type": "VARCHAR(60)", "is_fk": false},
+            {"name": "line_id", "type": "INTEGER", "is_fk": true, "references": "production_lines.line_id"},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Operational", "Degraded", "Down", "Decommissioned"], "is_fk": false},
+            {"name": "criticality", "type": "CHAR(1)", "enum_values": ["A", "B", "C"], "is_fk": false},
+            {"name": "next_pm_date", "type": "DATE", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "production_lines", "fk": "line_id", "label": "installed on line"},
+            {"type": "one_to_many", "target": "maintenance_work_orders", "fk": "equipment_id", "label": "maintained by"},
+            {"type": "one_to_many", "target": "spc_measurements", "fk": "equipment_id", "label": "measured on"},
+            {"type": "one_to_many", "target": "quality_inspections", "fk": "equipment_id", "label": "inspections performed on"}
+          ]
+        },
+        {
+          "table_name": "maintenance_work_orders",
+          "description": "Maintenance work orders: preventive, corrective, predictive, and emergency maintenance tasks.",
+          "row_estimate": 2200,
+          "columns": [
+            {"name": "maint_wo_id", "type": "SERIAL", "is_pk": true},
+            {"name": "maint_wo_number", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "equipment_id", "type": "INTEGER", "is_fk": true, "references": "equipment.equipment_id"},
+            {"name": "maint_type", "type": "VARCHAR(20)", "enum_values": ["Preventive", "Corrective", "Predictive", "Emergency"], "is_fk": false},
+            {"name": "description", "type": "TEXT", "is_fk": false},
+            {"name": "priority", "type": "SMALLINT", "is_fk": false},
+            {"name": "assigned_to", "type": "INTEGER", "is_fk": true, "references": "employees.employee_id"},
+            {"name": "downtime_minutes", "type": "INTEGER", "is_fk": false},
+            {"name": "root_cause", "type": "TEXT", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Open", "In Progress", "Complete", "Cancelled"], "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "equipment", "fk": "equipment_id", "label": "for equipment"}
+          ]
+        }
+      ]
+    },
+    {
+      "domain_name": "Quality",
+      "tables": [
+        {
+          "table_name": "quality_inspections",
+          "description": "Inspection records: incoming material, in-process, final, and first article inspections.",
+          "row_estimate": 15000,
+          "columns": [
+            {"name": "inspection_id", "type": "SERIAL", "is_pk": true},
+            {"name": "work_order_id", "type": "INTEGER", "is_fk": true, "references": "work_orders.work_order_id"},
+            {"name": "equipment_id", "type": "INTEGER", "is_fk": true, "references": "equipment.equipment_id"},
+            {"name": "inspection_type", "type": "VARCHAR(30)", "enum_values": ["Incoming", "In-Process", "Final", "First Article"], "is_fk": false},
+            {"name": "inspector_id", "type": "INTEGER", "is_fk": true, "references": "employees.employee_id"},
+            {"name": "sample_size", "type": "INTEGER", "is_fk": false},
+            {"name": "pass_count", "type": "INTEGER", "is_fk": false},
+            {"name": "fail_count", "type": "INTEGER", "is_fk": false},
+            {"name": "result", "type": "VARCHAR(10)", "enum_values": ["Pass", "Fail", "Conditional"], "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "work_orders", "fk": "work_order_id", "label": "inspects work order"},
+            {"type": "many_to_one", "target": "equipment", "fk": "equipment_id", "label": "inspected on equipment"},
+            {"type": "one_to_many", "target": "defect_records", "fk": "inspection_id", "label": "found defects"}
+          ]
+        },
+        {
+          "table_name": "defect_records",
+          "description": "Individual defect records with classification, severity, root cause, and disposition.",
+          "row_estimate": 3500,
+          "columns": [
+            {"name": "defect_id", "type": "SERIAL", "is_pk": true},
+            {"name": "inspection_id", "type": "INTEGER", "is_fk": true, "references": "quality_inspections.inspection_id"},
+            {"name": "work_order_id", "type": "INTEGER", "is_fk": true, "references": "work_orders.work_order_id"},
+            {"name": "product_id", "type": "INTEGER", "is_fk": true, "references": "products.product_id"},
+            {"name": "defect_type", "type": "VARCHAR(40)", "enum_values": ["Dimensional", "Surface Finish", "Porosity", "Crack", "Burr", "Cosmetic", "Material"], "is_fk": false},
+            {"name": "severity", "type": "VARCHAR(10)", "enum_values": ["Critical", "Major", "Minor"], "is_fk": false},
+            {"name": "root_cause", "type": "VARCHAR(60)", "enum_values": ["Tooling Wear", "Operator Error", "Material Defect", "Setup Error", "Machine Drift"], "is_fk": false},
+            {"name": "disposition", "type": "VARCHAR(20)", "enum_values": ["Rework", "Scrap", "Use As-Is", "Return to Vendor"], "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "quality_inspections", "fk": "inspection_id", "label": "found during inspection"},
+            {"type": "many_to_one", "target": "products", "fk": "product_id", "label": "defect on product"}
+          ]
+        },
+        {
+          "table_name": "spc_measurements",
+          "description": "Statistical Process Control measurements for CPK analysis and control charts. Each row is one measurement of one characteristic.",
+          "row_estimate": 85000,
+          "columns": [
+            {"name": "measurement_id", "type": "SERIAL", "is_pk": true},
+            {"name": "equipment_id", "type": "INTEGER", "is_fk": true, "references": "equipment.equipment_id"},
+            {"name": "product_id", "type": "INTEGER", "is_fk": true, "references": "products.product_id"},
+            {"name": "work_order_id", "type": "INTEGER", "is_fk": true, "references": "work_orders.work_order_id"},
+            {"name": "characteristic", "type": "VARCHAR(80)", "is_fk": false},
+            {"name": "nominal_value", "type": "NUMERIC(12,6)", "is_fk": false},
+            {"name": "upper_spec_limit", "type": "NUMERIC(12,6)", "is_fk": false},
+            {"name": "lower_spec_limit", "type": "NUMERIC(12,6)", "is_fk": false},
+            {"name": "measured_value", "type": "NUMERIC(12,6)", "is_fk": false},
+            {"name": "measurement_unit", "type": "VARCHAR(10)", "enum_values": ["mm", "μm", "Ra", "Rz"], "is_fk": false},
+            {"name": "in_spec", "type": "BOOLEAN", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "equipment", "fk": "equipment_id", "label": "measured on equipment"},
+            {"type": "many_to_one", "target": "products", "fk": "product_id", "label": "measurement for product"},
+            {"type": "many_to_one", "target": "work_orders", "fk": "work_order_id", "label": "during work order"}
+          ]
+        }
+      ]
+    },
+    {
+      "domain_name": "Supply_Chain",
+      "tables": [
+        {
+          "table_name": "suppliers",
+          "description": "Approved vendor list with quality rating, ISO certification status, and delivery performance.",
+          "row_estimate": 65,
+          "columns": [
+            {"name": "supplier_id", "type": "SERIAL", "is_pk": true},
+            {"name": "supplier_code", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "supplier_name", "type": "VARCHAR(150)", "is_fk": false},
+            {"name": "rating", "type": "CHAR(1)", "enum_values": ["A", "B", "C", "D"], "is_fk": false},
+            {"name": "iso_certified", "type": "BOOLEAN", "is_fk": false},
+            {"name": "on_time_delivery_pct", "type": "NUMERIC(5,2)", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "one_to_many", "target": "purchase_orders", "fk": "supplier_id", "label": "receives POs"}
+          ]
+        },
+        {
+          "table_name": "purchase_orders",
+          "description": "Purchase orders to suppliers for raw materials, purchased parts, and consumables.",
+          "row_estimate": 6200,
+          "columns": [
+            {"name": "po_id", "type": "SERIAL", "is_pk": true},
+            {"name": "po_number", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "supplier_id", "type": "INTEGER", "is_fk": true, "references": "suppliers.supplier_id"},
+            {"name": "component_id", "type": "INTEGER", "is_fk": true, "references": "components.component_id"},
+            {"name": "quantity", "type": "INTEGER", "is_fk": false},
+            {"name": "unit_cost", "type": "NUMERIC(10,2)", "is_fk": false},
+            {"name": "status", "type": "VARCHAR(20)", "enum_values": ["Open", "Partial", "Received", "Closed", "Cancelled"], "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "suppliers", "fk": "supplier_id", "label": "ordered from supplier"},
+            {"type": "many_to_one", "target": "components", "fk": "component_id", "label": "for component"}
+          ]
+        },
+        {
+          "table_name": "inventory",
+          "description": "Current stock levels by component, warehouse, and bin location.",
+          "row_estimate": 1800,
+          "columns": [
+            {"name": "inventory_id", "type": "SERIAL", "is_pk": true},
+            {"name": "component_id", "type": "INTEGER", "is_fk": true, "references": "components.component_id"},
+            {"name": "warehouse_code", "type": "VARCHAR(10)", "enum_values": ["PLANT-1", "PLANT-2", "WIP"], "is_fk": false},
+            {"name": "location_bin", "type": "VARCHAR(20)", "is_fk": false},
+            {"name": "quantity_on_hand", "type": "INTEGER", "is_fk": false},
+            {"name": "quantity_reserved", "type": "INTEGER", "is_fk": false},
+            {"name": "quantity_available", "type": "INTEGER", "is_fk": false}
+          ],
+          "relationships": [
+            {"type": "many_to_one", "target": "components", "fk": "component_id", "label": "stock of component"}
+          ]
+        }
+      ]
+    }
+  ],
+  "cross_domain_relationships": [
+    {
+      "from": "Sales.order_lines",
+      "to": "Engineering_BOM.products",
+      "via": "product_id",
+      "description": "Order lines reference products from Engineering, linking customer demand to manufacturing specs."
+    },
+    {
+      "from": "Production.work_orders",
+      "to": "Sales.order_lines",
+      "via": "order_line_id",
+      "description": "Work orders are generated from sales order lines, connecting production scheduling to customer demand."
+    },
+    {
+      "from": "Production.work_orders",
+      "to": "Engineering_BOM.products",
+      "via": "product_id",
+      "description": "Work orders reference the product being manufactured, linking to BOM and engineering specs."
+    },
+    {
+      "from": "Quality.quality_inspections",
+      "to": "Production.work_orders",
+      "via": "work_order_id",
+      "description": "Inspections are performed against work orders, tying quality results to specific production runs."
+    },
+    {
+      "from": "Quality.quality_inspections",
+      "to": "Equipment_Maintenance.equipment",
+      "via": "equipment_id",
+      "description": "Inspections reference equipment, enabling correlation between machine condition and quality outcomes."
+    },
+    {
+      "from": "Quality.spc_measurements",
+      "to": "Equipment_Maintenance.equipment",
+      "via": "equipment_id",
+      "description": "SPC data links to specific equipment, enabling predictive maintenance from quality drift patterns."
+    },
+    {
+      "from": "Quality.defect_records",
+      "to": "Engineering_BOM.products",
+      "via": "product_id",
+      "description": "Defects are tracked per product, supporting Pareto analysis and design feedback loops."
+    },
+    {
+      "from": "Supply_Chain.purchase_orders",
+      "to": "Engineering_BOM.components",
+      "via": "component_id",
+      "description": "Purchase orders procure components defined in Engineering BOMs."
+    },
+    {
+      "from": "Supply_Chain.inventory",
+      "to": "Engineering_BOM.components",
+      "via": "component_id",
+      "description": "Inventory tracks stock levels of components used in product BOMs."
+    },
+    {
+      "from": "Equipment_Maintenance.equipment",
+      "to": "Production.production_lines",
+      "via": "line_id",
+      "description": "Equipment is installed on production lines, linking maintenance to production capacity."
+    }
+  ]
+}

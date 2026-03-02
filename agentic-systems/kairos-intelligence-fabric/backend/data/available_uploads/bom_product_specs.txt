@@ -1,0 +1,105 @@
+ACME Industrial Manufacturing — Product Specifications & Bills of Materials
+Document: ENG-BOM-001 | Rev B | Effective: 2025-10-01
+
+This document contains engineering specifications and active BOMs for ACME's three primary product families. All BOMs are revision-controlled per ACME's ISO 9001 document control procedure. Changes require ECO (Engineering Change Order) approval from the Engineering Manager.
+
+============================================================
+PRODUCT 1: Precision Gear Assembly (prod-gear-assy-100)
+============================================================
+
+Description: Three-stage spur gear train for industrial power transmission. Used in conveyor drives, pump systems, and packaging machinery. Output torque rating 450 Nm at 1800 RPM input.
+Product Family: Precision Gears
+Drawing: DWG-GA-100 Rev D
+Standard Lead Time: 18 days
+Unit Weight: 12.4 kg
+
+Critical Specifications:
+- Gear tooth profile: involute, 20° pressure angle, Module 2.5
+- Gear quality: AGMA Class 11 (equivalent to ISO 1328 Grade 5)
+- Input shaft bore: 25.000 mm +0.000/-0.013 (CPK target ≥1.33)
+- Output shaft runout: ≤0.015 mm TIR
+- Surface hardness: 58-62 HRC on tooth flanks (carburized 8620 steel)
+- Backlash: 0.05-0.10 mm
+
+BOM — Rev D (Active):
+Seq | Component                    | Code              | Material        | Qty | Unit | Supplier
+ 10 | Input gear blank             | (comp-steel-8620) | AISI 8620       |   1 | EA   | (supp-precision-steel)
+ 20 | Intermediate gear blank      | (comp-steel-8620) | AISI 8620       |   1 | EA   | (supp-precision-steel)
+ 30 | Output gear blank            | (comp-steel-8620) | AISI 8620       |   1 | EA   | (supp-precision-steel)
+ 40 | Input shaft                  | (comp-steel-4140) | AISI 4140       |   1 | EA   | (supp-precision-steel)
+ 50 | Housing — lower              | (comp-alum-6061)  | AL 6061-T6      |   1 | EA   | Machined in-house
+ 60 | Housing — upper cover        | (comp-alum-6061)  | AL 6061-T6      |   1 | EA   | Machined in-house
+ 70 | Deep groove ball bearing     | (comp-bearing-6205)| SKF 6205-2RS   |   4 | EA   | (supp-midwest-bearings)
+ 80 | Retaining ring, internal 52mm| (comp-retring-52) | Spring steel    |   4 | EA   | (supp-allied-fasteners)
+ 90 | Oil seal 25x42x7             | (comp-seal-25)    | NBR rubber      |   2 | EA   | (supp-allied-fasteners)
+100 | Socket head cap screw M8x25  | (comp-shcs-m8)    | Grade 12.9      |   8 | EA   | (supp-allied-fasteners)
+110 | Dowel pin 6x20               | (comp-dowel-6)    | Hardened steel   |   2 | EA   | (supp-allied-fasteners)
+
+Manufacturing Routing: Rough turning on (equip-cnc-lathe-01) → Gear hobbing (external vendor) → Heat treat (external vendor) → Finish grinding on (equip-cnc-grind-01) → Assembly on (line-assy-01) → Final inspection on (equip-cmm-01)
+
+============================================================
+PRODUCT 2: Hydraulic Actuator Block (prod-hyd-act-200)
+============================================================
+
+Description: Precision-machined hydraulic valve body with integrated actuator bore. Used in mobile hydraulic systems for construction and agricultural equipment. Operating pressure rated to 210 bar.
+Product Family: Hydraulic Components
+Drawing: DWG-HA-200 Rev C
+Standard Lead Time: 14 days
+Unit Weight: 8.7 kg
+
+Critical Specifications:
+- Actuator bore diameter: 50.000 mm +0.025/-0.000 (H7 tolerance, CPK target ≥1.50)
+- Valve spool bore: 12.000 mm +0.018/-0.000
+- Surface finish on bores: Ra ≤ 0.8 μm (measured on equip-cmm-01)
+- Pressure test: 315 bar for 60 seconds, zero leakage
+- Port threads: SAE J1926-1 (O-ring boss), M18x1.5
+- Flatness of mating face: ≤0.02 mm over 150 mm
+
+BOM — Rev C (Active):
+Seq | Component                    | Code              | Material        | Qty | Unit | Supplier
+ 10 | Valve body casting           | (comp-iron-ductile)| Ductile Iron 65-45-12 | 1 | EA | (supp-ohio-castings)
+ 20 | Actuator piston              | (comp-steel-4140) | AISI 4140 hard chrome | 1 | EA | (supp-precision-steel)
+ 30 | Piston seal kit              | (comp-seal-kit-50)| Polyurethane/NBR|   1 | KIT  | (supp-allied-fasteners)
+ 40 | O-ring boss plugs SAE-8      | (comp-plug-sae8)  | Zinc-plated steel|  4 | EA   | (supp-allied-fasteners)
+ 50 | Solenoid valve cartridge     | (comp-solenoid-12)| Assembled unit  |   2 | EA   | (supp-hydraulic-controls)
+ 60 | Pressure relief valve        | (comp-prv-210)    | Assembled unit  |   1 | EA   | (supp-hydraulic-controls)
+ 70 | Socket head cap screw M6x30  | (comp-shcs-m6)    | Grade 12.9      |   6 | EA   | (supp-allied-fasteners)
+
+Manufacturing Routing: CNC milling on (equip-cnc-mill-01) → Boring on (equip-cnc-mill-02) → Honing (manual station) → Deburr → Pressure test → Assembly on (line-assy-01) → Final inspection
+
+============================================================
+PRODUCT 3: Custom Mounting Bracket (prod-brkt-mtg-300)
+============================================================
+
+Description: Heavy-duty welded structural bracket for industrial equipment mounting. Customer-specific designs with standard base geometry. Zinc plated per ASTM B633 Type III, Class Fe/Zn 12.
+Product Family: Custom Brackets
+Drawing: DWG-MB-300 Rev A
+Standard Lead Time: 10 days
+Unit Weight: 6.2 kg
+
+Critical Specifications:
+- Base plate flatness: ≤0.5 mm over 300 mm
+- Hole pattern positional tolerance: ±0.25 mm (4x M12 mounting holes)
+- Weld quality: AWS D1.1 Class B, full penetration on load-bearing joints
+- Zinc plating thickness: 12 μm minimum per ASTM B633
+- Pull-off adhesion test: ≥3.5 MPa on plated surface
+- Load rating: 25 kN static, 12 kN dynamic (fatigue tested)
+
+BOM — Rev A (Active):
+Seq | Component                    | Code              | Material        | Qty | Unit | Supplier
+ 10 | Base plate 300x200x12        | (comp-steel-a36)  | ASTM A36        |   1 | EA   | (supp-precision-steel)
+ 20 | Gusset plate 150x100x8       | (comp-steel-a36)  | ASTM A36        |   2 | EA   | (supp-precision-steel)
+ 30 | Vertical stiffener 200x80x10 | (comp-steel-a36)  | ASTM A36        |   2 | EA   | (supp-precision-steel)
+ 40 | Hex bolt M12x40 Grade 8.8    | (comp-hex-m12)    | Grade 8.8       |   4 | EA   | (supp-allied-fasteners)
+ 50 | Flat washer M12               | (comp-washer-m12) | Zinc-plated     |   4 | EA   | (supp-allied-fasteners)
+ 60 | Welding wire ER70S-6, 1.2mm  | (comp-weld-wire)  | Mild steel      | 0.3 | KG   | (supp-allied-fasteners)
+
+Manufacturing Routing: Laser cut plates (external vendor) → Robotic welding on (equip-weld-rob-01) at (line-weld-01) → CNC drilling on (equip-cnc-mill-02) → Zinc plating (Plant 2 coating line) → Final inspection → Ship
+
+============================================================
+NOTES
+============================================================
+
+Scrap factors: Gear blanks carry a 3% scrap factor due to heat treat distortion. Hydraulic castings carry 2% for porosity rejects found during pressure test. Bracket steel components carry 1.5% for weld defects. These factors are built into the BOM quantity calculations for MRP planning.
+
+All incoming raw materials are inspected per ACME quality procedure QP-INC-001. Steel certifications (mill certs) are verified against material spec requirements. Components from (supp-precision-steel) have historically maintained a 97.2% OTD rate with zero quality rejections in the last 12 months. Components from (supp-ohio-castings) require 100% incoming inspection due to historical porosity issues (see supplier audit report).

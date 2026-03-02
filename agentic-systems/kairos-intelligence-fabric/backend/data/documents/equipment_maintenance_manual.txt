@@ -1,0 +1,42 @@
+EQUIPMENT MAINTENANCE MANUAL — MACHINING DEPARTMENT
+Document ID: DOC-MAINT-001
+Revision: 3.2 | Effective Date: 2026-01-15
+Prepared by: Maria Chen, Maintenance Supervisor
+
+1. CNC MILL A-7 (equip-cnc-a7)
+   - Preventive Maintenance Schedule: Every 500 operating hours
+   - Spindle bearing inspection: Monthly. Replace bearings at 8,000-hour intervals.
+   - Coolant system: Check coolant concentration weekly (target 8-10%). Flush and replace every 6 months.
+   - Way covers: Inspect for damage monthly. Replace if torn or deformed.
+   - Ball screw lubrication: Auto-lube system check weekly. Manual greasing every 2,000 hours.
+   - Current MTBF: 2,400 hours. Target MTBF: 3,000 hours by Q3 2026.
+   - Known issue: Intermittent tool changer fault (Error E-4072). Root cause: proximity sensor degradation. Scheduled replacement for March 2026.
+
+2. CNC MILL B-3 (equip-cnc-b3)
+   - Preventive Maintenance Schedule: Every 500 operating hours
+   - Spindle runout check: Monthly (max allowable 0.005mm TIR).
+   - Hydraulic system: Check pressure weekly (target 45-50 bar). Replace filters every 1,000 hours.
+   - Axis backlash compensation: Quarterly laser calibration.
+   - Current MTBF: 1,800 hours. Below target of 2,500 hours.
+   - Action item: Investigate premature bearing wear on Z-axis. Vibration analysis scheduled for February 2026.
+
+3. LATHE L-1 (equip-lathe-l1)
+   - Preventive Maintenance Schedule: Every 400 operating hours
+   - Chuck jaw inspection: Weekly. Replace jaws when wear exceeds 0.1mm.
+   - Tailstock alignment: Monthly verification.
+   - Turret indexing: Check repeatability quarterly (max 0.003mm).
+   - Current MTBF: 3,200 hours. Exceeds target.
+   - Status: Best-performing equipment in department.
+
+4. LATHE L-2 (equip-lathe-l2)
+   - Currently under maintenance (since 2026-02-10)
+   - Issue: Main drive motor overheating at loads above 70%.
+   - Root cause analysis: Cooling fan bearing failure + blocked air intake filter.
+   - Estimated return to service: 2026-02-20.
+   - Temporary workaround: Reduced to 60% max load for urgent jobs only.
+
+5. GENERAL MAINTENANCE PROCEDURES
+   - All equipment must be locked out/tagged out (LOTO) before maintenance.
+   - Maintenance logs must be updated in SAP PM module within 24 hours.
+   - Critical spare parts inventory maintained for all Category A equipment.
+   - Emergency maintenance requests: Contact shift supervisor + maintenance hotline ext. 4400.

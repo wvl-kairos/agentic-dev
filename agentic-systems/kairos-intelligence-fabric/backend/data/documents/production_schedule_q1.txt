@@ -1,0 +1,65 @@
+PRODUCTION SCHEDULE — Q1 2026
+Document ID: DOC-PROD-001
+Prepared by: Operations Planning Department
+Approved by: Plant Manager
+
+1. MACHINING DEPARTMENT
+
+Line: Machining Line Alpha (line-machining-alpha)
+Equipment: CNC Mill A-7, CNC Mill B-3, Lathe L-1, Lathe L-2
+
+Week 1-4 (January):
+- Precision Gear Set (prod-gear-set): 1,200 units
+  - CNC Mill A-7: Gear blank machining (4 hrs/batch of 50)
+  - Lathe L-1: Shaft turning (2 hrs/batch of 50)
+  - Cycle time target: 4.2 min/unit
+- Turbine Blade Assembly (prod-turbine-blade): 400 units
+  - CNC Mill B-3: 5-axis profiling (8 hrs/batch of 20)
+  - Critical path item — zero defect tolerance
+
+Week 5-8 (February):
+- Precision Gear Set: 1,000 units (reduced — Lathe L-2 maintenance)
+- Custom Shaft Assembly (prod-shaft-assy): 600 units (new order ORD-2026-008)
+  - Priority order for automotive customer
+  - Requires overtime authorization if Lathe L-2 not returned by Feb 20
+
+Week 9-13 (March):
+- Precision Gear Set: 1,400 units (catch-up for January/February shortfall)
+- Turbine Blade Assembly: 500 units
+- Scheduled equipment maintenance window: March 15-17 (all machining equipment)
+
+2. INJECTION MOLDING DEPARTMENT
+
+Line: Injection Molding Line (line-injection)
+Equipment: Injection Molder IM-200, Injection Molder IM-350
+
+Full quarter:
+- Automotive Bracket Assembly (prod-bracket-assy): 15,000 units/month
+  - IM-200: Running 3 shifts, 6 days/week
+  - Mold change scheduled for February 28 (preventive maintenance)
+- Industrial Valve Housing (prod-valve-housing): 8,000 units/month
+  - IM-350: Running 2 shifts, 5 days/week
+  - Material supply: Confirm polymer stock from Advanced Polymers Inc (supp-advanced-polymers)
+
+3. ASSEMBLY DEPARTMENT
+
+Line: Assembly Line 1 (line-assembly-1)
+- Aerospace Component Kit (prod-aerospace-kit): 200 units/month
+  - Manual assembly + automated testing
+  - Requires certified operators only (see training log DOC-TRAIN-001)
+
+Line: Assembly Line 2 (line-assembly-2)
+- Electronic Control Module (prod-control-module): 3,000 units/month
+  - SMT placement + wave soldering + functional test
+  - Component lead times: 8 weeks for specialty ICs
+
+4. CAPACITY CONSTRAINTS
+- Lathe L-2 downtime impacts machining by ~15% in February
+- IM-350 approaching max capacity — expansion proposal under review
+- Assembly Line 2 bottleneck at functional test station (cycle time 45 sec vs. target 30 sec)
+
+5. KEY PERFORMANCE TARGETS
+- Overall OEE: >82%
+- On-time delivery: >95%
+- First-pass yield: >98%
+- Scrap rate: <2%

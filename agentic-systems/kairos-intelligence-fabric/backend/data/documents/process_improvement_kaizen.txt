@@ -1,0 +1,74 @@
+KAIZEN EVENT REPORT — CYCLE TIME REDUCTION
+Document ID: DOC-KAIZEN-001
+Event Date: 2026-01-13 through 2026-01-17
+Facilitator: Carlos Mendez (person-cmendez)
+Team: Maria Chen, Lisa Zhang, Robert Kim, 2 operators
+
+1. PROJECT CHARTER
+Objective: Reduce cycle time on Assembly Line 1 (line-assembly-1) for Aerospace Component Kit (prod-aerospace-kit) assembly by 20%.
+
+Background:
+- Current cycle time: 25 minutes per unit
+- Customer demand increasing from 200 to 300 units/month by Q3 2026
+- Current capacity at 1 shift: 210 units/month (insufficient for growth)
+- Options: Add shift ($180K/year) OR reduce cycle time (target: 20 min)
+
+2. CURRENT STATE ANALYSIS (VALUE STREAM MAP)
+
+Step 1: Kit staging (2.5 min) — Operator walks to staging area, gathers components
+Step 2: Sub-assembly A (4.0 min) — Manual assembly of electronic module
+Step 3: Sub-assembly B (3.5 min) — Bracket and housing assembly
+Step 4: Final integration (5.0 min) — Combine sub-assemblies + wiring
+Step 5: Functional test (4.5 min) — Automated test sequence
+Step 6: Visual inspection (2.0 min) — Inspector Robert Kim
+Step 7: Packaging (1.5 min) — Custom foam packaging
+Step 8: Documentation (2.0 min) — Print labels, log in system
+
+Total: 25.0 min | Value-added time: 17.0 min | Non-value-added: 8.0 min (32%)
+
+3. ROOT CAUSES OF WASTE
+- Kit staging: Operator walks 15 meters to staging area (motion waste)
+- Sub-assembly A: Waiting for soldering iron to heat up between units (waiting waste)
+- Documentation: Manual data entry into 2 separate systems (processing waste)
+- Inspection: Separate station requires part transfer (transport waste)
+
+4. IMPROVEMENTS IMPLEMENTED
+
+4.1 Kit Delivery System (Eliminated 2.0 min)
+- Installed gravity-feed rack at workstation for top 10 components
+- Material handler delivers kits every 2 hours instead of operator pull
+- Investment: $2,800 (gravity rack + kanban cards)
+
+4.2 Inline Soldering Station (Eliminated 0.8 min)
+- Dedicated soldering station with always-on temperature control
+- Flux pen replaced with no-clean solder wire
+- Investment: $1,200
+
+4.3 Integrated Test + Inspect Station (Eliminated 1.5 min)
+- Combined functional test and visual inspection at single station
+- Added camera inspection system for solder joint verification
+- Operator performs visual check during automated test sequence
+- Investment: $8,500 (camera system + fixture modification)
+
+4.4 Digital Documentation (Eliminated 1.2 min)
+- Barcode scanning replaces manual data entry
+- Single scan populates both MES and quality systems
+- Investment: $3,500 (barcode scanners + software integration)
+
+5. RESULTS
+
+New cycle time: 19.5 min (22% reduction) ✓ Exceeded 20% target
+Value-added ratio: 17.0 / 19.5 = 87% (up from 68%)
+New capacity at 1 shift: 270 units/month
+Capacity gap to 300: Only 30 units — achievable with minor overtime
+
+Total investment: $16,000
+Projected annual savings: $180,000 (avoided 2nd shift)
+Payback period: 33 days
+
+6. SUSTAIN PLAN
+- Standard work document updated (posted at workstation)
+- Operator training completed (Lisa Zhang + 2 backup operators)
+- Weekly cycle time audit for first 8 weeks
+- Monthly review thereafter
+- Next target: Sub-assembly B fixture redesign (potential 1 min reduction)

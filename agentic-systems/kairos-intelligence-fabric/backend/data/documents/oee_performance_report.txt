@@ -1,0 +1,71 @@
+OEE PERFORMANCE REPORT — JANUARY 2026
+Document ID: DOC-OEE-001
+Prepared by: Operations Analytics Team
+
+OVERALL EQUIPMENT EFFECTIVENESS (OEE) = Availability × Performance × Quality
+
+1. EQUIPMENT-LEVEL OEE SUMMARY
+
+Equipment: CNC Mill A-7 (equip-cnc-a7)
+- Availability: 91.2% (planned uptime: 520 hrs, actual: 474 hrs)
+  - Downtime causes: Tool changes (18 hrs), Material waiting (12 hrs), Unplanned stops (16 hrs)
+- Performance: 94.5% (theoretical cycle time vs actual)
+  - Slowdowns: Feed rate reductions for hard materials (5.5%)
+- Quality: 99.1% (2,847 good parts / 2,873 total)
+  - Scrap: 26 parts (dimensional out-of-spec)
+- OEE: 85.4% ★ ABOVE TARGET (82%)
+
+Equipment: CNC Mill B-3 (equip-cnc-b3)
+- Availability: 84.3%
+  - Downtime causes: Z-axis bearing issue (22 hrs), Coolant system repair (8 hrs), Setup (18 hrs)
+- Performance: 91.8%
+  - Slowdowns: Vibration-induced feed reduction on 5-axis work
+- Quality: 98.5%
+  - Scrap: 15 parts (surface finish rejects on turbine blades)
+- OEE: 76.2% ⚠ BELOW TARGET
+
+Equipment: Lathe L-1 (equip-lathe-l1)
+- Availability: 94.7%
+  - Minimal unplanned downtime. Well-maintained.
+- Performance: 96.2%
+- Quality: 99.6%
+- OEE: 90.8% ★★ BEST IN CLASS
+
+Equipment: Lathe L-2 (equip-lathe-l2)
+- Availability: 72.1% (motor overheating issue from Jan 25 onwards)
+  - Major downtime: 85 hrs for motor cooling system investigation
+- Performance: 88.4%
+  - Reduced to 60% load capacity
+- Quality: 98.8%
+- OEE: 63.0% ⚠⚠ CRITICAL — Below minimum threshold (70%)
+
+Equipment: Injection Molder IM-200 (equip-im-200)
+- Availability: 92.8%
+  - Downtime: Mold changes (12 hrs), Color changes (6 hrs), Minor faults (8 hrs)
+- Performance: 97.1%
+- Quality: 98.8%
+- OEE: 89.0% ★ ABOVE TARGET
+
+Equipment: Injection Molder IM-350 (equip-im-350)
+- Availability: 88.5%
+  - Downtime: Material drying issues (14 hrs), Hydraulic leak repair (10 hrs)
+- Performance: 93.4%
+- Quality: 97.9%
+- OEE: 80.9% ⚠ SLIGHTLY BELOW TARGET
+
+2. DEPARTMENT SUMMARY
+
+Machining Department:
+- Average OEE: 78.9% (dragged down by Lathe L-2)
+- Excluding L-2: 84.1%
+- Action: Priority repair of Lathe L-2 motor cooling system
+
+Injection Molding Department:
+- Average OEE: 85.0%
+- Action: Investigate IM-350 material drying issues with supplier
+
+3. TRENDS & RECOMMENDATIONS
+- Lathe L-1 demonstrates best practice — analyze and replicate maintenance approach.
+- CNC Mill B-3 Z-axis bearing issue is recurring (3rd time in 6 months). Consider full axis rebuild.
+- Overall plant OEE: 80.9%. Target for Q2: 84%.
+- Capital request: Predictive maintenance sensor package for all Category A equipment ($45K).

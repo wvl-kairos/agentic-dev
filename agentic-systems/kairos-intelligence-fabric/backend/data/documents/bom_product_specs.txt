@@ -1,0 +1,77 @@
+BILL OF MATERIALS & PRODUCT SPECIFICATIONS
+Document ID: DOC-BOM-001
+Revision: 5.1 | Date: 2026-02-01
+Engineering Department
+
+1. PRECISION GEAR SET (prod-gear-set)
+   Part Number: PGS-2026-A
+   Unit Cost: $145.00
+   Lead Time: 3 weeks
+
+   BOM:
+   - Steel billet, 4140 alloy (qty: 1) — Supplier: Precision Steel Co (supp-precision-steel)
+   - Bearing, deep groove 6205 (qty: 2) — Supplier: Global Components Ltd (supp-global-components)
+   - Shaft seal, NBR 25x35x7 (qty: 2) — Supplier: Global Components Ltd
+   - Retaining ring, DIN 471 (qty: 4) — Supplier: Global Components Ltd
+   - Lubricant, synthetic gear oil (qty: 0.5L) — Supplier: ChemTech Solutions (supp-chemtech)
+
+   Manufacturing Route:
+   1. CNC milling (equip-cnc-a7): Gear blank — 35 min
+   2. CNC turning (equip-lathe-l1): Shaft — 18 min
+   3. Heat treatment (external): Case hardening — 48 hr batch
+   4. Grinding (equip-grinder-g1): Finish grind — 12 min
+   5. Assembly (line-assembly-1): Final assembly + test — 25 min
+   Total cycle time: ~90 min (excluding heat treatment)
+
+2. TURBINE BLADE ASSEMBLY (prod-turbine-blade)
+   Part Number: TBA-2026-X
+   Unit Cost: $890.00
+   Lead Time: 6 weeks
+
+   BOM:
+   - Inconel 718 bar stock (qty: 1) — Supplier: Precision Steel Co (supp-precision-steel)
+   - Thermal barrier coating material (qty: 50g) — Supplier: ChemTech Solutions (supp-chemtech)
+   - Root attachment hardware, titanium (qty: 6) — Supplier: TitanParts Inc (supp-titanparts)
+   - Inspection template, CMM program (qty: 1) — Internal
+
+   Manufacturing Route:
+   1. 5-axis CNC profiling (equip-cnc-b3): Airfoil machining — 120 min
+   2. EDM (equip-edm-w1): Cooling holes — 45 min
+   3. Coating (external): TBC application — 72 hr batch
+   4. CMM inspection (equip-cmm-01): Full dimensional — 30 min
+   5. Balance check: Dynamic balance — 15 min
+   Total cycle time: ~210 min (excluding coating)
+   Quality requirement: Zero defect. 100% CMM inspection mandatory.
+
+3. AUTOMOTIVE BRACKET ASSEMBLY (prod-bracket-assy)
+   Part Number: ABA-2026-M
+   Unit Cost: $12.50
+   Lead Time: 2 weeks
+
+   BOM:
+   - Nylon 66, 30% glass filled (qty: 85g) — Supplier: Advanced Polymers Inc (supp-advanced-polymers)
+   - Steel insert, zinc plated (qty: 2) — Supplier: Precision Steel Co (supp-precision-steel)
+   - Label, barcode (qty: 1) — Internal
+
+   Manufacturing Route:
+   1. Injection molding (equip-im-200): Mold + insert — 45 sec cycle
+   2. Trim + deburr (manual): 15 sec
+   3. Functional test: Pull test + dimensional — 20 sec
+   Total cycle time: 80 sec
+
+4. INDUSTRIAL VALVE HOUSING (prod-valve-housing)
+   Part Number: IVH-2026-C
+   Unit Cost: $28.00
+   Lead Time: 3 weeks
+
+   BOM:
+   - PPS resin, 40% glass filled (qty: 220g) — Supplier: Advanced Polymers Inc (supp-advanced-polymers)
+   - O-ring, Viton (qty: 2) — Supplier: Global Components Ltd (supp-global-components)
+   - Brass insert, M8 thread (qty: 4) — Supplier: Global Components Ltd
+
+   Manufacturing Route:
+   1. Injection molding (equip-im-350): Mold + insert — 90 sec cycle
+   2. CNC machining: Bore finishing — 60 sec
+   3. Leak test: Helium leak detection — 30 sec
+   4. CMM sampling: 1 in 25 parts
+   Total cycle time: 3 min

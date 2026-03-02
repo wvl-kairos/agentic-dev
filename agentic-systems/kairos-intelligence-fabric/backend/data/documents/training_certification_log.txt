@@ -1,0 +1,68 @@
+OPERATOR TRAINING & CERTIFICATION LOG
+Document ID: DOC-TRAIN-001
+Last Updated: 2026-02-10
+HR & Training Department
+
+1. CERTIFIED OPERATORS
+
+Name: Lisa Zhang (person-lzhang)
+Role: Senior Assembly Operator
+Certifications:
+- Aerospace Assembly Level 3 (IPC-A-620C): Certified 2025-06, Expires 2027-06
+- Soldering (IPC J-STD-001): Certified 2025-03, Expires 2027-03
+- Pneumatic Press Operation: Certified 2024-11, Expires 2026-11
+- Forklift Operation: Certified 2025-09, Expires 2026-09
+- First Aid / CPR: Certified 2025-08, Expires 2026-08
+Assigned lines: Assembly Line 1 (line-assembly-1)
+Notes: Only operator certified for aerospace kit assembly. Cross-training backup needed.
+
+Name: Robert Kim (person-rkim)
+Role: Quality Inspector
+Certifications:
+- CMM Operation (Hexagon): Certified 2025-04, Expires 2027-04
+- Visual Inspection Level 2: Certified 2025-01, Expires 2027-01
+- SPC Charting: Certified 2024-12, Expires 2026-12
+- GD&T (ASME Y14.5): Certified 2025-07, Expires 2027-07
+Assigned area: Quality Lab
+Notes: Primary CMM operator. Handles all turbine blade inspections.
+
+Name: Sarah Lopez (person-slopez)
+Role: Quality Inspector
+Certifications:
+- Visual Inspection Level 2: Certified 2025-02, Expires 2027-02
+- SPC Charting: Certified 2025-01, Expires 2027-01
+- Injection Molding Inspection: Certified 2025-06, Expires 2027-06
+Assigned area: Injection Molding Quality
+Notes: Specializes in polymer part inspection. Highest first-pass yield record.
+
+Name: Carlos Mendez (person-cmendez)
+Role: Shift Supervisor
+Certifications:
+- OSHA 30-Hour General Industry: Certified 2025-05, Expires 2028-05
+- Lean Manufacturing Green Belt: Certified 2024-09, No expiry
+- Emergency Response Team Lead: Certified 2025-11, Expires 2026-11
+- Hazardous Materials Handling: Certified 2025-03, Expires 2027-03
+Assigned: All production areas, 2nd shift
+Notes: Lead for continuous improvement projects.
+
+Name: Maria Chen (person-mchen)
+Role: Maintenance Supervisor
+Certifications:
+- PLC Programming (Siemens S7): Certified 2025-02, Expires 2027-02
+- Hydraulic Systems Maintenance: Certified 2024-08, Expires 2026-08
+- Electrical Safety (NFPA 70E): Certified 2025-06, Expires 2026-06
+- Predictive Maintenance (Vibration Analysis Cat II): Certified 2025-09, Expires 2027-09
+Assigned: All maintenance activities
+Notes: Key person for equipment troubleshooting. Single point of failure for PLC expertise.
+
+2. UPCOMING TRAINING NEEDS
+- Cross-training: Need 2nd aerospace assembly operator by Q2 2026.
+- Expiring certifications: Lisa Zhang forklift (Sep 2026), Maria Chen electrical safety (Jun 2026).
+- New equipment training: When replacement CNC arrives, 3 operators need training.
+- Lean Six Sigma Black Belt: Carlos Mendez nominated for March 2026 cohort.
+
+3. TRAINING BUDGET
+- Annual budget: $35,000
+- Spent YTD: $8,200
+- Committed: $12,000 (Black Belt training + aerospace certification renewal)
+- Remaining: $14,800

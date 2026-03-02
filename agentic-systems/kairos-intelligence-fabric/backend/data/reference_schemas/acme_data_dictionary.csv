@@ -1,0 +1,107 @@
+table_name,column_name,data_type,is_primary_key,foreign_key_references,nullable,description
+customers,customer_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+customers,customer_code,VARCHAR(20),FALSE,,FALSE,"Unique customer identifier, e.g. 'CUST-1001'"
+customers,company_name,VARCHAR(150),FALSE,,FALSE,Legal company name
+customers,contact_name,VARCHAR(120),FALSE,,TRUE,Primary contact full name
+customers,contact_email,VARCHAR(120),FALSE,,TRUE,Primary contact email address
+customers,payment_terms,VARCHAR(30),FALSE,,TRUE,"Payment terms: Net 30, Net 45, Net 60, COD"
+customers,credit_limit,NUMERIC(12 2),FALSE,,TRUE,Maximum credit extended in USD
+customers,is_active,BOOLEAN,FALSE,,TRUE,Whether customer account is active (default TRUE)
+sales_orders,order_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+sales_orders,order_number,VARCHAR(20),FALSE,,FALSE,"Unique order number, e.g. 'SO-2026-0001'"
+sales_orders,customer_id,INTEGER,FALSE,customers.customer_id,FALSE,Reference to ordering customer
+sales_orders,order_date,DATE,FALSE,,FALSE,Date order was placed
+sales_orders,required_date,DATE,FALSE,,FALSE,Customer-requested delivery date
+sales_orders,promised_date,DATE,FALSE,,TRUE,ACME-committed delivery date
+sales_orders,status,VARCHAR(20),FALSE,,FALSE,"Order status: Open, In Production, Shipped, Closed, Cancelled"
+sales_orders,priority,SMALLINT,FALSE,,TRUE,"Priority 1-5: 1=Critical, 2=High, 3=Normal, 4=Low, 5=Backlog"
+sales_orders,total_amount,NUMERIC(12 2),FALSE,,TRUE,Total order value in USD
+sales_orders,created_by,INTEGER,FALSE,employees.employee_id,TRUE,Employee who created the order
+order_lines,line_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+order_lines,order_id,INTEGER,FALSE,sales_orders.order_id,FALSE,Parent sales order
+order_lines,line_number,SMALLINT,FALSE,,FALSE,Line sequence within order
+order_lines,product_id,INTEGER,FALSE,products.product_id,FALSE,Product being ordered
+order_lines,quantity,INTEGER,FALSE,,FALSE,Ordered quantity (must be > 0)
+order_lines,unit_price,NUMERIC(10 2),FALSE,,FALSE,Price per unit in USD
+order_lines,line_status,VARCHAR(20),FALSE,,TRUE,"Line status: Pending, Released, Complete, Cancelled"
+products,product_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+products,product_code,VARCHAR(30),FALSE,,FALSE,"Unique product code, e.g. 'GEAR-ASSY-100'"
+products,product_name,VARCHAR(150),FALSE,,FALSE,Full product description
+products,product_family,VARCHAR(60),FALSE,,TRUE,"Product family: Precision Gears, Hydraulic Components, Custom Brackets, Actuators"
+products,standard_cost,NUMERIC(10 2),FALSE,,TRUE,Standard manufacturing cost per unit in USD
+products,lead_time_days,INTEGER,FALSE,,TRUE,Standard manufacturing lead time in calendar days
+products,drawing_number,VARCHAR(40),FALSE,,TRUE,Engineering drawing reference
+products,revision,VARCHAR(10),FALSE,,TRUE,"Drawing revision letter, default 'A'"
+components,component_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+components,component_code,VARCHAR(30),FALSE,,FALSE,"Unique code, e.g. 'STEEL-4140-ROD'"
+components,component_name,VARCHAR(150),FALSE,,FALSE,Full component description
+components,component_type,VARCHAR(30),FALSE,,FALSE,"Type: Raw Material, Purchased Part, Sub-Assembly, Consumable"
+components,material_spec,VARCHAR(80),FALSE,,TRUE,"Material specification, e.g. 'AISI 4140', 'AL 6061-T6'"
+components,reorder_point,INTEGER,FALSE,,TRUE,Minimum stock level triggering reorder
+bom_headers,bom_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+bom_headers,product_id,INTEGER,FALSE,products.product_id,FALSE,Product this BOM defines
+bom_headers,bom_revision,VARCHAR(10),FALSE,,FALSE,"BOM revision, e.g. 'A', 'B'"
+bom_headers,effective_date,DATE,FALSE,,FALSE,Date BOM becomes effective
+bom_headers,status,VARCHAR(20),FALSE,,TRUE,"BOM status: Draft, Active, Obsolete"
+bom_details,bom_detail_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+bom_details,bom_id,INTEGER,FALSE,bom_headers.bom_id,FALSE,Parent BOM header
+bom_details,component_id,INTEGER,FALSE,components.component_id,FALSE,Component used in this BOM level
+bom_details,quantity_per,NUMERIC(10 4),FALSE,,FALSE,Quantity of component per unit of parent product
+bom_details,scrap_factor_pct,NUMERIC(5 2),FALSE,,TRUE,Expected scrap percentage for this component (default 0)
+suppliers,supplier_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+suppliers,supplier_code,VARCHAR(20),FALSE,,FALSE,"Unique code, e.g. 'SUPP-001'"
+suppliers,supplier_name,VARCHAR(150),FALSE,,FALSE,Legal supplier name
+suppliers,rating,CHAR(1),FALSE,,TRUE,"Supplier rating: A=Preferred, B=Approved, C=Conditional, D=Probation"
+suppliers,iso_certified,BOOLEAN,FALSE,,TRUE,Whether supplier holds ISO 9001 certification
+suppliers,lead_time_days,INTEGER,FALSE,,TRUE,Average lead time in calendar days
+suppliers,on_time_delivery_pct,NUMERIC(5 2),FALSE,,TRUE,Historical on-time delivery percentage
+purchase_orders,po_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+purchase_orders,po_number,VARCHAR(20),FALSE,,FALSE,"Unique PO number, e.g. 'PO-2026-0150'"
+purchase_orders,supplier_id,INTEGER,FALSE,suppliers.supplier_id,FALSE,Supplier for this purchase order
+purchase_orders,component_id,INTEGER,FALSE,components.component_id,FALSE,Component being purchased
+purchase_orders,quantity,INTEGER,FALSE,,FALSE,Ordered quantity
+purchase_orders,unit_cost,NUMERIC(10 2),FALSE,,FALSE,Cost per unit in USD
+purchase_orders,status,VARCHAR(20),FALSE,,TRUE,"PO status: Open, Partial, Received, Closed, Cancelled"
+production_lines,line_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+production_lines,line_code,VARCHAR(20),FALSE,,FALSE,"Unique line code, e.g. 'LINE-CNC-01'"
+production_lines,line_name,VARCHAR(80),FALSE,,FALSE,"Descriptive name, e.g. 'CNC Machining Cell A'"
+production_lines,plant,VARCHAR(20),FALSE,,FALSE,"Plant location: Plant 1 - Dayton, Plant 2 - Columbus"
+production_lines,line_type,VARCHAR(30),FALSE,,TRUE,"Line type: CNC Machining, Assembly, Welding, Coating"
+work_orders,work_order_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+work_orders,work_order_number,VARCHAR(20),FALSE,,FALSE,"Unique WO number, e.g. 'WO-2026-00345'"
+work_orders,product_id,INTEGER,FALSE,products.product_id,FALSE,Product being manufactured
+work_orders,line_id,INTEGER,FALSE,production_lines.line_id,TRUE,Assigned production line
+work_orders,planned_qty,INTEGER,FALSE,,FALSE,Planned production quantity
+work_orders,completed_qty,INTEGER,FALSE,,TRUE,Actual quantity completed (default 0)
+work_orders,scrap_qty,INTEGER,FALSE,,TRUE,Quantity scrapped (default 0)
+work_orders,status,VARCHAR(20),FALSE,,TRUE,"WO status: Planned, Released, In Progress, Complete, On Hold, Cancelled"
+equipment,equipment_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+equipment,equipment_code,VARCHAR(30),FALSE,,FALSE,"Unique code, e.g. 'CNC-LATHE-01'"
+equipment,equipment_name,VARCHAR(100),FALSE,,FALSE,Full equipment description
+equipment,equipment_type,VARCHAR(40),FALSE,,FALSE,"Type: CNC Lathe, CNC Mill, Welding Robot, Coating Line, CMM"
+equipment,line_id,INTEGER,FALSE,production_lines.line_id,TRUE,Production line where equipment is installed
+equipment,status,VARCHAR(20),FALSE,,TRUE,"Equipment status: Operational, Degraded, Down, Decommissioned"
+equipment,criticality,CHAR(1),FALSE,,TRUE,"Criticality rating: A=Critical, B=Important, C=Low"
+quality_inspections,inspection_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+quality_inspections,work_order_id,INTEGER,FALSE,work_orders.work_order_id,TRUE,Work order being inspected
+quality_inspections,inspection_type,VARCHAR(30),FALSE,,FALSE,"Type: Incoming, In-Process, Final, First Article"
+quality_inspections,result,VARCHAR(10),FALSE,,FALSE,"Inspection result: Pass, Fail, Conditional"
+defect_records,defect_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+defect_records,defect_type,VARCHAR(40),FALSE,,FALSE,"Defect classification: Dimensional, Surface Finish, Porosity, Crack, Burr, Cosmetic, Material"
+defect_records,severity,VARCHAR(10),FALSE,,FALSE,"Severity level: Critical, Major, Minor"
+defect_records,root_cause,VARCHAR(60),FALSE,,TRUE,"Root cause: Tooling Wear, Operator Error, Material Defect, Setup Error, Machine Drift"
+defect_records,disposition,VARCHAR(20),FALSE,,TRUE,"Disposition: Rework, Scrap, Use As-Is, Return to Vendor"
+spc_measurements,measurement_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+spc_measurements,equipment_id,INTEGER,FALSE,equipment.equipment_id,TRUE,Equipment where measurement was taken
+spc_measurements,product_id,INTEGER,FALSE,products.product_id,TRUE,Product being measured
+spc_measurements,characteristic,VARCHAR(80),FALSE,,FALSE,"Measured characteristic, e.g. 'Bore Diameter', 'Surface Roughness Ra'"
+spc_measurements,nominal_value,NUMERIC(12 6),FALSE,,FALSE,Target/nominal dimension value
+spc_measurements,upper_spec_limit,NUMERIC(12 6),FALSE,,FALSE,Upper specification limit (USL)
+spc_measurements,lower_spec_limit,NUMERIC(12 6),FALSE,,FALSE,Lower specification limit (LSL)
+spc_measurements,measured_value,NUMERIC(12 6),FALSE,,FALSE,Actual measured value
+spc_measurements,in_spec,BOOLEAN,FALSE,,FALSE,Computed: TRUE if measured_value is between LSL and USL
+shipments,shipment_id,SERIAL,TRUE,,FALSE,Auto-increment primary key
+shipments,shipment_number,VARCHAR(20),FALSE,,FALSE,"Unique shipment number, e.g. 'SHIP-2026-0200'"
+shipments,order_id,INTEGER,FALSE,sales_orders.order_id,FALSE,Sales order being shipped
+shipments,carrier,VARCHAR(60),FALSE,,TRUE,"Shipping carrier: UPS, FedEx, LTL Carrier, Customer Pickup"
+shipments,status,VARCHAR(20),FALSE,,TRUE,"Shipment status: Pending, Shipped, In Transit, Delivered, Returned"

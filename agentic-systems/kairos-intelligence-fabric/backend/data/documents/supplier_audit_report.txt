@@ -1,0 +1,42 @@
+SUPPLIER QUALITY AUDIT REPORT
+Document ID: DOC-SUPPL-001
+Audit Date: 2026-01-22 through 2026-01-24
+Supplier: Precision Steel Co (supp-precision-steel)
+Auditor: James Wilson, Supply Chain Manager
+
+1. SUPPLIER OVERVIEW
+- Supplier ID: supp-precision-steel
+- Location: Detroit, MI
+- Products supplied: Raw steel billets, precision-ground bar stock, custom forgings
+- Annual spend: $2.4M
+- Quality rating: 4.2/5.0 (per supplier scorecard)
+- On-time delivery: 94% (target: 97%)
+
+2. AUDIT FINDINGS
+
+2.1 Quality Management System (Score: 85/100)
+- ISO 9001:2015 certified (valid through 2027-06)
+- Document control: Adequate. Minor finding — 3 work instructions had outdated revision dates.
+- Calibration program: All measurement equipment within calibration. Good traceability.
+- Nonconformance tracking: Using digital NCR system. Average closure time: 12 days (target: 10 days).
+
+2.2 Process Control (Score: 78/100)
+- Heat treatment: Furnace temperature uniformity survey overdue by 2 months.
+- Material traceability: Full lot traceability from raw material to shipped product. Bar coding system effective.
+- In-process inspection: SPC charts maintained for key dimensions. Cp values generally above 1.33.
+- MAJOR FINDING: Surface grinding process lacks automated in-process gauging. Relying on operator checks every 25th part.
+
+2.3 Delivery Performance (Score: 72/100)
+- 6% late deliveries in Q4 2025 due to capacity constraints.
+- Lead time increased from 4 weeks to 6 weeks for custom forgings.
+- Supplier adding second shift to address capacity. Expected improvement by Q2 2026.
+
+3. CORRECTIVE ACTIONS REQUIRED
+- CAR-001: Implement automated gauging on grinding line (Due: 2026-04-30)
+- CAR-002: Complete furnace temperature survey (Due: 2026-02-28)
+- CAR-003: Reduce NCR closure time to 10 days (Due: 2026-03-31)
+- CAR-004: Develop capacity plan to restore 97% OTD (Due: 2026-03-15)
+
+4. OVERALL ASSESSMENT
+Conditional approval. Re-audit scheduled for 2026-05 to verify corrective actions.
+Alternative supplier evaluation initiated for critical forgings (RFQ sent to 3 candidates).

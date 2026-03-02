@@ -1,0 +1,50 @@
+STATISTICAL PROCESS CONTROL (SPC) REPORT — INJECTION MOLDING LINE
+Document ID: DOC-QA-001
+Report Period: January 2026
+Prepared by: David Park, Quality Engineer
+
+EXECUTIVE SUMMARY
+This report analyzes SPC data for the injection molding production line (line-injection) processing products PROD-004 (Automotive Bracket Assembly) and PROD-005 (Industrial Valve Housing).
+
+1. PROCESS CAPABILITY ANALYSIS
+
+Product: Automotive Bracket Assembly (prod-bracket-assy)
+- Critical dimension: Wall thickness (spec: 3.20 ± 0.15 mm)
+- Cp = 1.45, Cpk = 1.32
+- Process is capable and centered.
+- X-bar chart: No out-of-control signals detected.
+- R chart: Range stable, average range = 0.08 mm.
+
+Product: Industrial Valve Housing (prod-valve-housing)
+- Critical dimension: Bore diameter (spec: 25.00 ± 0.05 mm)
+- Cp = 1.12, Cpk = 0.98
+- WARNING: Cpk below 1.0 threshold. Process drift detected.
+- X-bar chart: Western Electric Rule 2 violation on Jan 15-17 (2 of 3 consecutive points beyond 2σ).
+- Root cause: Material lot variation from supplier SUPP-003 (Advanced Polymers Inc).
+- Corrective action: Incoming inspection tightened for polymer lots. Supplier notified.
+
+2. DEFECT ANALYSIS
+
+Overall defect rate: 1.2% (target: <1.5%)
+- Flash defects: 0.4% (primarily on Bracket Assembly)
+- Short shots: 0.3% (correlated with material viscosity variation)
+- Sink marks: 0.2% (mold temperature optimization in progress)
+- Surface blemishes: 0.3%
+
+3. INSPECTION RESULTS BY INSPECTOR
+
+Inspector: Robert Kim (person-rkim)
+- Parts inspected: 2,847
+- Defects found: 38 (1.33%)
+- First-pass yield: 98.67%
+
+Inspector: Sarah Lopez (person-slopez)
+- Parts inspected: 3,102
+- Defects found: 34 (1.10%)
+- First-pass yield: 98.90%
+
+4. RECOMMENDATIONS
+- Escalate Valve Housing Cpk issue to supplier quality team.
+- Implement cavity pressure monitoring for real-time SPC.
+- Schedule mold maintenance for Bracket Assembly tool (increasing flash trend).
+- Target: Achieve Cpk > 1.33 for all critical dimensions by Q2 2026.
