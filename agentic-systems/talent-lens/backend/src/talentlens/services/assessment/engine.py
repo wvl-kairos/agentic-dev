@@ -12,19 +12,216 @@ Pipeline per interview:
 import logging
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from talentlens.models.database.assessment import Assessment, CriterionScore
+from talentlens.models.database.candidate import Candidate, PipelineStage
+from talentlens.models.database.evidence import Evidence
+from talentlens.models.database.interview import Interview
+from talentlens.models.database.rubric import Rubric
+from talentlens.services.assessment.contribution import detect_contributions
+from talentlens.services.assessment.scoring import score_interview
+from talentlens.services.assessment.talk_ratio import compute_talk_ratio
+from talentlens.services.notifications.slack import notify_assessment_complete
 
 logger = logging.getLogger(__name__)
+
+# Maps interview type → pipeline stage the candidate should advance to after assessment
+STAGE_ADVANCEMENT = {
+    "screening": PipelineStage.coderpad,
+    "coderpad": PipelineStage.technical_interview,
+    "technical": PipelineStage.final_interview,
+    "final": PipelineStage.decision,
+}
+
+
+async def _find_rubric(candidate: Candidate, db: AsyncSession) -> list[dict]:
+    """Find the best matching rubric for a candidate's venture + role."""
+    result = await db.execute(
+        select(Rubric)
+        .where(Rubric.venture_id == candidate.venture_id)
+        .options(selectinload(Rubric.criteria))
+        .order_by(Rubric.created_at.desc())
+    )
+    rubrics = result.scalars().all()
+
+    # Try to match by role
+    for rubric in rubrics:
+        if rubric.role and candidate.role and rubric.role.lower() in candidate.role.lower():
+            return [
+                {
+                    "name": c.name,
+                    "description": c.description,
+                    "weight": c.weight,
+                    "max_score": c.max_score,
+                }
+                for c in rubric.criteria
+            ], rubric.id
+
+    # Fall back to first rubric or default criteria
+    if rubrics and rubrics[0].criteria:
+        rubric = rubrics[0]
+        return [
+            {
+                "name": c.name,
+                "description": c.description,
+                "weight": c.weight,
+                "max_score": c.max_score,
+            }
+            for c in rubric.criteria
+        ], rubric.id
+
+    # No rubric found — use defaults
+    logger.warning("No rubric found for candidate %s, using defaults", candidate.id)
+    return [
+        {"name": "Technical Skills", "description": "Depth of technical knowledge demonstrated", "weight": 2.0, "max_score": 5},
+        {"name": "Communication", "description": "Clarity and structure of responses", "weight": 1.0, "max_score": 5},
+        {"name": "Problem Solving", "description": "Approach to breaking down problems", "weight": 1.5, "max_score": 5},
+        {"name": "Individual Ownership", "description": "Ability to articulate personal contributions", "weight": 1.0, "max_score": 5},
+    ], None
 
 
 async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> uuid.UUID:
     """Run the full assessment pipeline for an interview.
     Returns the created Assessment ID."""
-    # TODO: load interview + candidate + rubric
-    # TODO: compute talk ratio
-    # TODO: detect contributions
-    # TODO: call Claude for scoring
-    # TODO: persist results
-    # TODO: advance candidate stage
-    # TODO: notify via Slack
-    raise NotImplementedError
+
+    # 1. Load interview
+    interview = await db.get(Interview, interview_id)
+    if not interview:
+        raise ValueError(f"Interview {interview_id} not found")
+
+    if not interview.transcript:
+        raise ValueError(f"Interview {interview_id} has no transcript")
+
+    # Load candidate if linked
+    candidate = None
+    if interview.candidate_id:
+        candidate = await db.get(Candidate, interview.candidate_id)
+
+    # 2. Compute talk ratio
+    diarization = interview.diarization
+    # Handle both raw list and enriched dict format
+    if isinstance(diarization, dict):
+        segments = diarization.get("segments", [])
+    else:
+        segments = diarization or []
+
+    candidate_name = candidate.name if candidate else None
+    talk_result = compute_talk_ratio(segments, candidate_name)
+    interview.talk_ratio = talk_result["candidate_ratio"]
+
+    logger.info(
+        "Interview %s: talk ratio %.0f%% (%s)",
+        interview_id,
+        talk_result["candidate_ratio"] * 100,
+        talk_result["candidate_speaker"],
+    )
+
+    # 3. Detect contributions
+    contributions = detect_contributions(
+        interview.transcript,
+        candidate_speaker=talk_result["candidate_speaker"],
+    )
+    logger.info(
+        "Interview %s: %d individual, %d collective contributions",
+        interview_id,
+        contributions["individual_count"],
+        contributions["collective_count"],
+    )
+
+    # 4. Find rubric and score via Claude
+    rubric_id = None
+    if candidate:
+        criteria, rubric_id = await _find_rubric(candidate, db)
+    else:
+        criteria, rubric_id = [
+            {"name": "Technical Skills", "description": "Depth of technical knowledge", "weight": 2.0, "max_score": 5},
+            {"name": "Communication", "description": "Clarity of responses", "weight": 1.0, "max_score": 5},
+            {"name": "Problem Solving", "description": "Approach to problems", "weight": 1.5, "max_score": 5},
+            {"name": "Individual Ownership", "description": "Personal contributions", "weight": 1.0, "max_score": 5},
+        ], None
+
+    scoring_result = await score_interview(
+        transcript=interview.transcript,
+        criteria=criteria,
+        talk_ratio=talk_result["candidate_ratio"],
+        contributions=contributions,
+        interview_type=interview.interview_type.value,
+    )
+
+    # 5. Persist Assessment
+    stage = interview.interview_type.value
+    assessment = Assessment(
+        candidate_id=interview.candidate_id,
+        interview_id=interview.id,
+        rubric_id=rubric_id,
+        stage=stage,
+        overall_score=scoring_result.get("overall_score"),
+        summary=scoring_result.get("summary"),
+        recommendation=scoring_result.get("recommendation"),
+        raw_response={"scoring": scoring_result, "talk_ratio": talk_result, "contributions": contributions},
+    )
+    db.add(assessment)
+    await db.flush()
+
+    # Persist criterion scores + evidence
+    for cs_data in scoring_result.get("criteria_scores", []):
+        criterion_score = CriterionScore(
+            assessment_id=assessment.id,
+            criterion_name=cs_data.get("criterion_name", ""),
+            score=cs_data.get("score", 0),
+            max_score=cs_data.get("max_score", 5),
+            reasoning=cs_data.get("reasoning"),
+        )
+        db.add(criterion_score)
+        await db.flush()
+
+        for ev_data in cs_data.get("evidence", []):
+            evidence = Evidence(
+                criterion_score_id=criterion_score.id,
+                quote=ev_data.get("quote", ""),
+                speaker=ev_data.get("speaker"),
+                relevance="supports",
+            )
+            db.add(evidence)
+
+    # Store analysis in interview diarization
+    interview.diarization = {
+        "segments": segments,
+        "analysis": {
+            "talk_ratio": talk_result,
+            "contributions": contributions,
+        },
+    }
+
+    # 6. Advance candidate stage
+    if candidate:
+        next_stage = STAGE_ADVANCEMENT.get(stage)
+        if next_stage and candidate.stage != PipelineStage.rejected:
+            candidate.stage = next_stage
+            logger.info("Advanced candidate %s to stage %s", candidate.name, next_stage.value)
+
+    await db.commit()
+
+    logger.info(
+        "Assessment %s complete: %.1f/5.0 → %s",
+        assessment.id,
+        scoring_result.get("overall_score", 0),
+        scoring_result.get("recommendation", "unknown"),
+    )
+
+    # 7. Slack notification (fire-and-forget, don't fail the pipeline)
+    try:
+        await notify_assessment_complete(
+            candidate_name=candidate.name if candidate else "Unknown",
+            stage=stage,
+            overall_score=scoring_result.get("overall_score", 0),
+            recommendation=scoring_result.get("recommendation", "unknown"),
+            scorecard_url=f"/assessment/{assessment.id}",
+        )
+    except Exception as e:
+        logger.warning("Slack notification failed (non-critical): %s", e)
+
+    return assessment.id
