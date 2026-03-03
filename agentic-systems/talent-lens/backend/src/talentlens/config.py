@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     deepgram_api_key: str = ""
 
     # Fireflies
+    fireflies_api_key: str = ""
     fireflies_webhook_secret: str = ""
 
     # Slack

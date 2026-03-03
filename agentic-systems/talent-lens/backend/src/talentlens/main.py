@@ -9,6 +9,7 @@ from talentlens.api.routes import (
     candidates,
     dashboard,
     health,
+    interviews,
     rubrics,
     ventures,
     webhooks,
@@ -53,6 +54,7 @@ app.include_router(health.router, prefix="/api")
 app.include_router(ventures.router, prefix="/api")
 app.include_router(webhooks.router, prefix="/api")
 app.include_router(candidates.router, prefix="/api")
+app.include_router(interviews.router, prefix="/api")
 app.include_router(assessments.router, prefix="/api")
 app.include_router(rubrics.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")

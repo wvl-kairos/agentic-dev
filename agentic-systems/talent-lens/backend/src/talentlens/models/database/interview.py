@@ -17,8 +17,8 @@ class InterviewType(str, enum.Enum):
 class Interview(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "interviews"
 
-    candidate_id: Mapped["UUID"] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("candidates.id"), index=True
+    candidate_id: Mapped["UUID | None"] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("candidates.id"), nullable=True, index=True
     )
     interview_type: Mapped[InterviewType] = mapped_column(Enum(InterviewType))
     source: Mapped[str | None] = mapped_column(String(100))  # "fireflies", "coderpad", "manual"
