@@ -4,7 +4,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from talentlens.api.routes import assessments, candidates, dashboard, health, rubrics, webhooks
+from talentlens.api.routes import (
+    assessments,
+    candidates,
+    dashboard,
+    health,
+    rubrics,
+    ventures,
+    webhooks,
+)
 from talentlens.config import settings
 
 logging.basicConfig(
@@ -42,6 +50,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api")
+app.include_router(ventures.router, prefix="/api")
 app.include_router(webhooks.router, prefix="/api")
 app.include_router(candidates.router, prefix="/api")
 app.include_router(assessments.router, prefix="/api")
