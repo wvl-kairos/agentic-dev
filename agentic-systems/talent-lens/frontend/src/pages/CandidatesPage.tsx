@@ -1,31 +1,163 @@
+import { Link } from "react-router-dom";
+import { Loader2, AlertCircle, User, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useCandidates } from "@/hooks/useCandidates";
+import type { PipelineStage } from "@/types/candidate";
+
+/** Stage badge styling map. */
+const STAGE_BADGE: Record<
+  PipelineStage,
+  { label: string; bg: string; text: string }
+> = {
+  screening: { label: "Screening", bg: "bg-blue-100", text: "text-blue-800" },
+  coderpad: { label: "CoderPad", bg: "bg-purple-100", text: "text-purple-800" },
+  technical_interview: {
+    label: "Technical",
+    bg: "bg-amber-100",
+    text: "text-amber-800",
+  },
+  final_interview: {
+    label: "Final Interview",
+    bg: "bg-orange-100",
+    text: "text-orange-800",
+  },
+  decision: { label: "Decision", bg: "bg-slate-100", text: "text-slate-800" },
+  hired: { label: "Hired", bg: "bg-emerald-100", text: "text-emerald-800" },
+  rejected: { label: "Rejected", bg: "bg-red-100", text: "text-red-800" },
+};
+
+function StageBadge({ stage }: { stage: PipelineStage }) {
+  const meta = STAGE_BADGE[stage] ?? {
+    label: stage,
+    bg: "bg-slate-100",
+    text: "text-slate-600",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+        meta.bg,
+        meta.text
+      )}
+    >
+      {meta.label}
+    </span>
+  );
+}
 
 export function CandidatesPage() {
   const { candidates, loading, error } = useCandidates();
 
-  if (loading) return <p>Loading candidates...</p>;
-  if (error) return <p className="text-destructive">Error: {error}</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        <span className="ml-2 text-slate-500">Loading candidates...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 p-4">
+        <AlertCircle className="h-5 w-5 text-red-500" />
+        <p className="text-sm text-red-700">Failed to load candidates: {error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Candidates</h2>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Candidates</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            {candidates.length} candidate{candidates.length !== 1 && "s"} in
+            the pipeline
+          </p>
+        </div>
+      </div>
+
       {candidates.length === 0 ? (
-        <p className="text-muted-foreground">No candidates yet.</p>
+        <div className="rounded-lg border border-dashed p-8 text-center">
+          <User className="mx-auto h-10 w-10 text-slate-300" />
+          <p className="mt-2 text-sm text-slate-500">
+            No candidates yet. Add a candidate to get started.
+          </p>
+        </div>
       ) : (
-        <div className="space-y-2">
-          {candidates.map((c) => (
-            <div key={c.id} className="rounded-md border p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{c.name}</p>
-                  <p className="text-sm text-muted-foreground">{c.role}</p>
-                </div>
-                <span className="rounded-full bg-secondary px-3 py-1 text-xs">
-                  {c.stage}
-                </span>
-              </div>
-            </div>
-          ))}
+        /* Table layout */
+        <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b bg-slate-50">
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Candidate
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Role
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Stage
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Added
+                </th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {candidates.map((c) => (
+                <tr
+                  key={c.id}
+                  className="group transition-colors hover:bg-slate-50"
+                >
+                  <td className="px-4 py-3">
+                    <Link
+                      to={`/assessment/${c.id}`}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-200 text-sm font-semibold text-slate-600">
+                        {c.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .slice(0, 2)
+                          .toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900 group-hover:text-blue-700">
+                          {c.name}
+                        </p>
+                        {c.email && (
+                          <p className="text-xs text-slate-400">{c.email}</p>
+                        )}
+                      </div>
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-600">
+                    {c.role ?? <span className="text-slate-300">--</span>}
+                  </td>
+                  <td className="px-4 py-3">
+                    <StageBadge stage={c.stage} />
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-500">
+                    {new Date(c.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      to={`/assessment/${c.id}`}
+                      className="inline-flex items-center text-sm text-slate-400 hover:text-blue-600"
+                    >
+                      View
+                      <ChevronRight className="ml-0.5 h-4 w-4" />
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

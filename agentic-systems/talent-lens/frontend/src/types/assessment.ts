@@ -22,4 +22,6 @@ export interface Assessment {
   recommendation: string | null;
   criterion_scores: CriterionScore[];
   created_at: string;
+  /** Populated client-side by joining interview data. */
+  talk_ratio?: number | null;
 }
