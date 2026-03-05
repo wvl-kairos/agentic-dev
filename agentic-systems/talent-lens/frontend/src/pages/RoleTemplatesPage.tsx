@@ -16,6 +16,9 @@ import {
   Trash2,
   X,
   Briefcase,
+  FileText,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
@@ -370,11 +373,15 @@ function TemplateCard({
   capabilities,
   onEdit,
   onDelete,
+  onGenerateJD,
+  generatingJD,
 }: {
   template: RoleTemplate;
   capabilities: import("@/types/capability").Capability[];
   onEdit: () => void;
   onDelete: () => void;
+  onGenerateJD: () => void;
+  generatingJD: boolean;
 }) {
   const requirements = template.requirements.map((r) => ({
     capability_id: r.capability_id,
@@ -448,6 +455,24 @@ function TemplateCard({
         </div>
         <div className="flex items-center gap-1">
           <button
+            onClick={onGenerateJD}
+            disabled={generatingJD}
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+              generatingJD
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+            )}
+            title="Generate job description"
+          >
+            {generatingJD ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <FileText className="h-3.5 w-3.5" />
+            )}
+            {generatingJD ? "Generating..." : "Generate JD"}
+          </button>
+          <button
             onClick={onEdit}
             className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             title="Edit template"
@@ -498,6 +523,165 @@ function TemplateCard({
             ))}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Job Description Types + Modal
+// ---------------------------------------------------------------------------
+
+interface JobDescription {
+  title: string;
+  summary: string;
+  about_role: string;
+  responsibilities: string[];
+  required_qualifications: string[];
+  preferred_qualifications: string[];
+  tech_stack: string[];
+  level: string;
+}
+
+function JobDescriptionModal({
+  jd,
+  onClose,
+}: {
+  jd: JobDescription;
+  onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const plainText = [
+    `# ${jd.title}`,
+    `**Level:** ${jd.level}`,
+    "",
+    jd.summary,
+    "",
+    "## About the Role",
+    jd.about_role,
+    "",
+    "## Responsibilities",
+    ...jd.responsibilities.map((r) => `- ${r}`),
+    "",
+    "## Required Qualifications",
+    ...jd.required_qualifications.map((q) => `- ${q}`),
+    ...(jd.preferred_qualifications.length > 0
+      ? [
+          "",
+          "## Preferred Qualifications",
+          ...jd.preferred_qualifications.map((q) => `- ${q}`),
+        ]
+      : []),
+    ...(jd.tech_stack.length > 0
+      ? ["", "## Tech Stack", ...jd.tech_stack.map((t) => `- ${t}`)]
+      : []),
+  ].join("\n");
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(plainText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="rounded-lg border bg-white shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b px-5 py-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-blue-600" />
+            <h3 className="text-lg font-semibold text-slate-900">{jd.title}</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-green-600" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="overflow-y-auto px-5 py-4 space-y-4 text-sm text-slate-700">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+              {jd.level}
+            </span>
+          </div>
+
+          <p className="text-slate-600 leading-relaxed">{jd.summary}</p>
+
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-1">About the Role</h4>
+            <p className="leading-relaxed whitespace-pre-line">{jd.about_role}</p>
+          </div>
+
+          {jd.responsibilities.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-slate-800 mb-1">Responsibilities</h4>
+              <ul className="list-disc list-inside space-y-0.5">
+                {jd.responsibilities.map((r, i) => (
+                  <li key={i}>{r}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {jd.required_qualifications.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-slate-800 mb-1">
+                Required Qualifications
+              </h4>
+              <ul className="list-disc list-inside space-y-0.5">
+                {jd.required_qualifications.map((q, i) => (
+                  <li key={i}>{q}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {jd.preferred_qualifications.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-slate-800 mb-1">
+                Preferred Qualifications
+              </h4>
+              <ul className="list-disc list-inside space-y-0.5">
+                {jd.preferred_qualifications.map((q, i) => (
+                  <li key={i}>{q}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {jd.tech_stack.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-slate-800 mb-1">Tech Stack</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {jd.tech_stack.map((t, i) => (
+                  <span
+                    key={i}
+                    className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -582,6 +766,8 @@ export function RoleTemplatesPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [ventureId, setVentureId] = useState<string | null>(null);
+  const [generatingJDFor, setGeneratingJDFor] = useState<string | null>(null);
+  const [jobDescription, setJobDescription] = useState<JobDescription | null>(null);
 
   // Fetch first venture for creating templates
   useEffect(() => {
@@ -696,6 +882,21 @@ export function RoleTemplatesPage() {
     }
   };
 
+  const handleGenerateJD = async (templateId: string) => {
+    setGeneratingJDFor(templateId);
+    try {
+      const jd = await api.post<JobDescription>(
+        `/role-templates/${templateId}/generate-jd`,
+        {}
+      );
+      setJobDescription(jd);
+    } catch (_e) {
+      // Error handled by API layer
+    } finally {
+      setGeneratingJDFor(null);
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       {/* Header */}
@@ -765,6 +966,8 @@ export function RoleTemplatesPage() {
                     setMode("edit");
                   }}
                   onDelete={() => setDeleteTarget(tpl)}
+                  onGenerateJD={() => handleGenerateJD(tpl.id)}
+                  generatingJD={generatingJDFor === tpl.id}
                 />
               ))}
             </div>
@@ -779,6 +982,14 @@ export function RoleTemplatesPage() {
           onConfirm={handleDelete}
           onCancel={() => setDeleteTarget(null)}
           deleting={deleting}
+        />
+      )}
+
+      {/* Job description modal */}
+      {jobDescription && (
+        <JobDescriptionModal
+          jd={jobDescription}
+          onClose={() => setJobDescription(null)}
         />
       )}
     </div>

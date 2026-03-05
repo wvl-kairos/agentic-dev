@@ -110,6 +110,26 @@ class RoleTemplateResponse(BaseModel):
 # Candidate Skills View
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Job Description
+# ---------------------------------------------------------------------------
+
+class JobDescriptionResponse(BaseModel):
+    """Generated job description from a role template."""
+    title: str
+    summary: str
+    about_role: str
+    responsibilities: list[str] = []
+    required_qualifications: list[str] = []
+    preferred_qualifications: list[str] = []
+    tech_stack: list[str] = []
+    level: str
+
+
+# ---------------------------------------------------------------------------
+# Candidate Skills View
+# ---------------------------------------------------------------------------
+
 class CandidateCapabilityScore(BaseModel):
     """Aggregated score for a single capability across all assessments."""
     capability_id: uuid.UUID

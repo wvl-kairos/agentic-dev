@@ -29,7 +29,7 @@ RULES:
 You MUST respond with valid JSON only, no markdown formatting."""
 
 USER_PROMPT_TEMPLATE = """Evaluate this {interview_type} interview transcript against the rubric criteria below.
-
+{role_context_block}
 ## Pre-computed Metrics
 - Talk ratio: {talk_ratio:.0%} (candidate speaking time)
 - Individual contribution statements: {individual_count}
@@ -93,14 +93,36 @@ def _validate_evidence(result: dict, transcript: str) -> dict:
     return result
 
 
+def _build_role_context_block(role_context: dict) -> str:
+    """Build a role context section for the prompt when using role template criteria."""
+    if not role_context:
+        return ""
+    role_name = role_context.get("role_name", "")
+    role_desc = role_context.get("role_description", "")
+    lines = ["\n## Role Context"]
+    lines.append(f"This candidate is being evaluated for the **{role_name}** position.")
+    if role_desc:
+        lines.append(f"Role description: {role_desc}")
+    lines.append(
+        "The rubric criteria below are derived from the role's required capabilities "
+        "and technology stack. Score the candidate specifically against these role requirements.\n"
+    )
+    return "\n".join(lines)
+
+
 async def score_interview(
     transcript: str,
     criteria: list[dict],
     talk_ratio: float,
     contributions: dict,
     interview_type: str,
+    role_context: dict | None = None,
 ) -> dict:
     """Score an interview transcript against rubric criteria using Claude.
+
+    Args:
+        role_context: Optional dict with role_name, role_description when using
+                      role-template-derived criteria.
 
     Returns structured assessment with scores, reasoning, and validated evidence.
     """
@@ -115,8 +137,10 @@ async def score_interview(
 
     # Build the prompt
     criteria_block = _build_criteria_block(criteria)
+    role_context_block = _build_role_context_block(role_context or {})
     user_prompt = USER_PROMPT_TEMPLATE.format(
         interview_type=interview_type,
+        role_context_block=role_context_block,
         talk_ratio=talk_ratio,
         individual_count=contributions.get("individual_count", 0),
         collective_count=contributions.get("collective_count", 0),

@@ -18,11 +18,13 @@ from talentlens.schemas.capability import (
     CapabilityResponse,
     CandidateCapabilityScore,
     CandidateSkillsResponse,
+    JobDescriptionResponse,
     RoleTemplateCreate,
     RoleTemplateResponse,
     RoleTemplateUpdate,
     TechnologyResponse,
 )
+from talentlens.services.job_description import generate_job_description
 from talentlens.models.database.candidate import Candidate
 from talentlens.models.database.assessment import Assessment, CriterionScore
 from talentlens.models.database.rubric import RubricCriterion
@@ -225,6 +227,70 @@ async def delete_role_template(template_id: uuid.UUID, db: DBSession):
         raise HTTPException(status_code=404, detail="Role template not found")
     await db.delete(template)
     await db.commit()
+
+
+# ---------------------------------------------------------------------------
+# Job Description Generation
+# ---------------------------------------------------------------------------
+
+
+@router.post(
+    "/role-templates/{template_id}/generate-jd",
+    response_model=JobDescriptionResponse,
+)
+async def generate_jd_from_template(template_id: uuid.UUID, db: DBSession):
+    """Generate a job description from a role template using Claude."""
+    result = await db.execute(
+        select(RoleTemplate)
+        .where(RoleTemplate.id == template_id)
+        .options(*_role_template_load_options())
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="Role template not found")
+
+    # Build capability data for the generator
+    capabilities = []
+    for req in template.requirements:
+        cap = req.capability
+        capabilities.append({
+            "name": cap.name if cap else "Unknown",
+            "description": cap.description if cap else None,
+            "required_level": req.required_level,
+        })
+
+    # Build technology data for the generator
+    technologies = []
+    for treq in template.technology_requirements:
+        tech = treq.technology
+        # Find parent capability name
+        cap_name = ""
+        if tech:
+            for req in template.requirements:
+                if req.capability and req.capability.id == tech.capability_id:
+                    cap_name = req.capability.name
+                    break
+            if not cap_name:
+                # Look up capability directly
+                cap_result = await db.execute(
+                    select(Capability).where(Capability.id == tech.capability_id)
+                )
+                parent_cap = cap_result.scalar_one_or_none()
+                cap_name = parent_cap.name if parent_cap else ""
+
+        technologies.append({
+            "name": tech.name if tech else "Unknown",
+            "capability_name": cap_name,
+            "required_level": treq.required_level,
+        })
+
+    jd = await generate_job_description(
+        name=template.name,
+        description=template.description,
+        capabilities=capabilities,
+        technologies=technologies,
+    )
+    return jd
 
 
 # ---------------------------------------------------------------------------

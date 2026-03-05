@@ -18,6 +18,12 @@ from sqlalchemy.orm import selectinload
 
 from talentlens.models.database.assessment import Assessment, CriterionScore
 from talentlens.models.database.candidate import Candidate, PipelineStage
+from talentlens.models.database.capability import (
+    Capability,
+    RoleCapabilityRequirement,
+    RoleTemplate,
+    RoleTechnologyRequirement,
+)
 from talentlens.models.database.evidence import Evidence
 from talentlens.models.database.interview import Interview
 from talentlens.models.database.rubric import Rubric
@@ -35,6 +41,107 @@ STAGE_ADVANCEMENT = {
     "technical": PipelineStage.final_interview,
     "final": PipelineStage.decision,
 }
+
+
+LEVEL_LABELS = {1: "Beginner", 2: "Junior", 3: "Mid-level", 4: "Senior", 5: "Expert"}
+
+
+async def _build_criteria_from_template(
+    role_template_id: uuid.UUID, db: AsyncSession
+) -> tuple[list[dict], dict]:
+    """Build evaluation criteria from a role template's capability + technology requirements.
+
+    Returns:
+        (criteria_list, role_context) where role_context is extra info for the scoring prompt.
+    """
+    result = await db.execute(
+        select(RoleTemplate)
+        .where(RoleTemplate.id == role_template_id)
+        .options(
+            selectinload(RoleTemplate.requirements)
+            .selectinload(RoleCapabilityRequirement.capability),
+            selectinload(RoleTemplate.technology_requirements)
+            .selectinload(RoleTechnologyRequirement.technology),
+        )
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        return [], {}
+
+    criteria = []
+
+    # Capability-based criteria — each required capability becomes a scored criterion
+    for req in template.requirements:
+        cap = req.capability
+        if not cap:
+            continue
+        level_label = LEVEL_LABELS.get(req.required_level, f"Level {req.required_level}")
+        criteria.append({
+            "name": cap.name,
+            "description": (
+                f"{cap.description or cap.name} — "
+                f"Evaluate at {level_label} level ({req.required_level}/5). "
+                f"Look for depth of knowledge, practical experience, and problem-solving "
+                f"ability consistent with a {level_label} engineer in this area."
+            ),
+            "weight": max(1.0, req.required_level / 2),  # higher requirements = heavier weight
+            "max_score": 5,
+            "capability_id": str(cap.id),
+        })
+
+    # Technology-based criteria — group by parent capability for clarity
+    tech_by_cap: dict[str, list[tuple[str, int]]] = {}
+    for treq in template.technology_requirements:
+        tech = treq.technology
+        if not tech:
+            continue
+        # Find parent capability name
+        cap_name = None
+        for req in template.requirements:
+            if req.capability and req.capability.id == tech.capability_id:
+                cap_name = req.capability.name
+                break
+        if not cap_name:
+            cap_result = await db.execute(
+                select(Capability).where(Capability.id == tech.capability_id)
+            )
+            parent_cap = cap_result.scalar_one_or_none()
+            cap_name = parent_cap.name if parent_cap else "Technical"
+
+        tech_by_cap.setdefault(cap_name, []).append((tech.name, treq.required_level))
+
+    for cap_name, techs in tech_by_cap.items():
+        tech_list = ", ".join(
+            f"{name} ({LEVEL_LABELS.get(level, 'Level ' + str(level))})"
+            for name, level in techs
+        )
+        avg_level = sum(level for _, level in techs) / len(techs) if techs else 3
+        criteria.append({
+            "name": f"{cap_name} — Technology Stack",
+            "description": (
+                f"Evaluate proficiency in the following technologies: {tech_list}. "
+                f"Look for hands-on experience, depth of understanding, awareness of "
+                f"best practices, and ability to discuss trade-offs for each technology."
+            ),
+            "weight": max(1.0, avg_level / 2),
+            "max_score": 5,
+        })
+
+    role_context = {
+        "role_name": template.name,
+        "role_description": template.description or "",
+        "capability_count": len(template.requirements),
+        "technology_count": len(template.technology_requirements),
+    }
+
+    logger.info(
+        "Built %d criteria from role template '%s' (%d capabilities, %d technologies)",
+        len(criteria),
+        template.name,
+        len(template.requirements),
+        len(template.technology_requirements),
+    )
+    return criteria, role_context
 
 
 async def _find_rubric(candidate: Candidate, db: AsyncSession) -> list[dict]:
@@ -131,9 +238,25 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         contributions["collective_count"],
     )
 
-    # 4. Find rubric and score via Claude
+    # 4. Build criteria: prefer role template → manual rubric → defaults
     rubric_id = None
-    if candidate:
+    role_context = {}
+
+    if candidate and candidate.role_template_id:
+        # Use role template requirements as dynamic criteria
+        criteria, role_context = await _build_criteria_from_template(
+            candidate.role_template_id, db
+        )
+        if criteria:
+            logger.info(
+                "Using role template criteria for candidate %s (%d criteria)",
+                candidate.name,
+                len(criteria),
+            )
+        else:
+            # Template exists but has no requirements — fall back to rubric
+            criteria, rubric_id = await _find_rubric(candidate, db)
+    elif candidate:
         criteria, rubric_id = await _find_rubric(candidate, db)
     else:
         criteria, rubric_id = [
@@ -149,6 +272,7 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         talk_ratio=talk_result["candidate_ratio"],
         contributions=contributions,
         interview_type=interview.interview_type.value,
+        role_context=role_context,
     )
 
     # 5. Persist Assessment
