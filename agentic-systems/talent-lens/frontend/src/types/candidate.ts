@@ -13,6 +13,7 @@ export interface Candidate {
   name: string;
   email: string | null;
   role: string | null;
+  role_template_id: string | null;
   stage: PipelineStage;
   created_at: string;
   updated_at: string;

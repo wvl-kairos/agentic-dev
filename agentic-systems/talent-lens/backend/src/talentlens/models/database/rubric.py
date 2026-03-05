@@ -1,4 +1,4 @@
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -25,6 +25,9 @@ class RubricCriterion(Base, UUIDMixin, TimestampMixin):
     rubric_id: Mapped["UUID"] = mapped_column(
         UUID(as_uuid=True), ForeignKey("rubrics.id"), index=True
     )
+    capability_id: Mapped["UUID | None"] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("capabilities.id"), nullable=True
+    )
     name: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
     weight: Mapped[float] = mapped_column(Float, default=1.0)
@@ -32,3 +35,4 @@ class RubricCriterion(Base, UUIDMixin, TimestampMixin):
     order: Mapped[int] = mapped_column(Integer, default=0)
 
     rubric = relationship("Rubric", back_populates="criteria")
+    capability = relationship("Capability")

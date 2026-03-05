@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Loader2,
@@ -10,10 +10,15 @@ import {
   Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { api } from "@/utils/api";
 import { useAssessments } from "@/hooks/useAssessments";
+import { useCapabilities } from "@/hooks/useCapabilities";
 import { PipelineStepper } from "@/components/PipelineStepper";
 import { ScoreBar } from "@/components/ScoreBar";
+import { CapabilityMatrix } from "@/components/CapabilityMatrix";
+import { SkillsRadar } from "@/components/SkillsRadar";
 import type { Assessment, CriterionScore } from "@/types/assessment";
+import type { CandidateSkills } from "@/types/capability";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -227,6 +232,96 @@ function AssessmentCard({ assessment }: { assessment: Assessment }) {
 }
 
 // ---------------------------------------------------------------------------
+// Skills Matrix Section
+// ---------------------------------------------------------------------------
+
+function SkillsMatrixSection({ candidateId }: { candidateId: string }) {
+  const { capabilities, loading: capsLoading } = useCapabilities();
+  const [skills, setSkills] = useState<CandidateSkills | null>(null);
+  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skillsError, setSkillsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSkillsLoading(true);
+    setSkillsError(null);
+
+    api
+      .get<CandidateSkills>(`/candidates/${candidateId}/skills`)
+      .then((data) => setSkills(data))
+      .catch((e: Error) => setSkillsError(e.message))
+      .finally(() => setSkillsLoading(false));
+  }, [candidateId]);
+
+  if (skillsLoading || capsLoading) {
+    return (
+      <div className="rounded-lg border bg-white p-5 shadow-sm">
+        <div className="flex items-center justify-center h-24">
+          <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+          <span className="ml-2 text-sm text-slate-500">Loading skills...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (skillsError || !skills) {
+    return (
+      <div className="rounded-lg border bg-white p-5 shadow-sm">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-slate-400" />
+          <p className="text-sm text-slate-500">
+            Skills data not available yet.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (skills.capabilities.length === 0) {
+    return null;
+  }
+
+  const hasRoleTemplate = skills.role_template != null;
+
+  return (
+    <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+      <div className="border-b px-5 py-4">
+        <h3 className="text-base font-semibold text-slate-800">
+          Skills Matrix
+        </h3>
+        {hasRoleTemplate && skills.role_template && (
+          <p className="mt-0.5 text-sm text-slate-500">
+            Compared against{" "}
+            <span className="font-medium text-slate-600">
+              {skills.role_template.name}
+            </span>{" "}
+            requirements
+          </p>
+        )}
+      </div>
+      <div className="px-5 py-4">
+        {hasRoleTemplate && capabilities.length > 0 ? (
+          <CapabilityMatrix
+            capabilities={capabilities}
+            requirements={
+              skills.role_template!.requirements.map((r) => ({
+                capability_id: r.capability_id,
+                required_level: r.required_level,
+              }))
+            }
+            scores={skills.capabilities.map((c) => ({
+              capability_id: c.capability_id,
+              avg_score: c.avg_score,
+            }))}
+          />
+        ) : (
+          <SkillsRadar skills={skills.capabilities} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
@@ -346,6 +441,9 @@ export function AssessmentPage() {
           ))}
         </div>
       )}
+
+      {/* Skills Matrix */}
+      {id && <SkillsMatrixSection candidateId={id} />}
     </div>
   );
 }

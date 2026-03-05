@@ -1,6 +1,14 @@
 from talentlens.models.base import Base
 from talentlens.models.database.assessment import Assessment, CriterionScore
 from talentlens.models.database.candidate import Candidate
+from talentlens.models.database.capability import (
+    Capability,
+    CapabilityLevel,
+    RoleCapabilityRequirement,
+    RoleTemplate,
+    RoleTechnologyRequirement,
+    Technology,
+)
 from talentlens.models.database.evidence import Evidence
 from talentlens.models.database.interview import Interview
 from talentlens.models.database.rubric import Rubric, RubricCriterion
@@ -16,4 +24,10 @@ __all__ = [
     "Assessment",
     "CriterionScore",
     "Evidence",
+    "Capability",
+    "CapabilityLevel",
+    "RoleTemplate",
+    "RoleCapabilityRequirement",
+    "Technology",
+    "RoleTechnologyRequirement",
 ]

@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from talentlens.api.routes import (
     assessments,
     candidates,
+    capabilities,
     dashboard,
     health,
     interviews,
@@ -57,4 +58,5 @@ app.include_router(candidates.router, prefix="/api")
 app.include_router(interviews.router, prefix="/api")
 app.include_router(assessments.router, prefix="/api")
 app.include_router(rubrics.router, prefix="/api")
+app.include_router(capabilities.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")

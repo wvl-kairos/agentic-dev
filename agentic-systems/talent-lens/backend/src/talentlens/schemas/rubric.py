@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class RubricCriterionCreate(BaseModel):
     name: str
     description: str | None = None
+    capability_id: uuid.UUID | None = None
     weight: float = 1.0
     max_score: int = 5
     order: int = 0
@@ -24,6 +25,7 @@ class RubricCriterionResponse(BaseModel):
     id: uuid.UUID
     name: str
     description: str | None
+    capability_id: uuid.UUID | None = None
     weight: float
     max_score: int
     order: int

@@ -15,6 +15,12 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "POST", body: JSON.stringify(body) }),
+  put: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: "PUT", body: JSON.stringify(body) }),
   patch: <T>(path: string, body: unknown) =>
     request<T>(path, { method: "PATCH", body: JSON.stringify(body) }),
+  del: (path: string) =>
+    fetch(`${BASE}${path}`, { method: "DELETE" }).then((res) => {
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+    }),
 };
