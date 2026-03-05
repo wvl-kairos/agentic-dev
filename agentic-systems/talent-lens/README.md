@@ -1,6 +1,6 @@
 # TalentLens
 
-AI-powered interview intelligence platform for [UP Labs](https://uplabs.co). Automates end-to-end candidate evaluation across the full hiring pipeline — from Fireflies transcript ingestion through Claude-powered assessment to Slack-delivered scorecards.
+AI-powered interview intelligence platform for UP Labs. Automates end-to-end candidate evaluation across the full hiring pipeline — from Fireflies transcript ingestion through Claude-powered assessment to Slack-delivered scorecards.
 
 Built for venture studios hiring technical talent at scale, where every interview needs consistent, evidence-backed evaluation aligned to role-specific skills.
 
