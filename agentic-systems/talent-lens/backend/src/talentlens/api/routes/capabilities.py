@@ -184,6 +184,7 @@ async def update_role_template(
         )
         for req in existing.scalars().all():
             await db.delete(req)
+        await db.flush()
         for req in data.requirements:
             db.add(RoleCapabilityRequirement(
                 role_template_id=template_id,
@@ -200,6 +201,7 @@ async def update_role_template(
         )
         for treq in existing.scalars().all():
             await db.delete(treq)
+        await db.flush()
         for treq in data.technology_requirements:
             db.add(RoleTechnologyRequirement(
                 role_template_id=template_id,
@@ -335,18 +337,30 @@ async def get_candidate_skills(candidate_id: uuid.UUID, db: DBSession):
     )
     assessments = assess_result.scalars().all()
 
-    # Link criterion names to capabilities via rubric_criteria
+    # Link criterion names to capabilities.
+    # Two strategies:
+    # 1. Direct name match — when role template is used, criterion names ARE capability names
+    # 2. Rubric criteria lookup — fallback for manually-defined rubrics with capability_id set
     criterion_names: set[str] = set()
     for a in assessments:
         for cs in a.criterion_scores:
             criterion_names.add(cs.criterion_name)
 
     cap_map: dict[str, uuid.UUID] = {}
-    if criterion_names:
+
+    # Strategy 1: match criterion names directly to capability names
+    cap_name_to_id = {cap.name: cap.id for cap in capabilities}
+    for name in criterion_names:
+        if name in cap_name_to_id:
+            cap_map[name] = cap_name_to_id[name]
+
+    # Strategy 2: fallback to rubric_criteria for any unmatched criterion names
+    unmatched = criterion_names - set(cap_map.keys())
+    if unmatched:
         rc_result = await db.execute(
             select(RubricCriterion)
             .where(
-                RubricCriterion.name.in_(criterion_names),
+                RubricCriterion.name.in_(unmatched),
                 RubricCriterion.capability_id.isnot(None),
             )
         )

@@ -8,6 +8,8 @@ import {
   BarChart3,
   Cloud,
   Users,
+  HeartHandshake,
+  Globe,
   Search,
   GripVertical,
   ChevronDown,
@@ -28,6 +30,8 @@ const ICON_MAP: Record<string, React.ElementType> = {
   analytics: BarChart3,
   devops: Cloud,
   leadership: Users,
+  "soft-skills": HeartHandshake,
+  "cultural-fit": Globe,
 };
 
 const COLOR_MAP: Record<string, string> = {
@@ -38,6 +42,8 @@ const COLOR_MAP: Record<string, string> = {
   analytics: "bg-pink-100 text-pink-700",
   devops: "bg-cyan-100 text-cyan-700",
   leadership: "bg-amber-100 text-amber-700",
+  "soft-skills": "bg-rose-100 text-rose-700",
+  "cultural-fit": "bg-teal-100 text-teal-700",
 };
 
 // ---------------------------------------------------------------------------

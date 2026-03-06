@@ -7,12 +7,17 @@ import {
   BarChart3,
   Cloud,
   Users,
+  HeartHandshake,
+  Globe,
+  Check,
+  X,
+  Minus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Capability } from "@/types/capability";
 
 // ---------------------------------------------------------------------------
-// Icon map – maps capability slugs to lucide icons
+// Icon map
 // ---------------------------------------------------------------------------
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -23,11 +28,13 @@ const ICON_MAP: Record<string, React.ElementType> = {
   analytics: BarChart3,
   devops: Cloud,
   leadership: Users,
+  "soft-skills": HeartHandshake,
+  "cultural-fit": Globe,
 };
 
 function CapabilityIcon({ slug }: { slug: string }) {
   const Icon = ICON_MAP[slug] ?? Monitor;
-  return <Icon className="h-4 w-4 text-slate-500" />;
+  return <Icon className="h-4 w-4 text-slate-500 flex-shrink-0" />;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,17 +60,195 @@ interface CapabilityMatrixProps {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Editable Level Selector (for RoleTemplatesPage)
 // ---------------------------------------------------------------------------
 
-function scoreColor(score: number, required: number): string {
-  if (score >= required) return "bg-emerald-500";
-  if (score >= required - 1) return "bg-amber-500";
-  return "bg-red-500";
+function EditableLevelDots({
+  cap,
+  reqLevel,
+  onRequirementChange,
+}: {
+  cap: Capability;
+  reqLevel: number;
+  onRequirementChange: (capability_id: string, level: number) => void;
+}) {
+  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
+
+  return (
+    <div className="flex items-center gap-1.5">
+      {[1, 2, 3, 4, 5].map((level) => {
+        const levelData = cap.levels.find((l) => l.level === level);
+        const tooltipKey = `${cap.id}-${level}`;
+        const isActive = level <= reqLevel;
+
+        return (
+          <div key={level} className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                const newLevel = reqLevel === level ? 0 : level;
+                onRequirementChange(cap.id, newLevel);
+              }}
+              onMouseEnter={() => setHoveredTooltip(tooltipKey)}
+              onMouseLeave={() => setHoveredTooltip(null)}
+              className={cn(
+                "h-5 w-5 rounded-full transition-colors cursor-pointer hover:ring-2 hover:ring-blue-400",
+                isActive ? "bg-blue-500" : "bg-slate-200"
+              )}
+            />
+            {hoveredTooltip === tooltipKey && levelData && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 w-48 rounded-md bg-slate-800 px-3 py-2 text-xs text-white shadow-lg pointer-events-none">
+                <p className="font-semibold">
+                  Level {level}: {levelData.title}
+                </p>
+                {levelData.description && (
+                  <p className="mt-1 text-slate-300">
+                    {levelData.description}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
-// Component
+// Score comparison row (for AssessmentPage)
+// ---------------------------------------------------------------------------
+
+function ScoreComparisonRow({
+  cap,
+  reqLevel,
+  capScore,
+}: {
+  cap: Capability;
+  reqLevel: number;
+  capScore: number | null;
+}) {
+  const isRequired = reqLevel > 0;
+  const hasScore = capScore != null;
+
+  // Determine status
+  let status: "meets" | "close" | "below" | "pending" | "not-required" =
+    "not-required";
+  if (!isRequired && hasScore) {
+    status = "meets"; // bonus skill, always fine
+  } else if (isRequired && hasScore) {
+    if (capScore >= reqLevel) status = "meets";
+    else if (capScore >= reqLevel - 1) status = "close";
+    else status = "below";
+  } else if (isRequired && !hasScore) {
+    status = "pending";
+  }
+
+  const barColor = {
+    meets: "bg-emerald-500",
+    close: "bg-amber-500",
+    below: "bg-red-500",
+    pending: "bg-slate-200",
+    "not-required": "bg-slate-300",
+  }[status];
+
+  const statusIcon = {
+    meets: <Check className="h-3.5 w-3.5 text-emerald-600" />,
+    close: <Minus className="h-3.5 w-3.5 text-amber-600" />,
+    below: <X className="h-3.5 w-3.5 text-red-600" />,
+    pending: null,
+    "not-required": null,
+  }[status];
+
+  // Normalized bar: 100% width = required level (or 5 for optional skills)
+  const baseline = isRequired ? reqLevel : 5;
+  const barPct = hasScore ? Math.min((capScore / baseline) * 100, 100) : 0;
+
+  // Percentage label for how well the candidate meets the requirement
+  const fulfillmentPct = isRequired && hasScore
+    ? Math.round((capScore / reqLevel) * 100)
+    : null;
+
+  return (
+    <div className="group py-2 first:pt-0 last:pb-0">
+      {/* Row: icon + name + bars + numbers */}
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 w-44 min-w-[11rem] flex-shrink-0">
+          <CapabilityIcon slug={cap.slug} />
+          <span
+            className="text-sm font-medium text-slate-700 truncate"
+            title={cap.name}
+          >
+            {cap.name}
+          </span>
+        </div>
+
+        {/* Bar area — normalized: full width = required level */}
+        <div className="flex-1 min-w-0">
+          <div className="relative h-6 rounded bg-slate-100 overflow-hidden">
+            {/* Candidate score bar */}
+            {hasScore && (
+              <div
+                className={cn("h-full rounded transition-all", barColor)}
+                style={{ width: `${barPct}%` }}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Numbers + status */}
+        <div className="flex items-center gap-2 w-32 flex-shrink-0 justify-end">
+          {hasScore ? (
+            <span
+              className={cn(
+                "text-sm font-bold tabular-nums",
+                status === "meets"
+                  ? "text-emerald-600"
+                  : status === "close"
+                    ? "text-amber-600"
+                    : status === "below"
+                      ? "text-red-600"
+                      : "text-slate-500"
+              )}
+            >
+              {capScore.toFixed(1)}
+            </span>
+          ) : (
+            <span className="text-xs text-slate-400 italic">
+              {isRequired ? "Pending" : ""}
+            </span>
+          )}
+
+          {isRequired && (
+            <span className="text-xs text-slate-400">/ {reqLevel}</span>
+          )}
+
+          {fulfillmentPct != null && (
+            <span
+              className={cn(
+                "text-[10px] font-semibold tabular-nums w-8 text-right",
+                status === "meets"
+                  ? "text-emerald-500"
+                  : status === "close"
+                    ? "text-amber-500"
+                    : "text-red-500"
+              )}
+            >
+              {fulfillmentPct}%
+            </span>
+          )}
+
+          {statusIcon && (
+            <span className="flex-shrink-0">{statusIcon}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Component
 // ---------------------------------------------------------------------------
 
 export function CapabilityMatrix({
@@ -73,96 +258,173 @@ export function CapabilityMatrix({
   editable = false,
   onRequirementChange,
 }: CapabilityMatrixProps) {
-  const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
-
-  const reqMap = new Map(requirements.map((r) => [r.capability_id, r.required_level]));
-  const scoreMap = new Map(scores?.map((s) => [s.capability_id, s.avg_score]) ?? []);
+  const reqMap = new Map(
+    requirements.map((r) => [r.capability_id, r.required_level])
+  );
+  const scoreMap = new Map(
+    scores?.map((s) => [s.capability_id, s.avg_score]) ?? []
+  );
 
   const sorted = [...capabilities].sort((a, b) => a.order - b.order);
+  const hasAnyScore = scores?.some((s) => s.avg_score != null) ?? false;
+
+  // ── Editable mode: dots for setting requirement levels ──
+  if (editable && onRequirementChange) {
+    return (
+      <div className="space-y-1.5">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-44 min-w-[11rem]" />
+          <div className="flex items-center gap-1.5">
+            {[1, 2, 3, 4, 5].map((level) => (
+              <span
+                key={level}
+                className="flex h-5 w-5 items-center justify-center text-[10px] font-semibold text-slate-400"
+              >
+                {level}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {sorted.map((cap) => {
+          const reqLevel = reqMap.get(cap.id) ?? 0;
+          return (
+            <div key={cap.id} className="flex items-center gap-3">
+              <div className="flex items-center gap-2 w-44 min-w-[11rem]">
+                <CapabilityIcon slug={cap.slug} />
+                <span
+                  className="text-sm font-medium text-slate-700 truncate"
+                  title={cap.name}
+                >
+                  {cap.name}
+                </span>
+              </div>
+              <EditableLevelDots
+                cap={cap}
+                reqLevel={reqLevel}
+                onRequirementChange={onRequirementChange}
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ── Read-only mode: bar comparison (required vs candidate) ──
+
+  // Separate into required and non-required capabilities
+  const requiredCaps = sorted.filter(
+    (cap) => (reqMap.get(cap.id) ?? 0) > 0
+  );
+  const optionalCaps = sorted.filter(
+    (cap) =>
+      (reqMap.get(cap.id) ?? 0) === 0 &&
+      (scoreMap.get(cap.id) ?? null) != null
+  );
 
   return (
-    <div className="space-y-1.5">
-      {sorted.map((cap) => {
-        const reqLevel = reqMap.get(cap.id) ?? 0;
-        const capScore = scoreMap.get(cap.id) ?? null;
+    <div className="space-y-4">
+      {/* Legend */}
+      {hasAnyScore && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[10px] text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-6 rounded bg-emerald-500" />
+            Meets / exceeds
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-6 rounded bg-amber-500" />
+            Close
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2 w-6 rounded bg-red-500" />
+            Below
+          </span>
+          <span className="text-slate-400">|</span>
+          <span>Full bar = meets requirement</span>
+        </div>
+      )}
 
-        return (
-          <div key={cap.id} className="flex items-center gap-3">
-            {/* Capability label */}
-            <div className="flex items-center gap-2 w-40 min-w-[10rem]">
-              <CapabilityIcon slug={cap.slug} />
-              <span className="text-sm font-medium text-slate-700 truncate">
-                {cap.name}
-              </span>
-            </div>
+      {/* Required capabilities */}
+      {requiredCaps.length > 0 && (
+        <div className="divide-y divide-slate-100">
+          {requiredCaps.map((cap) => (
+            <ScoreComparisonRow
+              key={cap.id}
+              cap={cap}
+              reqLevel={reqMap.get(cap.id) ?? 0}
+              capScore={scoreMap.get(cap.id) ?? null}
+            />
+          ))}
+        </div>
+      )}
 
-            {/* Level dots */}
-            <div className="flex items-center gap-1.5">
-              {[1, 2, 3, 4, 5].map((level) => {
-                const levelData = cap.levels.find((l) => l.level === level);
-                const tooltipKey = `${cap.id}-${level}`;
-                const isRequired = level <= reqLevel;
-                const isScored = capScore != null && level <= Math.round(capScore);
+      {/* Optional capabilities with scores */}
+      {optionalCaps.length > 0 && (
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            Additional Skills Detected
+          </p>
+          <div className="divide-y divide-slate-100">
+            {optionalCaps.map((cap) => (
+              <ScoreComparisonRow
+                key={cap.id}
+                cap={cap}
+                reqLevel={0}
+                capScore={scoreMap.get(cap.id) ?? null}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
-                // Determine the dot color
-                let dotColor = "bg-slate-200";
-                if (scores && capScore != null && isScored) {
-                  dotColor = scoreColor(capScore, reqLevel);
-                } else if (!scores && isRequired) {
-                  dotColor = "bg-blue-500";
-                } else if (scores && isRequired && !isScored) {
-                  // Required but not scored — show as outlined blue
-                  dotColor = "ring-2 ring-blue-300 bg-white";
-                }
-
+      {/* No scores yet */}
+      {scores && !hasAnyScore && (
+        <div>
+          {/* Show requirements as simple list */}
+          {requiredCaps.length > 0 && (
+            <div className="divide-y divide-slate-100">
+              {requiredCaps.map((cap) => {
+                const reqLevel = reqMap.get(cap.id) ?? 0;
                 return (
-                  <div key={level} className="relative">
-                    <button
-                      type="button"
-                      disabled={!editable}
-                      onClick={() => {
-                        if (editable && onRequirementChange) {
-                          // Toggle: clicking the current level resets to 0
-                          const newLevel = reqLevel === level ? 0 : level;
-                          onRequirementChange(cap.id, newLevel);
-                        }
-                      }}
-                      onMouseEnter={() => setHoveredTooltip(tooltipKey)}
-                      onMouseLeave={() => setHoveredTooltip(null)}
-                      className={cn(
-                        "h-5 w-5 rounded-full transition-colors",
-                        dotColor,
-                        editable && "cursor-pointer hover:ring-2 hover:ring-blue-400",
-                        !editable && "cursor-default"
-                      )}
-                    />
-                    {/* Tooltip */}
-                    {hoveredTooltip === tooltipKey && levelData && (
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 w-48 rounded-md bg-slate-800 px-3 py-2 text-xs text-white shadow-lg pointer-events-none">
-                        <p className="font-semibold">
-                          Level {level}: {levelData.title}
-                        </p>
-                        {levelData.description && (
-                          <p className="mt-1 text-slate-300">
-                            {levelData.description}
-                          </p>
-                        )}
+                  <div key={cap.id} className="flex items-center gap-3 py-2">
+                    <div className="flex items-center gap-2 w-44 min-w-[11rem]">
+                      <CapabilityIcon slug={cap.slug} />
+                      <span className="text-sm font-medium text-slate-700 truncate" title={cap.name}>
+                        {cap.name}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="relative h-6 rounded bg-slate-100 overflow-hidden">
+                        <div
+                          className="h-full rounded bg-blue-200"
+                          style={{ width: `${(reqLevel / 5) * 100}%` }}
+                        />
                       </div>
-                    )}
+                    </div>
+                    <div className="w-28 flex-shrink-0 text-right">
+                      <span className="text-xs text-slate-500">
+                        Level {reqLevel} required
+                      </span>
+                    </div>
                   </div>
                 );
               })}
             </div>
+          )}
+          <p className="text-xs text-slate-400 italic pt-2">
+            Candidate scores will appear after assessments are completed.
+          </p>
+        </div>
+      )}
 
-            {/* Score number when scores are provided */}
-            {scores && (
-              <span className="text-xs text-slate-500 tabular-nums w-10 text-right">
-                {capScore != null ? capScore.toFixed(1) : "--"}
-              </span>
-            )}
-          </div>
-        );
-      })}
+      {/* No requirements at all — shouldn't happen, but safety */}
+      {!scores && requiredCaps.length === 0 && (
+        <p className="text-xs text-slate-400 italic">
+          No capability requirements defined for this role.
+        </p>
+      )}
     </div>
   );
 }
