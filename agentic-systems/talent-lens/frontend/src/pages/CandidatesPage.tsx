@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, AlertCircle, User, ChevronRight } from "lucide-react";
+import { Loader2, AlertCircle, User, ChevronRight, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCandidates } from "@/hooks/useCandidates";
-import type { PipelineStage } from "@/types/candidate";
+import { useCandidateStore } from "@/stores/candidateStore";
+import { useRoleTemplates } from "@/hooks/useRoleTemplates";
+import { api } from "@/utils/api";
+import type { Candidate, PipelineStage } from "@/types/candidate";
 
 /** Stage badge styling map. */
 const STAGE_BADGE: Record<
@@ -45,10 +48,81 @@ function StageBadge({ stage }: { stage: PipelineStage }) {
   );
 }
 
-export function CandidatesPage() {
-  const { candidates, loading, error } = useCandidates();
+// ---------------------------------------------------------------------------
+// Role Template Selector (inline dropdown)
+// ---------------------------------------------------------------------------
 
-  if (loading) {
+function RoleTemplateSelector({
+  candidate,
+  templates,
+  onAssign,
+}: {
+  candidate: Candidate;
+  templates: { id: string; name: string }[];
+  onAssign: (candidateId: string, templateId: string | null) => Promise<void>;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value || null;
+    setSaving(true);
+    try {
+      await onAssign(candidate.id, value);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <select
+        value={candidate.role_template_id ?? ""}
+        onChange={handleChange}
+        disabled={saving}
+        className={cn(
+          "w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-xs transition-colors",
+          "focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500",
+          saving && "opacity-50 cursor-not-allowed",
+          !candidate.role_template_id && "text-slate-400"
+        )}
+      >
+        <option value="">No template</option>
+        {templates.map((t) => (
+          <option key={t.id} value={t.id}>
+            {t.name}
+          </option>
+        ))}
+      </select>
+      {saving && (
+        <Loader2 className="absolute right-6 top-1.5 h-3 w-3 animate-spin text-slate-400" />
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main Page
+// ---------------------------------------------------------------------------
+
+export function CandidatesPage() {
+  const { candidates, loading, error, fetchCandidates } = useCandidateStore();
+  const { templates, loading: tplLoading } = useRoleTemplates();
+
+  useEffect(() => { fetchCandidates(); }, [fetchCandidates]);
+
+  const templateOptions = templates.map((t) => ({ id: t.id, name: t.name }));
+
+  const handleAssignTemplate = async (
+    candidateId: string,
+    templateId: string | null
+  ) => {
+    await api.patch(`/candidates/${candidateId}`, {
+      role_template_id: templateId,
+    });
+    await fetchCandidates();
+  };
+
+  if (loading || tplLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
@@ -99,6 +173,12 @@ export function CandidatesPage() {
                   Role
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <div className="flex items-center gap-1">
+                    <Briefcase className="h-3 w-3" />
+                    Role Template
+                  </div>
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Stage
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -138,6 +218,13 @@ export function CandidatesPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">
                     {c.role ?? <span className="text-slate-300">--</span>}
+                  </td>
+                  <td className="px-4 py-3 w-48">
+                    <RoleTemplateSelector
+                      candidate={c}
+                      templates={templateOptions}
+                      onAssign={handleAssignTemplate}
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <StageBadge stage={c.stage} />
