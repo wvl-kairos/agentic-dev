@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, FileText, Video, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, Video, Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
 
@@ -7,7 +7,6 @@ const navItems = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard },
   { label: "Candidates", path: "/candidates", icon: Users },
   { label: "Interviews", path: "/interviews", icon: Video },
-  { label: "Rubrics", path: "/rubrics", icon: FileText },
   { label: "Roles", path: "/role-templates", icon: Briefcase },
 ];
 

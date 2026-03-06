@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Loader2, AlertCircle, User, ChevronRight, Briefcase } from "lucide-react";
+import { Loader2, AlertCircle, User, ChevronRight, Briefcase, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCandidateStore } from "@/stores/candidateStore";
 import { useRoleTemplates } from "@/hooks/useRoleTemplates";
@@ -101,12 +101,159 @@ function RoleTemplateSelector({
 }
 
 // ---------------------------------------------------------------------------
+// Add Candidate Modal
+// ---------------------------------------------------------------------------
+
+function AddCandidateModal({
+  templates,
+  onClose,
+  onCreated,
+}: {
+  templates: { id: string; name: string }[];
+  onClose: () => void;
+  onCreated: () => void;
+}) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
+  const [roleTemplateId, setRoleTemplateId] = useState("");
+  const [ventureId, setVentureId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api
+      .get<{ id: string }[]>("/ventures/")
+      .then((ventures) => {
+        if (ventures[0]) setVentureId(ventures[0].id);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.post("/candidates/", {
+        venture_id: ventureId,
+        name,
+        email: email || undefined,
+        role: role || undefined,
+        role_template_id: roleTemplateId || undefined,
+      });
+      onCreated();
+      onClose();
+    } catch (_e) {
+      // Error handled by API layer; keep modal open
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="rounded-lg border bg-white shadow-xl max-w-md w-full">
+        <div className="flex items-center justify-between border-b px-5 py-4">
+          <h3 className="text-lg font-semibold text-slate-900">
+            Add Candidate
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Maria Garcia"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="maria@example.com"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Role
+            </label>
+            <input
+              type="text"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              placeholder="e.g. Senior Backend Engineer"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Role Template
+            </label>
+            <select
+              value={roleTemplateId}
+              onChange={(e) => setRoleTemplateId(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">None</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2 pt-2">
+            <button
+              type="submit"
+              disabled={saving || !name.trim()}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-white transition-colors",
+                saving || !name.trim()
+                  ? "bg-slate-300 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              )}
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Add Candidate
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
 export function CandidatesPage() {
   const { candidates, loading, error, fetchCandidates } = useCandidateStore();
   const { templates, loading: tplLoading } = useRoleTemplates();
+  const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => { fetchCandidates(); }, [fetchCandidates]);
 
@@ -151,6 +298,13 @@ export function CandidatesPage() {
             the pipeline
           </p>
         </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          Add Candidate
+        </button>
       </div>
 
       {candidates.length === 0 ? (
@@ -246,6 +400,14 @@ export function CandidatesPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {showAddModal && (
+        <AddCandidateModal
+          templates={templateOptions}
+          onClose={() => setShowAddModal(false)}
+          onCreated={() => fetchCandidates()}
+        />
       )}
     </div>
   );
