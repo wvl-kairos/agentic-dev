@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
+import type { PipelineStage } from "@/types/candidate";
+import type { InterviewType } from "@/types/interview";
 import { useAssessments } from "@/hooks/useAssessments";
 import { useCapabilities } from "@/hooks/useCapabilities";
 import { PipelineStepper } from "@/components/PipelineStepper";
@@ -104,12 +107,159 @@ function SkillsMatrixSection({ candidateId }: { candidateId: string }) {
 }
 
 // ---------------------------------------------------------------------------
+// Upload Interview Modal
+// ---------------------------------------------------------------------------
+
+const INTERVIEW_TYPES: { value: InterviewType; label: string }[] = [
+  { value: "screening", label: "Screening" },
+  { value: "coderpad", label: "CoderPad" },
+  { value: "technical", label: "Technical" },
+  { value: "final", label: "Final" },
+];
+
+function stageToInterviewType(stage: PipelineStage): InterviewType {
+  switch (stage) {
+    case "screening":
+      return "screening";
+    case "coderpad":
+      return "coderpad";
+    case "technical_interview":
+      return "technical";
+    case "final_interview":
+      return "final";
+    default:
+      return "screening";
+  }
+}
+
+function UploadInterviewModal({
+  candidateId,
+  defaultType,
+  onClose,
+  onUploaded,
+}: {
+  candidateId: string;
+  defaultType: InterviewType;
+  onClose: () => void;
+  onUploaded: () => void;
+}) {
+  const [interviewType, setInterviewType] = useState<InterviewType>(defaultType);
+  const [transcript, setTranscript] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [status, setStatus] = useState<"idle" | "processing">("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await api.post("/interviews/", {
+        candidate_id: candidateId,
+        interview_type: interviewType,
+        transcript,
+        source: "manual",
+      });
+      setStatus("processing");
+      setSaving(false);
+      // Give the background pipeline a few seconds, then refetch and close
+      setTimeout(() => {
+        onUploaded();
+        onClose();
+      }, 4000);
+    } catch (_e) {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="rounded-lg border bg-white shadow-xl max-w-lg w-full">
+        <div className="flex items-center justify-between border-b px-5 py-4">
+          <h3 className="text-lg font-semibold text-slate-900">
+            Upload Interview
+          </h3>
+          <button
+            onClick={onClose}
+            className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {status === "processing" ? (
+          <div className="flex flex-col items-center justify-center gap-3 px-5 py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+            <p className="text-sm text-slate-600">
+              Processing interview... Assessment will appear shortly.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Interview Type
+              </label>
+              <select
+                value={interviewType}
+                onChange={(e) => setInterviewType(e.target.value as InterviewType)}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                {INTERVIEW_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Transcript <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                required
+                value={transcript}
+                onChange={(e) => setTranscript(e.target.value)}
+                placeholder="Paste the interview transcript here..."
+                rows={12}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+              />
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="submit"
+                disabled={saving || !transcript.trim()}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-sm font-medium text-white transition-colors",
+                  saving || !transcript.trim()
+                    ? "bg-slate-300 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                )}
+              >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                Upload
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex items-center gap-1.5 rounded-md border px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Page
 // ---------------------------------------------------------------------------
 
 export function AssessmentPage() {
   const { id } = useParams<{ id: string }>();
-  const { assessments, candidate, loading, error } = useAssessments(id!);
+  const { assessments, candidate, loading, error, refetch } = useAssessments(id!);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   if (loading) {
     return (
@@ -163,23 +313,32 @@ export function AssessmentPage() {
       {/* Top section: Candidate info + Decision + Stats */}
       {candidate && (
         <div className="rounded-lg border bg-white p-5 shadow-sm">
-          {/* Candidate name / role / email */}
-          <div className="mb-4">
-            <h2 className="text-xl font-bold text-slate-900">
-              {candidate.name}
-            </h2>
-            <div className="flex items-center gap-3 mt-0.5">
-              {candidate.role && (
-                <span className="text-sm text-slate-500">
-                  {candidate.role}
-                </span>
-              )}
-              {candidate.email && (
-                <span className="text-sm text-slate-400">
-                  {candidate.email}
-                </span>
-              )}
+          {/* Candidate name / role / email + upload button */}
+          <div className="mb-4 flex items-start justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                {candidate.name}
+              </h2>
+              <div className="flex items-center gap-3 mt-0.5">
+                {candidate.role && (
+                  <span className="text-sm text-slate-500">
+                    {candidate.role}
+                  </span>
+                )}
+                {candidate.email && (
+                  <span className="text-sm text-slate-400">
+                    {candidate.email}
+                  </span>
+                )}
+              </div>
             </div>
+            <button
+              onClick={() => setShowUploadModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              <Upload className="h-4 w-4" />
+              Upload Interview
+            </button>
           </div>
 
           {/* Decision box + Aggregate stats side by side */}
@@ -234,6 +393,15 @@ export function AssessmentPage() {
 
       {/* Skills Matrix */}
       {id && <SkillsMatrixSection candidateId={id} />}
+
+      {showUploadModal && candidate && (
+        <UploadInterviewModal
+          candidateId={candidate.id}
+          defaultType={stageToInterviewType(candidate.stage)}
+          onClose={() => setShowUploadModal(false)}
+          onUploaded={() => refetch()}
+        />
+      )}
     </div>
   );
 }

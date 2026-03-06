@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Assessment } from "@/types/assessment";
 import type { Candidate } from "@/types/candidate";
 import type { Interview } from "@/types/interview";
@@ -9,6 +9,7 @@ interface UseAssessmentsReturn {
   candidate: Candidate | null;
   loading: boolean;
   error: string | null;
+  refetch: () => void;
 }
 
 export function useAssessments(candidateId: string): UseAssessmentsReturn {
@@ -17,7 +18,7 @@ export function useAssessments(candidateId: string): UseAssessmentsReturn {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchData = useCallback(() => {
     setLoading(true);
     setError(null);
 
@@ -49,5 +50,9 @@ export function useAssessments(candidateId: string): UseAssessmentsReturn {
       .finally(() => setLoading(false));
   }, [candidateId]);
 
-  return { assessments, candidate, loading, error };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { assessments, candidate, loading, error, refetch: fetchData };
 }
