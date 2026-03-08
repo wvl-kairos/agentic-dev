@@ -1,4 +1,4 @@
-export type InterviewType = "screening" | "coderpad" | "technical" | "final";
+export type InterviewType = "initial" | "screening" | "coderpad" | "technical" | "final";
 
 export interface Interview {
   id: string;

@@ -13,6 +13,7 @@ import type { PipelineStage } from "@/types/candidate";
 
 /** Label and color for each pipeline stage card. */
 const STAGE_META: Record<PipelineStage, { label: string; bg: string; text: string }> = {
+  initial_interview: { label: "Initial", bg: "bg-teal-50", text: "text-teal-700" },
   screening: { label: "Screening", bg: "bg-blue-50", text: "text-blue-700" },
   coderpad: { label: "CoderPad", bg: "bg-purple-50", text: "text-purple-700" },
   technical_interview: {

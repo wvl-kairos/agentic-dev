@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -111,6 +111,7 @@ function SkillsMatrixSection({ candidateId }: { candidateId: string }) {
 // ---------------------------------------------------------------------------
 
 const INTERVIEW_TYPES: { value: InterviewType; label: string }[] = [
+  { value: "initial", label: "Initial Interview" },
   { value: "screening", label: "Screening" },
   { value: "coderpad", label: "CoderPad" },
   { value: "technical", label: "Technical" },
@@ -119,6 +120,8 @@ const INTERVIEW_TYPES: { value: InterviewType; label: string }[] = [
 
 function stageToInterviewType(stage: PipelineStage): InterviewType {
   switch (stage) {
+    case "initial_interview":
+      return "initial";
     case "screening":
       return "screening";
     case "coderpad":
@@ -130,6 +133,35 @@ function stageToInterviewType(stage: PipelineStage): InterviewType {
     default:
       return "screening";
   }
+}
+
+/** Parse SRT subtitle format — strip sequence numbers, timestamps, and blank lines. */
+function parseSRT(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split("\n\n")
+    .map((block) => {
+      const lines = block.trim().split("\n");
+      // Skip sequence number (first line) and timestamp (second line)
+      return lines.filter((_, i) => i >= 2).join(" ");
+    })
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Parse WebVTT format — strip header, timestamps, and cue settings. */
+function parseVTT(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .replace(/^WEBVTT.*\n\n?/, "") // strip header
+    .split("\n\n")
+    .map((block) => {
+      const lines = block.trim().split("\n");
+      // Filter out timestamp lines (contain " --> ")
+      return lines.filter((l) => !l.includes(" --> ") && !/^\d+$/.test(l.trim())).join(" ");
+    })
+    .filter(Boolean)
+    .join("\n");
 }
 
 function UploadInterviewModal({
@@ -147,6 +179,27 @@ function UploadInterviewModal({
   const [transcript, setTranscript] = useState("");
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"idle" | "processing">("idle");
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const raw = reader.result as string;
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (ext === "srt") {
+        setTranscript(parseSRT(raw));
+      } else if (ext === "vtt") {
+        setTranscript(parseVTT(raw));
+      } else {
+        setTranscript(raw);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,6 +262,33 @@ function UploadInterviewModal({
                   </option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Upload File
+              </label>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <FileText className="h-4 w-4" />
+                  Choose .txt / .srt / .vtt
+                </button>
+                {fileName && (
+                  <span className="text-xs text-slate-500 truncate max-w-[200px]">
+                    {fileName}
+                  </span>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".txt,.srt,.vtt"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">

@@ -9,6 +9,7 @@ import type { Assessment, CriterionScore } from "@/types/assessment";
 // ---------------------------------------------------------------------------
 
 const STAGE_LABELS: Record<string, string> = {
+  initial: "Initial Interview with Talent Team",
   screening: "Screening",
   coderpad: "CoderPad",
   technical_interview: "Technical Interview",

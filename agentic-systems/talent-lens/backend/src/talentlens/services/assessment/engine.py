@@ -36,11 +36,35 @@ logger = logging.getLogger(__name__)
 
 # Maps interview type → pipeline stage the candidate should advance to after assessment
 STAGE_ADVANCEMENT = {
+    "initial": PipelineStage.screening,
     "screening": PipelineStage.coderpad,
     "coderpad": PipelineStage.technical_interview,
     "technical": PipelineStage.final_interview,
     "final": PipelineStage.decision,
 }
+
+# Lighter criteria for the initial talent team conversation — focuses on
+# communication, motivation, and general background rather than deep technical eval.
+INITIAL_CRITERIA = [
+    {
+        "name": "Communication & Presence",
+        "weight": 1.5,
+        "max_score": 5,
+        "description": "Clarity, confidence, and professionalism in responses",
+    },
+    {
+        "name": "Motivation & Cultural Fit",
+        "weight": 1.5,
+        "max_score": 5,
+        "description": "Interest in the role, alignment with company values, enthusiasm",
+    },
+    {
+        "name": "Relevant Background",
+        "weight": 1.0,
+        "max_score": 5,
+        "description": "Overview of experience and relevance to the role",
+    },
+]
 
 
 LEVEL_LABELS = {1: "Beginner", 2: "Junior", 3: "Mid-level", 4: "Senior", 5: "Expert"}
@@ -238,11 +262,16 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         contributions["collective_count"],
     )
 
-    # 4. Build criteria: prefer role template → manual rubric → defaults
+    # 4. Build criteria: initial interviews use lighter criteria; otherwise
+    #    prefer role template → manual rubric → defaults
     rubric_id = None
     role_context = {}
 
-    if candidate and candidate.role_template_id:
+    if interview.interview_type.value == "initial":
+        # Lighter evaluation for initial talent team conversation
+        criteria = INITIAL_CRITERIA
+        logger.info("Using INITIAL_CRITERIA for initial interview %s", interview_id)
+    elif candidate and candidate.role_template_id:
         # Use role template requirements as dynamic criteria
         criteria, role_context = await _build_criteria_from_template(
             candidate.role_template_id, db

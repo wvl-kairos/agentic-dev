@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Assessment } from "@/types/assessment";
 
 const STAGES = [
+  { key: "initial", label: "Initial" },
   { key: "screening", label: "Screen" },
   { key: "coderpad", label: "Coder" },
   { key: "technical_interview", label: "Tech" },

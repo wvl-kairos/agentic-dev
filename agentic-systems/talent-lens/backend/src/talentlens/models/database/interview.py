@@ -8,6 +8,7 @@ from talentlens.models.base import Base, TimestampMixin, UUIDMixin
 
 
 class InterviewType(str, enum.Enum):
+    initial = "initial"
     screening = "screening"
     coderpad = "coderpad"
     technical = "technical"

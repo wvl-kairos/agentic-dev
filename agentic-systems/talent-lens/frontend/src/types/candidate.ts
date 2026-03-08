@@ -1,4 +1,5 @@
 export type PipelineStage =
+  | "initial_interview"
   | "screening"
   | "coderpad"
   | "technical_interview"

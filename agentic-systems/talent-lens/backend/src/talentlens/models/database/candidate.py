@@ -8,6 +8,7 @@ from talentlens.models.base import Base, TimestampMixin, UUIDMixin
 
 
 class PipelineStage(str, enum.Enum):
+    initial_interview = "initial_interview"
     screening = "screening"
     coderpad = "coderpad"
     technical_interview = "technical_interview"

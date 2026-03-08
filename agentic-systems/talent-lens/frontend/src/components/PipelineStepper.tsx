@@ -4,6 +4,7 @@ import type { PipelineStage } from "@/types/candidate";
 
 /** Ordered pipeline stages for the stepper (excludes terminal states). */
 const PIPELINE_STAGES: { key: PipelineStage; label: string }[] = [
+  { key: "initial_interview", label: "Initial" },
   { key: "screening", label: "Screening" },
   { key: "coderpad", label: "CoderPad" },
   { key: "technical_interview", label: "Technical" },

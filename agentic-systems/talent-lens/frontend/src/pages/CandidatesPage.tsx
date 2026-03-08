@@ -12,6 +12,7 @@ const STAGE_BADGE: Record<
   PipelineStage,
   { label: string; bg: string; text: string }
 > = {
+  initial_interview: { label: "Initial", bg: "bg-teal-100", text: "text-teal-800" },
   screening: { label: "Screening", bg: "bg-blue-100", text: "text-blue-800" },
   coderpad: { label: "CoderPad", bg: "bg-purple-100", text: "text-purple-800" },
   technical_interview: {
