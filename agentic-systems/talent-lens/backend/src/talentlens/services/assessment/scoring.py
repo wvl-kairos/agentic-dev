@@ -26,6 +26,21 @@ RULES:
 - Distinguish between genuine team references and cultural humility
 - Consider talk ratio and contribution patterns as additional signals, not primary scoring factors
 
+DEPTH ASSESSMENT — Watch for these red flags that indicate surface-level knowledge:
+- Candidate names a technology but cannot explain HOW it works or WHY they chose it
+- Candidate uses buzzwords without concrete examples from their own experience
+- Candidate conflates different concepts (e.g., MLOps monitoring vs LLM evaluation)
+- Candidate says "I used X" but cannot describe their specific implementation
+- Candidate cannot articulate trade-offs or limitations of tools they claim to use
+- Candidate deflects or asks to skip when pressed for technical depth
+- Candidate says "I don't remember" or "I forgot" on foundational concepts they listed on their resume
+
+SCORING CALIBRATION:
+- Score 1-2: Candidate is aware of the concept but has no practical depth
+- Score 3: Candidate can explain and has used it, but lacks nuance on trade-offs
+- Score 4: Candidate demonstrates practical depth with specific examples and trade-off awareness
+- Score 5: Candidate shows expert-level understanding, can design systems and compare alternatives
+
 You MUST respond with valid JSON only, no markdown formatting."""
 
 USER_PROMPT_TEMPLATE = """Evaluate this {interview_type} interview transcript against the rubric criteria below.
@@ -102,10 +117,18 @@ def _build_role_context_block(role_context: dict) -> str:
     lines = ["\n## Role Context"]
     lines.append(f"This candidate is being evaluated for the **{role_name}** position.")
     if role_desc:
-        lines.append(f"Role description: {role_desc}")
+        lines.append(f"\n### Role Requirements & Evaluation Focus")
+        lines.append(role_desc)
     lines.append(
-        "The rubric criteria below are derived from the role's required capabilities "
-        "and technology stack. Score the candidate specifically against these role requirements.\n"
+        "\n### Evaluation Instructions"
+        "\nThe rubric criteria below are derived from the role's required capabilities "
+        "and technology stack. When scoring:"
+        "\n- Probe for DEPTH, not breadth — naming a technology is score 1, explaining trade-offs is score 4+"
+        "\n- Require SPECIFIC examples from the candidate's own work, not theoretical knowledge"
+        "\n- Penalize buzzword usage without concrete implementation details"
+        "\n- If a candidate claims experience with a tool/framework, they should be able to describe:"
+        "\n  (a) what problem it solved, (b) how they configured/used it, (c) what alternatives they considered"
+        "\n- Cross-reference claims: if a candidate says they built X, they should be able to explain the architecture\n"
     )
     return "\n".join(lines)
 
