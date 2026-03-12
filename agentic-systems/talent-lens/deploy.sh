@@ -79,7 +79,7 @@ PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectN
 FRONTEND_URL_NUMBERED="https://${FRONTEND_SERVICE}-${PROJECT_NUMBER}.${REGION}.run.app"
 gcloud run services update "$BACKEND_SERVICE" \
   --region "$REGION" \
-  --set-env-vars "^||^CORS_ORIGINS=${FRONTEND_URL_NUMBERED},${FRONTEND_URL},http://localhost:5173"
+  --update-env-vars "^||^CORS_ORIGINS=${FRONTEND_URL_NUMBERED},${FRONTEND_URL},http://localhost:5173"
 
 echo ""
 echo "=== Deployment Complete ==="
