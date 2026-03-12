@@ -33,8 +33,7 @@ export function PipelineStepper({
     <div className="w-full">
       <div className="flex items-center justify-between">
         {PIPELINE_STAGES.map((stage, idx) => {
-          const isCompleted =
-            idx < currentIdx || completedStages.includes(stage.key);
+          const isCompleted = completedStages.includes(stage.key);
           const isCurrent = !isTerminal && idx === currentIdx;
 
           return (
@@ -76,7 +75,7 @@ export function PipelineStepper({
                 <div
                   className={cn(
                     "flex-1 h-0.5 mx-2 mt-[-1rem]",
-                    idx < currentIdx ? "bg-emerald-500" : "bg-slate-200"
+                    isCompleted ? "bg-emerald-500" : "bg-slate-200"
                   )}
                 />
               )}

@@ -361,7 +361,17 @@ export function AssessmentPage() {
     );
   }
 
-  const completedStages = assessments.map((a) => a.stage);
+  // Map interview-type stages (from assessments) to pipeline stages (for stepper)
+  const interviewToPipeline: Record<string, string> = {
+    initial: "initial_interview",
+    screening: "screening",
+    coderpad: "coderpad",
+    technical: "technical_interview",
+    final: "final_interview",
+  };
+  const completedStages = assessments.map(
+    (a) => interviewToPipeline[a.stage] ?? a.stage
+  );
 
   const scoredAssessments = assessments.filter(
     (a) => a.overall_score != null

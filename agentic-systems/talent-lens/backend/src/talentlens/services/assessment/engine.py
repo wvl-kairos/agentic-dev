@@ -349,12 +349,31 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         },
     }
 
-    # 6. Advance candidate stage
+    # 6. Advance candidate stage — only if the next stage is actually ahead
+    #    of the current one. This prevents skipping stages when interviews
+    #    are uploaded out of order (e.g., technical before screening).
     if candidate:
         next_stage = STAGE_ADVANCEMENT.get(stage)
         if next_stage and candidate.stage != PipelineStage.rejected:
-            candidate.stage = next_stage
-            logger.info("Advanced candidate %s to stage %s", candidate.name, next_stage.value)
+            # Ordered pipeline stages for comparison
+            stage_order = [
+                PipelineStage.initial_interview,
+                PipelineStage.screening,
+                PipelineStage.coderpad,
+                PipelineStage.technical_interview,
+                PipelineStage.final_interview,
+                PipelineStage.decision,
+            ]
+            current_idx = stage_order.index(candidate.stage) if candidate.stage in stage_order else -1
+            next_idx = stage_order.index(next_stage) if next_stage in stage_order else -1
+            if next_idx > current_idx:
+                candidate.stage = next_stage
+                logger.info("Advanced candidate %s to stage %s", candidate.name, next_stage.value)
+            else:
+                logger.info(
+                    "Skipped stage advancement for %s: current %s is already at or past %s",
+                    candidate.name, candidate.stage.value, next_stage.value,
+                )
 
     await db.commit()
 
