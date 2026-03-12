@@ -73,11 +73,13 @@ gcloud run deploy "$FRONTEND_SERVICE" \
   --min-instances 0 \
   --max-instances 3
 
-# Update CORS
+# Update CORS — include both URL formats (short hash and numbered project)
 FRONTEND_URL=$(gcloud run services describe "$FRONTEND_SERVICE" --region "$REGION" --format 'value(status.url)')
+PROJECT_NUMBER=$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')
+FRONTEND_URL_NUMBERED="https://${FRONTEND_SERVICE}-${PROJECT_NUMBER}.${REGION}.run.app"
 gcloud run services update "$BACKEND_SERVICE" \
   --region "$REGION" \
-  --update-env-vars "CORS_ORIGINS=${FRONTEND_URL}"
+  --set-env-vars "^||^CORS_ORIGINS=${FRONTEND_URL_NUMBERED},${FRONTEND_URL},http://localhost:5173"
 
 echo ""
 echo "=== Deployment Complete ==="
