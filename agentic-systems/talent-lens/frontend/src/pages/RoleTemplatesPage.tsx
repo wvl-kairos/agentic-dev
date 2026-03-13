@@ -123,6 +123,17 @@ function TemplateForm({
     [techRequirements]
   );
 
+  // Filter capabilities for tech palette: only show technologies from selected capabilities
+  const selectedCapabilityIds = useMemo(
+    () => new Set(requirements.filter((r) => r.required_level > 0).map((r) => r.capability_id)),
+    [requirements]
+  );
+
+  const filteredCapabilities = useMemo(
+    () => capabilities.filter((c) => selectedCapabilityIds.has(c.id)),
+    [capabilities, selectedCapabilityIds]
+  );
+
   // Add a technology requirement
   const addTech = (techId: string) => {
     if (usedTechIds.has(techId)) return;
@@ -157,6 +168,12 @@ function TemplateForm({
       const existing = prev.find((r) => r.capability_id === capId);
       if (existing) {
         if (level === 0) {
+          // Auto-remove orphaned tech requirements when a capability is deselected
+          const cap = capabilities.find((c) => c.id === capId);
+          if (cap) {
+            const capTechIds = new Set(cap.technologies.map((t) => t.id));
+            setTechRequirements((tr) => tr.filter((r) => !capTechIds.has(r.technology_id)));
+          }
           return prev.filter((r) => r.capability_id !== capId);
         }
         return prev.map((r) =>
@@ -230,8 +247,8 @@ function TemplateForm({
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Brief description of this role..."
-          rows={2}
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"
+          rows={6}
+          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
         />
       </div>
 
@@ -268,11 +285,19 @@ function TemplateForm({
           <div className="flex gap-4">
             {/* Palette (left) */}
             <div className="flex-1 min-w-0">
-              <TechnologyPalette
-                capabilities={capabilities}
-                usedTechIds={usedTechIds}
-                onAdd={addTech}
-              />
+              {filteredCapabilities.length > 0 ? (
+                <TechnologyPalette
+                  capabilities={filteredCapabilities}
+                  usedTechIds={usedTechIds}
+                  onAdd={addTech}
+                />
+              ) : (
+                <div className="rounded-lg border border-dashed p-6 text-center">
+                  <p className="text-sm text-slate-400">
+                    Select capability requirements above to see available technologies
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Drop zone (right) */}
@@ -535,6 +560,8 @@ function TemplateCard({
 interface JobDescription {
   title: string;
   summary: string;
+  company_summary?: string;
+  location?: string;
   about_role: string;
   responsibilities: string[];
   required_qualifications: string[];
@@ -555,7 +582,9 @@ function JobDescriptionModal({
   const plainText = [
     `# ${jd.title}`,
     `**Level:** ${jd.level}`,
+    ...(jd.location ? [`**Location:** ${jd.location}`] : []),
     "",
+    ...(jd.company_summary ? ["## About UP Labs", jd.company_summary, ""] : []),
     jd.summary,
     "",
     "## About the Role",
@@ -620,7 +649,19 @@ function JobDescriptionModal({
             <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
               {jd.level}
             </span>
+            {jd.location && (
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+                {jd.location}
+              </span>
+            )}
           </div>
+
+          {jd.company_summary && (
+            <div className="rounded-md bg-blue-50 p-3 border border-blue-100">
+              <h4 className="font-semibold text-blue-800 mb-1 text-xs uppercase tracking-wide">About UP Labs</h4>
+              <p className="text-blue-700 leading-relaxed text-sm">{jd.company_summary}</p>
+            </div>
+          )}
 
           <p className="text-slate-600 leading-relaxed">{jd.summary}</p>
 

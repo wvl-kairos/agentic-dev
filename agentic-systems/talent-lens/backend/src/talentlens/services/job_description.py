@@ -9,6 +9,14 @@ from talentlens.config import settings
 
 logger = logging.getLogger(__name__)
 
+UP_LABS_SUMMARY = (
+    "UP Labs is a venture studio that builds, launches, and scales technology companies. "
+    "We partner with entrepreneurs and industry experts to create startups from scratch, "
+    "providing engineering talent, product strategy, and operational support. Our team works "
+    "across multiple ventures simultaneously, solving diverse technical challenges in a "
+    "fast-paced, collaborative environment."
+)
+
 SYSTEM_PROMPT = """You are a senior technical recruiter writing job descriptions for a technology venture studio (UP Labs).
 
 RULES:
@@ -19,14 +27,20 @@ RULES:
 - Be specific about what the candidate will work on based on the role description
 - Use inclusive language
 - Keep sections concise and scannable
+- Include the company summary in the about_role section naturally
+- Include the location in the output
 
 You MUST respond with valid JSON only, no markdown formatting."""
 
 USER_PROMPT_TEMPLATE = """Generate a job description for the following role template.
 
+## Company
+{company_summary}
+
 ## Role
 - Title: {name}
 - Description: {description}
+- Location: {location}
 
 ## Required Capabilities (General Engineering Skills)
 {capabilities_block}
@@ -38,6 +52,8 @@ USER_PROMPT_TEMPLATE = """Generate a job description for the following role temp
 {{
   "title": "<job title>",
   "summary": "<2-3 sentence role summary>",
+  "company_summary": "<1-2 sentences about UP Labs, adapted to this role>",
+  "location": "<location string>",
   "about_role": "<1-2 paragraph description of what the person will do>",
   "responsibilities": ["<responsibility 1>", "<responsibility 2>", ...],
   "required_qualifications": ["<qualification 1>", "<qualification 2>", ...],
@@ -80,6 +96,7 @@ async def generate_job_description(
     description: str | None,
     capabilities: list[dict],
     technologies: list[dict],
+    location: str = "Remote (Latin America)",
 ) -> dict:
     """Generate a structured job description from role template data.
 
@@ -88,6 +105,7 @@ async def generate_job_description(
         description: Role template description
         capabilities: List of {name, description, required_level}
         technologies: List of {name, capability_name, required_level}
+        location: Job location string
 
     Returns:
         Structured job description dict
@@ -97,6 +115,8 @@ async def generate_job_description(
         return {
             "title": name,
             "summary": "Job description generation unavailable: API key not configured.",
+            "company_summary": UP_LABS_SUMMARY,
+            "location": location,
             "about_role": "",
             "responsibilities": [],
             "required_qualifications": [],
@@ -109,8 +129,10 @@ async def generate_job_description(
     technologies_block = _build_technologies_block(technologies)
 
     user_prompt = USER_PROMPT_TEMPLATE.format(
+        company_summary=UP_LABS_SUMMARY,
         name=name,
         description=description or "No description provided.",
+        location=location,
         capabilities_block=capabilities_block,
         technologies_block=technologies_block,
     )
@@ -132,6 +154,8 @@ async def generate_job_description(
         return {
             "title": name,
             "summary": "Failed to generate job description.",
+            "company_summary": UP_LABS_SUMMARY,
+            "location": location,
             "about_role": response_text,
             "responsibilities": [],
             "required_qualifications": [],

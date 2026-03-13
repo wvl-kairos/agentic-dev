@@ -118,6 +118,8 @@ class JobDescriptionResponse(BaseModel):
     """Generated job description from a role template."""
     title: str
     summary: str
+    company_summary: str = ""
+    location: str = ""
     about_role: str
     responsibilities: list[str] = []
     required_qualifications: list[str] = []

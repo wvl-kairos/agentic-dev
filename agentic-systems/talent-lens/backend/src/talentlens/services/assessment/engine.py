@@ -69,6 +69,31 @@ INITIAL_CRITERIA = [
 
 LEVEL_LABELS = {1: "Beginner", 2: "Junior", 3: "Mid-level", 4: "Senior", 5: "Expert"}
 
+# Criteria always included in non-initial assessments — ensures cultural alignment
+# and communication are evaluated even when not explicitly in the role template.
+ALWAYS_INCLUDE_CRITERIA = [
+    {
+        "name": "Cultural Fit",
+        "weight": 1.0,
+        "max_score": 5,
+        "description": (
+            "Alignment with UP Labs values: ownership & accountability, collaborative mindset, "
+            "adaptability in a fast-paced venture studio, and growth orientation. "
+            "Look for evidence of initiative, willingness to learn, and team-first thinking."
+        ),
+    },
+    {
+        "name": "Soft Skills",
+        "weight": 1.0,
+        "max_score": 5,
+        "description": (
+            "Communication clarity, active listening, ability to explain complex ideas simply, "
+            "empathy, and professionalism. Evaluate how the candidate structures responses "
+            "and handles follow-up questions."
+        ),
+    },
+]
+
 
 async def _build_criteria_from_template(
     role_template_id: uuid.UUID, db: AsyncSession
@@ -294,6 +319,13 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
             {"name": "Problem Solving", "description": "Approach to problems", "weight": 1.5, "max_score": 5},
             {"name": "Individual Ownership", "description": "Personal contributions", "weight": 1.0, "max_score": 5},
         ], None
+
+    # Auto-include Cultural Fit & Soft Skills for non-initial interviews
+    if interview.interview_type.value != "initial":
+        existing_names = {c["name"] for c in criteria}
+        for extra in ALWAYS_INCLUDE_CRITERIA:
+            if extra["name"] not in existing_names:
+                criteria.append(extra)
 
     scoring_result = await score_interview(
         transcript=interview.transcript,

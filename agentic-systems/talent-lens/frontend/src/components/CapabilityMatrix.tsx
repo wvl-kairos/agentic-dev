@@ -324,6 +324,63 @@ export function CapabilityMatrix({
       (scoreMap.get(cap.id) ?? null) != null
   );
 
+  // ── Template-only view (no scores prop) — clean bars with weight % ──
+  if (!scores) {
+    if (requiredCaps.length === 0) {
+      return (
+        <p className="text-xs text-slate-400 italic">
+          No capability requirements defined for this role.
+        </p>
+      );
+    }
+
+    // Compute total weight for percentage display (matches engine.py: weight = max(1, reqLevel / 2))
+    const totalWeight = requiredCaps.reduce((sum, cap) => {
+      const level = reqMap.get(cap.id) ?? 0;
+      return sum + Math.max(1, level / 2);
+    }, 0);
+
+    return (
+      <div className="divide-y divide-slate-100">
+        {requiredCaps.map((cap) => {
+          const reqLevel = reqMap.get(cap.id) ?? 0;
+          const weight = Math.max(1, reqLevel / 2);
+          const weightPct = totalWeight > 0 ? Math.round((weight / totalWeight) * 100) : 0;
+
+          return (
+            <div key={cap.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">
+              <div className="flex items-center gap-2 w-44 min-w-[11rem] flex-shrink-0">
+                <CapabilityIcon slug={cap.slug} />
+                <span
+                  className="text-sm font-medium text-slate-700 truncate"
+                  title={cap.name}
+                >
+                  {cap.name}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="relative h-6 rounded bg-slate-100 overflow-hidden">
+                  <div
+                    className="h-full rounded bg-blue-400"
+                    style={{ width: `${(reqLevel / 5) * 100}%` }}
+                  />
+                </div>
+              </div>
+              <div className="w-32 flex-shrink-0 flex items-center justify-end gap-2">
+                <span className="text-xs font-medium text-blue-600 tabular-nums">
+                  {weightPct}%
+                </span>
+                <span className="text-xs text-slate-400">
+                  L{reqLevel}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Legend */}
@@ -380,7 +437,7 @@ export function CapabilityMatrix({
       )}
 
       {/* No scores yet */}
-      {scores && !hasAnyScore && (
+      {!hasAnyScore && (
         <div>
           {/* Show requirements as simple list */}
           {requiredCaps.length > 0 && (
@@ -417,13 +474,6 @@ export function CapabilityMatrix({
             Candidate scores will appear after assessments are completed.
           </p>
         </div>
-      )}
-
-      {/* No requirements at all — shouldn't happen, but safety */}
-      {!scores && requiredCaps.length === 0 && (
-        <p className="text-xs text-slate-400 italic">
-          No capability requirements defined for this role.
-        </p>
       )}
     </div>
   );
