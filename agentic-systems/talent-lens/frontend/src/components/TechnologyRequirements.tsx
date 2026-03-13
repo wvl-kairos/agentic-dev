@@ -143,48 +143,43 @@ function RequirementRow({
     : "bg-slate-100 text-slate-600";
 
   return (
-    <div className="flex items-center gap-3 rounded-md border bg-white px-3 py-2">
-      {/* Tech name */}
-      <span className="text-sm font-semibold text-slate-800 min-w-0 truncate">
-        {tech?.name ?? "Unknown"}
-      </span>
-
-      {/* Capability badge */}
-      {parentCap && (
-        <span
-          className={cn(
-            "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
-            capColor
-          )}
-        >
-          {parentCap.name}
+    <div className="rounded-md border bg-white px-3 py-2 space-y-1.5">
+      {/* Row 1: name + capability badge + remove */}
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold text-slate-800 truncate">
+          {tech?.name ?? "Unknown"}
         </span>
-      )}
-
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Priority selector */}
-      <PrioritySelector
-        value={req.priority}
-        onChange={(p) => onPriorityChange(req.technology_id, p)}
-      />
-
-      {/* Level dots */}
-      <LevelDots
-        level={req.required_level}
-        onChange={(level) => onLevelChange(req.technology_id, level)}
-      />
-
-      {/* Remove */}
-      <button
-        type="button"
-        onClick={() => onRemove(req.technology_id)}
-        className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
-        title="Remove technology"
-      >
-        <X className="h-3.5 w-3.5" />
-      </button>
+        {parentCap && (
+          <span
+            className={cn(
+              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium",
+              capColor
+            )}
+          >
+            {parentCap.name}
+          </span>
+        )}
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => onRemove(req.technology_id)}
+          className="shrink-0 rounded-md p-1 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+          title="Remove technology"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      {/* Row 2: priority + level dots */}
+      <div className="flex items-center gap-3">
+        <PrioritySelector
+          value={req.priority}
+          onChange={(p) => onPriorityChange(req.technology_id, p)}
+        />
+        <LevelDots
+          level={req.required_level}
+          onChange={(level) => onLevelChange(req.technology_id, level)}
+        />
+      </div>
     </div>
   );
 }
