@@ -86,6 +86,7 @@ async def recompute_talk_ratios(db: DBSession):
     """Re-compute talk ratios for all interviews where ratio is 0 or null.
 
     This fixes interviews processed before the transcript parser was added.
+    Interviews without speaker labels get talk_ratio set to NULL (not 0.0).
     """
     result = await db.execute(
         select(Interview).where(
@@ -95,6 +96,7 @@ async def recompute_talk_ratios(db: DBSession):
     )
     interviews = result.scalars().all()
     updated = 0
+    set_null = 0
 
     for interview in interviews:
         # Try diarization segments first
@@ -109,6 +111,10 @@ async def recompute_talk_ratios(db: DBSession):
             segments = parse_transcript_to_segments(interview.transcript)
 
         if not segments:
+            # No speaker labels — set to NULL instead of 0.0
+            if interview.talk_ratio == 0:
+                interview.talk_ratio = None
+                set_null += 1
             continue
 
         # Get candidate name for speaker identification
@@ -136,4 +142,4 @@ async def recompute_talk_ratios(db: DBSession):
             )
 
     await db.commit()
-    return {"updated": updated, "total_checked": len(interviews)}
+    return {"updated": updated, "set_null": set_null, "total_checked": len(interviews)}

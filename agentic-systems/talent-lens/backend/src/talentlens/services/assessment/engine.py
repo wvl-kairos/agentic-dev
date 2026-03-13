@@ -271,11 +271,13 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
 
     candidate_name = candidate.name if candidate else None
     talk_result = compute_talk_ratio(segments, candidate_name)
-    interview.talk_ratio = talk_result["candidate_ratio"]
+    # Store None (not 0.0) when we have no data — 0.0 implies the candidate never spoke
+    interview.talk_ratio = talk_result["candidate_ratio"] if segments else None
 
     logger.info(
-        "Interview %s: talk ratio %.0f%% (%s)",
+        "Interview %s: talk ratio %s (%s)",
         interview_id,
+        f"{talk_result['candidate_ratio'] * 100:.0f}%" if segments else "N/A (no speaker labels)",
         talk_result["candidate_ratio"] * 100,
         talk_result["candidate_speaker"],
     )
