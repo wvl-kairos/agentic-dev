@@ -11,9 +11,67 @@ Heuristic for identifying the candidate:
 """
 
 import logging
+import re
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
+
+
+def parse_transcript_to_segments(transcript: str) -> list[dict]:
+    """Parse a text transcript into diarization segments.
+
+    Handles the format produced by Fireflies and manual uploads:
+        Speaker Name: text content
+        Other Speaker: more text
+
+    Returns segments with speaker and text (no start/end times — talk ratio
+    will fall back to character-count mode).
+    """
+    segments: list[dict] = []
+    # Match lines starting with "Name:" or "Name :" pattern
+    # Speaker names are typically 1-4 words before a colon
+    pattern = re.compile(r"^([A-Z][A-Za-zÀ-ÿ' ]{0,50})\s*:\s*(.+)", re.MULTILINE)
+
+    current_speaker = None
+    current_text_parts: list[str] = []
+
+    for line in transcript.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+
+        match = pattern.match(line)
+        if match:
+            # Flush previous segment
+            if current_speaker and current_text_parts:
+                segments.append({
+                    "speaker": current_speaker,
+                    "text": " ".join(current_text_parts),
+                    "start": 0,
+                    "end": 0,
+                })
+            current_speaker = match.group(1).strip()
+            current_text_parts = [match.group(2).strip()]
+        elif current_speaker:
+            # Continuation of previous speaker's text
+            current_text_parts.append(line)
+
+    # Flush last segment
+    if current_speaker and current_text_parts:
+        segments.append({
+            "speaker": current_speaker,
+            "text": " ".join(current_text_parts),
+            "start": 0,
+            "end": 0,
+        })
+
+    if segments:
+        logger.info(
+            "Parsed %d segments from transcript text (%d speakers)",
+            len(segments),
+            len({s["speaker"] for s in segments}),
+        )
+    return segments
 
 
 def _speaker_stats(diarization: list[dict]) -> dict[str, dict]:

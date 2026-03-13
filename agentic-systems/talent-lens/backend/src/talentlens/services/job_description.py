@@ -147,8 +147,19 @@ async def generate_job_description(
     )
 
     response_text = message.content[0].text
+
+    # Strip markdown code fences if Claude wraps the JSON
+    cleaned = response_text.strip()
+    if cleaned.startswith("```"):
+        # Remove opening fence (```json or ```)
+        first_newline = cleaned.index("\n") if "\n" in cleaned else len(cleaned)
+        cleaned = cleaned[first_newline + 1:]
+        # Remove closing fence
+        if cleaned.rstrip().endswith("```"):
+            cleaned = cleaned.rstrip()[:-3].rstrip()
+
     try:
-        result = json.loads(response_text)
+        result = json.loads(cleaned)
     except json.JSONDecodeError:
         logger.error("Claude returned invalid JSON for JD: %.200s", response_text)
         return {

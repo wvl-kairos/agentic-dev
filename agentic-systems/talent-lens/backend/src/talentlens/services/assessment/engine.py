@@ -29,7 +29,7 @@ from talentlens.models.database.interview import Interview
 from talentlens.models.database.rubric import Rubric
 from talentlens.services.assessment.contribution import detect_contributions
 from talentlens.services.assessment.scoring import score_interview
-from talentlens.services.assessment.talk_ratio import compute_talk_ratio
+from talentlens.services.assessment.talk_ratio import compute_talk_ratio, parse_transcript_to_segments
 from talentlens.services.notifications.slack import notify_assessment_complete
 
 logger = logging.getLogger(__name__)
@@ -263,6 +263,11 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         segments = diarization.get("segments", [])
     else:
         segments = diarization or []
+
+    # If diarization is empty, parse the transcript text to extract speaker segments
+    if not segments and interview.transcript:
+        segments = parse_transcript_to_segments(interview.transcript)
+        logger.info("Parsed %d segments from transcript text for interview %s", len(segments), interview_id)
 
     candidate_name = candidate.name if candidate else None
     talk_result = compute_talk_ratio(segments, candidate_name)
