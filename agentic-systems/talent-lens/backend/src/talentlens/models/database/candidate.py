@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Enum, ForeignKey, String, Text
+from sqlalchemy import Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -33,6 +33,7 @@ class Candidate(Base, UUIDMixin, TimestampMixin):
     role_template_id: Mapped["UUID | None"] = mapped_column(
         UUID(as_uuid=True), ForeignKey("role_templates.id"), nullable=True
     )
+    salary_expected: Mapped[int | None] = mapped_column(Integer, nullable=True)
     cv_url: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
 

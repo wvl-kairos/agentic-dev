@@ -12,6 +12,7 @@ class CandidateCreate(BaseModel):
     email: str | None = None
     role: str | None = None
     role_template_id: uuid.UUID | None = None
+    salary_expected: int | None = None
 
 
 class CandidateUpdate(BaseModel):
@@ -20,6 +21,7 @@ class CandidateUpdate(BaseModel):
     role: str | None = None
     role_template_id: uuid.UUID | None = None
     stage: PipelineStage | None = None
+    salary_expected: int | None = None
     notes: str | None = None
 
 
@@ -30,6 +32,7 @@ class CandidateResponse(BaseModel):
     email: str | None
     role: str | None
     role_template_id: uuid.UUID | None = None
+    salary_expected: int | None = None
     stage: PipelineStage
     created_at: datetime
     updated_at: datetime

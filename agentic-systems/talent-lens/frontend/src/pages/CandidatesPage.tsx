@@ -117,6 +117,7 @@ function AddCandidateModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [salaryExpected, setSalaryExpected] = useState("");
   const [roleTemplateId, setRoleTemplateId] = useState("");
   const [ventureId, setVentureId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -139,6 +140,7 @@ function AddCandidateModal({
         name,
         email: email || undefined,
         role: role || undefined,
+        salary_expected: salaryExpected ? parseInt(salaryExpected, 10) : undefined,
         role_template_id: roleTemplateId || undefined,
       });
       onCreated();
@@ -199,6 +201,18 @@ function AddCandidateModal({
               value={role}
               onChange={(e) => setRole(e.target.value)}
               placeholder="e.g. Senior Backend Engineer"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Expected Salary (USD)
+            </label>
+            <input
+              type="number"
+              value={salaryExpected}
+              onChange={(e) => setSalaryExpected(e.target.value)}
+              placeholder="e.g. 80000"
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -328,6 +342,9 @@ export function CandidatesPage() {
                   Role
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Salary
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <div className="flex items-center gap-1">
                     <Briefcase className="h-3 w-3" />
                     Role Template
@@ -373,6 +390,11 @@ export function CandidatesPage() {
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">
                     {c.role ?? <span className="text-slate-300">--</span>}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-600 tabular-nums">
+                    {c.salary_expected
+                      ? `$${c.salary_expected.toLocaleString()}`
+                      : <span className="text-slate-300">--</span>}
                   </td>
                   <td className="px-4 py-3 w-48">
                     <RoleTemplateSelector

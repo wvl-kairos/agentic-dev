@@ -81,14 +81,25 @@ def _build_capabilities_block(capabilities: list[dict]) -> str:
 def _build_technologies_block(technologies: list[dict]) -> str:
     if not technologies:
         return "No specific technology requirements defined."
-    lines = []
+
+    PRIORITY_LABELS = {"must_have": "Required", "should_have": "Preferred", "nice_to_have": "Nice to Have"}
+    groups: dict[str, list[str]] = {"must_have": [], "should_have": [], "nice_to_have": []}
+
     for tech in technologies:
         level = tech.get("required_level", 3)
         label = LEVEL_LABELS.get(level, f"Level {level}")
         cap_name = tech.get("capability_name", "")
         prefix = f"[{cap_name}] " if cap_name else ""
-        lines.append(f"- {prefix}{tech['name']}: {label} (level {level}/5)")
-    return "\n".join(lines)
+        priority = tech.get("priority", "must_have")
+        groups.setdefault(priority, []).append(f"- {prefix}{tech['name']}: {label} (level {level}/5)")
+
+    lines = []
+    for key in ("must_have", "should_have", "nice_to_have"):
+        items = groups.get(key, [])
+        if items:
+            lines.append(f"\n### {PRIORITY_LABELS.get(key, key)}")
+            lines.extend(items)
+    return "\n".join(lines) if lines else "No specific technology requirements defined."
 
 
 async def generate_job_description(

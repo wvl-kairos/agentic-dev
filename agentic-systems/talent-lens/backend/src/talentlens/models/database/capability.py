@@ -48,6 +48,10 @@ class RoleTemplate(Base, UUIDMixin, TimestampMixin):
     )
     name: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
+    salary_min: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    salary_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    salary_currency: Mapped[str] = mapped_column(String(10), server_default="USD", default="USD")
+    role_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
     venture = relationship("Venture")
     requirements = relationship(
@@ -74,6 +78,7 @@ class RoleCapabilityRequirement(Base, UUIDMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("capabilities.id", ondelete="CASCADE"), index=True
     )
     required_level: Mapped[int] = mapped_column(Integer)  # 1-5
+    survey_level: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 1-10 from survey
 
     role_template = relationship("RoleTemplate", back_populates="requirements")
     capability = relationship("Capability", back_populates="role_requirements")
@@ -111,6 +116,7 @@ class RoleTechnologyRequirement(Base, UUIDMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("technologies.id", ondelete="CASCADE"), index=True
     )
     required_level: Mapped[int] = mapped_column(Integer)  # 1-5
+    priority: Mapped[str] = mapped_column(String(20), server_default="must_have", default="must_have")
 
     role_template = relationship("RoleTemplate", back_populates="technology_requirements")
     technology = relationship("Technology", back_populates="role_requirements")

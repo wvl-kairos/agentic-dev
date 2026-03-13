@@ -44,6 +44,7 @@ function CapabilityIcon({ slug }: { slug: string }) {
 interface Requirement {
   capability_id: string;
   required_level: number;
+  survey_level?: number;
 }
 
 interface Score {
@@ -63,43 +64,46 @@ interface CapabilityMatrixProps {
 // Editable Level Selector (for RoleTemplatesPage)
 // ---------------------------------------------------------------------------
 
-function EditableLevelDots({
+function EditableSurveyDots({
   cap,
-  reqLevel,
+  surveyLevel,
   onRequirementChange,
 }: {
   cap: Capability;
-  reqLevel: number;
-  onRequirementChange: (capability_id: string, level: number) => void;
+  surveyLevel: number;
+  onRequirementChange: (capability_id: string, surveyLevel: number) => void;
 }) {
   const [hoveredTooltip, setHoveredTooltip] = useState<string | null>(null);
 
   return (
-    <div className="flex items-center gap-1.5">
-      {[1, 2, 3, 4, 5].map((level) => {
-        const levelData = cap.levels.find((l) => l.level === level);
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => {
+        // Map survey level to capability level for tooltip: ceil(level/2)
+        const capLevel = Math.ceil(level / 2);
+        const levelData = cap.levels.find((l) => l.level === capLevel);
         const tooltipKey = `${cap.id}-${level}`;
-        const isActive = level <= reqLevel;
+        const isActive = level <= surveyLevel;
 
         return (
           <div key={level} className="relative">
             <button
               type="button"
               onClick={() => {
-                const newLevel = reqLevel === level ? 0 : level;
+                const newLevel = surveyLevel === level ? 0 : level;
                 onRequirementChange(cap.id, newLevel);
               }}
               onMouseEnter={() => setHoveredTooltip(tooltipKey)}
               onMouseLeave={() => setHoveredTooltip(null)}
               className={cn(
-                "h-5 w-5 rounded-full transition-colors cursor-pointer hover:ring-2 hover:ring-blue-400",
-                isActive ? "bg-blue-500" : "bg-slate-200"
+                "h-4 w-4 rounded-full transition-colors cursor-pointer hover:ring-2 hover:ring-blue-400",
+                isActive ? "bg-blue-500" : "bg-slate-200",
+                level % 2 === 0 && level < 10 ? "mr-1" : ""
               )}
             />
             {hoveredTooltip === tooltipKey && levelData && (
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-10 w-48 rounded-md bg-slate-800 px-3 py-2 text-xs text-white shadow-lg pointer-events-none">
                 <p className="font-semibold">
-                  Level {level}: {levelData.title}
+                  {level}/10 → L{capLevel}: {levelData.title}
                 </p>
                 {levelData.description && (
                   <p className="mt-1 text-slate-300">
@@ -111,6 +115,11 @@ function EditableLevelDots({
           </div>
         );
       })}
+      {surveyLevel > 0 && (
+        <span className="ml-1.5 text-xs font-medium text-blue-600 tabular-nums w-6">
+          {surveyLevel}/10
+        </span>
+      )}
     </div>
   );
 }
@@ -268,27 +277,35 @@ export function CapabilityMatrix({
   const sorted = [...capabilities].sort((a, b) => a.order - b.order);
   const hasAnyScore = scores?.some((s) => s.avg_score != null) ?? false;
 
-  // ── Editable mode: dots for setting requirement levels ──
+  // Build survey-level map from requirements
+  const surveyMap = new Map(
+    requirements.map((r) => [r.capability_id, r.survey_level ?? r.required_level * 2])
+  );
+
+  // ── Editable mode: 10-dot survey scale ──
   if (editable && onRequirementChange) {
     return (
       <div className="space-y-1.5">
         {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-44 min-w-[11rem]" />
-          <div className="flex items-center gap-1.5">
-            {[1, 2, 3, 4, 5].map((level) => (
+          <div className="flex items-center">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((level) => (
               <span
                 key={level}
-                className="flex h-5 w-5 items-center justify-center text-[10px] font-semibold text-slate-400"
+                className={cn(
+                  "flex h-4 w-4 items-center justify-center text-[9px] font-semibold text-slate-400",
+                  level % 2 === 0 && level < 10 ? "mr-1.5" : "mr-0.5"
+                )}
               >
-                {level}
+                {level % 2 === 0 ? level : ""}
               </span>
             ))}
           </div>
         </div>
 
         {sorted.map((cap) => {
-          const reqLevel = reqMap.get(cap.id) ?? 0;
+          const currentSurvey = surveyMap.get(cap.id) ?? 0;
           return (
             <div key={cap.id} className="flex items-center gap-3">
               <div className="flex items-center gap-2 w-44 min-w-[11rem]">
@@ -300,9 +317,9 @@ export function CapabilityMatrix({
                   {cap.name}
                 </span>
               </div>
-              <EditableLevelDots
+              <EditableSurveyDots
                 cap={cap}
-                reqLevel={reqLevel}
+                surveyLevel={currentSurvey}
                 onRequirementChange={onRequirementChange}
               />
             </div>
@@ -334,18 +351,28 @@ export function CapabilityMatrix({
       );
     }
 
-    // Compute total weight for percentage display (matches engine.py: weight = max(1, reqLevel / 2))
-    const totalWeight = requiredCaps.reduce((sum, cap) => {
+    // Compute weight percentages that always sum to 100 (largest-remainder method)
+    const rawWeights = requiredCaps.map((cap) => {
       const level = reqMap.get(cap.id) ?? 0;
-      return sum + Math.max(1, level / 2);
-    }, 0);
+      return Math.max(1, level / 2);
+    });
+    const totalWeight = rawWeights.reduce((s, w) => s + w, 0);
+    const exactPcts = rawWeights.map((w) => (totalWeight > 0 ? (w / totalWeight) * 100 : 0));
+    const floored = exactPcts.map(Math.floor);
+    let remainder = 100 - floored.reduce((s, v) => s + v, 0);
+    const remainders = exactPcts.map((v, i) => ({ i, r: v - (floored[i] ?? 0) }));
+    remainders.sort((a, b) => b.r - a.r);
+    for (const { i } of remainders) {
+      if (remainder <= 0) break;
+      floored[i] = (floored[i] ?? 0) + 1;
+      remainder--;
+    }
 
     return (
       <div className="divide-y divide-slate-100">
-        {requiredCaps.map((cap) => {
+        {requiredCaps.map((cap, idx) => {
           const reqLevel = reqMap.get(cap.id) ?? 0;
-          const weight = Math.max(1, reqLevel / 2);
-          const weightPct = totalWeight > 0 ? Math.round((weight / totalWeight) * 100) : 0;
+          const weightPct = floored[idx];
 
           return (
             <div key={cap.id} className="flex items-center gap-3 py-2 first:pt-0 last:pb-0">

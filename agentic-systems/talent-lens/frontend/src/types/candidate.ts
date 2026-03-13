@@ -15,6 +15,7 @@ export interface Candidate {
   email: string | null;
   role: string | null;
   role_template_id: string | null;
+  salary_expected: number | null;
   stage: PipelineStage;
   created_at: string;
   updated_at: string;

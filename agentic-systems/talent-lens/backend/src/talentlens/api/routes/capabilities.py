@@ -118,6 +118,10 @@ async def create_role_template(data: RoleTemplateCreate, db: DBSession):
         venture_id=data.venture_id,
         name=data.name,
         description=data.description,
+        salary_min=data.salary_min,
+        salary_max=data.salary_max,
+        salary_currency=data.salary_currency,
+        role_type=data.role_type,
     )
     db.add(template)
     await db.flush()
@@ -127,6 +131,7 @@ async def create_role_template(data: RoleTemplateCreate, db: DBSession):
             role_template_id=template.id,
             capability_id=req.capability_id,
             required_level=req.required_level,
+            survey_level=req.survey_level,
         ))
 
     for treq in data.technology_requirements:
@@ -134,6 +139,7 @@ async def create_role_template(data: RoleTemplateCreate, db: DBSession):
             role_template_id=template.id,
             technology_id=treq.technology_id,
             required_level=treq.required_level,
+            priority=treq.priority,
         ))
 
     await db.commit()
@@ -174,6 +180,14 @@ async def update_role_template(
         template.name = data.name
     if data.description is not None:
         template.description = data.description
+    if data.salary_min is not None:
+        template.salary_min = data.salary_min
+    if data.salary_max is not None:
+        template.salary_max = data.salary_max
+    if data.salary_currency is not None:
+        template.salary_currency = data.salary_currency
+    if data.role_type is not None:
+        template.role_type = data.role_type
 
     # Replace capability requirements if provided
     if data.requirements is not None:
@@ -190,6 +204,7 @@ async def update_role_template(
                 role_template_id=template_id,
                 capability_id=req.capability_id,
                 required_level=req.required_level,
+                survey_level=req.survey_level,
             ))
 
     # Replace technology requirements if provided
@@ -207,6 +222,7 @@ async def update_role_template(
                 role_template_id=template_id,
                 technology_id=treq.technology_id,
                 required_level=treq.required_level,
+                priority=treq.priority,
             ))
 
     await db.commit()
@@ -284,6 +300,7 @@ async def generate_jd_from_template(template_id: uuid.UUID, db: DBSession):
             "name": tech.name if tech else "Unknown",
             "capability_name": cap_name,
             "required_level": treq.required_level,
+            "priority": treq.priority if hasattr(treq, "priority") else "must_have",
         })
 
     jd = await generate_job_description(

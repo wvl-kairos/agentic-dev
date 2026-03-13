@@ -28,7 +28,7 @@ import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import { TechnologyPalette, TechChipOverlay } from "@/components/TechnologyPalette";
 import { TechnologyRequirements } from "@/components/TechnologyRequirements";
 import type { TechRequirementDraft } from "@/components/TechnologyRequirements";
-import type { RoleTemplate, Technology } from "@/types/capability";
+import type { RoleTemplate, Technology, TechPriority } from "@/types/capability";
 
 // ---------------------------------------------------------------------------
 // Color map for tech badges on cards
@@ -51,11 +51,16 @@ const COLOR_MAP: Record<string, string> = {
 interface RequirementDraft {
   capability_id: string;
   required_level: number;
+  survey_level?: number;
 }
 
 interface TemplateDraft {
   name: string;
   description: string;
+  salary_min: number | null;
+  salary_max: number | null;
+  salary_currency: string;
+  role_type: string;
   requirements: RequirementDraft[];
   technology_requirements: TechRequirementDraft[];
 }
@@ -79,6 +84,10 @@ function TemplateForm({
 }) {
   const [name, setName] = useState(initial.name);
   const [description, setDescription] = useState(initial.description);
+  const [salaryMin, setSalaryMin] = useState<string>(initial.salary_min?.toString() ?? "");
+  const [salaryMax, setSalaryMax] = useState<string>(initial.salary_max?.toString() ?? "");
+  const [salaryCurrency, setSalaryCurrency] = useState(initial.salary_currency);
+  const [roleType, setRoleType] = useState(initial.role_type);
   const [requirements, setRequirements] = useState<RequirementDraft[]>(
     initial.requirements
   );
@@ -139,7 +148,7 @@ function TemplateForm({
     if (usedTechIds.has(techId)) return;
     setTechRequirements((prev) => [
       ...prev,
-      { technology_id: techId, required_level: 3 },
+      { technology_id: techId, required_level: 3, priority: "must_have" as TechPriority },
     ]);
   };
 
@@ -163,11 +172,21 @@ function TemplateForm({
     );
   };
 
-  const handleRequirementChange = (capId: string, level: number) => {
+  // Change priority
+  const changeTechPriority = (techId: string, priority: TechPriority) => {
+    setTechRequirements((prev) =>
+      prev.map((r) =>
+        r.technology_id === techId ? { ...r, priority } : r
+      )
+    );
+  };
+
+  const handleRequirementChange = (capId: string, surveyLevel: number) => {
+    const requiredLevel = Math.ceil(surveyLevel / 2);
     setRequirements((prev) => {
       const existing = prev.find((r) => r.capability_id === capId);
       if (existing) {
-        if (level === 0) {
+        if (surveyLevel === 0) {
           // Auto-remove orphaned tech requirements when a capability is deselected
           const cap = capabilities.find((c) => c.id === capId);
           if (cap) {
@@ -177,11 +196,13 @@ function TemplateForm({
           return prev.filter((r) => r.capability_id !== capId);
         }
         return prev.map((r) =>
-          r.capability_id === capId ? { ...r, required_level: level } : r
+          r.capability_id === capId
+            ? { ...r, required_level: requiredLevel, survey_level: surveyLevel }
+            : r
         );
       }
-      if (level > 0) {
-        return [...prev, { capability_id: capId, required_level: level }];
+      if (surveyLevel > 0) {
+        return [...prev, { capability_id: capId, required_level: requiredLevel, survey_level: surveyLevel }];
       }
       return prev;
     });
@@ -213,6 +234,10 @@ function TemplateForm({
     onSave({
       name,
       description,
+      salary_min: salaryMin ? parseInt(salaryMin, 10) : null,
+      salary_max: salaryMax ? parseInt(salaryMax, 10) : null,
+      salary_currency: salaryCurrency,
+      role_type: roleType,
       requirements,
       technology_requirements: techRequirements,
     });
@@ -250,6 +275,55 @@ function TemplateForm({
           rows={6}
           className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
         />
+      </div>
+
+      {/* Role Type + Salary */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Role Type
+          </label>
+          <input
+            type="text"
+            value={roleType}
+            onChange={(e) => setRoleType(e.target.value)}
+            placeholder="e.g. Full-time, Contract"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Salary Range
+          </label>
+          <div className="flex items-center gap-2">
+            <select
+              value={salaryCurrency}
+              onChange={(e) => setSalaryCurrency(e.target.value)}
+              className="rounded-md border border-slate-300 px-2 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="MXN">MXN</option>
+              <option value="BRL">BRL</option>
+            </select>
+            <input
+              type="number"
+              value={salaryMin}
+              onChange={(e) => setSalaryMin(e.target.value)}
+              placeholder="Min"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <span className="text-slate-400">–</span>
+            <input
+              type="number"
+              value={salaryMax}
+              onChange={(e) => setSalaryMax(e.target.value)}
+              placeholder="Max"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Capability requirements */}
@@ -308,6 +382,7 @@ function TemplateForm({
                 capabilities={capabilities}
                 onRemove={removeTech}
                 onLevelChange={changeTechLevel}
+                onPriorityChange={changeTechPriority}
               />
             </div>
           </div>
@@ -355,16 +430,25 @@ function TemplateForm({
 // Tech Badge for template cards
 // ---------------------------------------------------------------------------
 
+const PRIORITY_LABEL: Record<string, { text: string; cls: string }> = {
+  must_have: { text: "Must", cls: "text-red-600" },
+  should_have: { text: "Should", cls: "text-amber-600" },
+  nice_to_have: { text: "Nice", cls: "text-slate-400" },
+};
+
 function TechBadge({
   tech,
   level,
   capSlug,
+  priority,
 }: {
   tech: Technology;
   level: number;
   capSlug: string;
+  priority?: string;
 }) {
   const colorClass = COLOR_MAP[capSlug] ?? "bg-slate-100 text-slate-600";
+  const prio = priority ? PRIORITY_LABEL[priority] : null;
 
   return (
     <span
@@ -385,6 +469,11 @@ function TechBadge({
           />
         ))}
       </span>
+      {prio && (
+        <span className={cn("text-[9px] font-semibold", prio.cls)}>
+          {prio.text}
+        </span>
+      )}
     </span>
   );
 }
@@ -438,7 +527,7 @@ function TemplateCard({
   const groupedTechReqs = useMemo(() => {
     const groups = new Map<
       string,
-      { capName: string; capSlug: string; items: { tech: Technology; level: number }[] }
+      { capName: string; capSlug: string; items: { tech: Technology; level: number; priority: string }[] }
     >();
     for (const tr of template.technology_requirements) {
       const tech = tr.technology
@@ -453,12 +542,12 @@ function TemplateCard({
 
       const existing = groups.get(key);
       if (existing) {
-        existing.items.push({ tech, level: tr.required_level });
+        existing.items.push({ tech, level: tr.required_level, priority: tr.priority ?? "must_have" });
       } else {
         groups.set(key, {
           capName,
           capSlug,
-          items: [{ tech, level: tr.required_level }],
+          items: [{ tech, level: tr.required_level, priority: tr.priority ?? "must_have" }],
         });
       }
     }
@@ -469,12 +558,27 @@ function TemplateCard({
     <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
       <div className="flex items-center justify-between border-b px-5 py-4">
         <div>
-          <h3 className="text-base font-semibold text-slate-800">
-            {template.name}
-          </h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-semibold text-slate-800">
+              {template.name}
+            </h3>
+            {template.role_type && (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                {template.role_type}
+              </span>
+            )}
+          </div>
           {template.description && (
             <p className="mt-0.5 text-sm text-slate-500">
               {template.description}
+            </p>
+          )}
+          {(template.salary_min || template.salary_max) && (
+            <p className="mt-0.5 text-xs text-slate-400">
+              {template.salary_currency}{" "}
+              {template.salary_min?.toLocaleString() ?? "–"}
+              {" – "}
+              {template.salary_max?.toLocaleString() ?? "–"}
             </p>
           )}
         </div>
@@ -541,6 +645,7 @@ function TemplateCard({
                       tech={item.tech}
                       level={item.level}
                       capSlug={group.capSlug}
+                      priority={item.priority}
                     />
                   ))}
                 </div>
@@ -849,6 +954,10 @@ export function RoleTemplatesPage() {
   const emptyDraft: TemplateDraft = {
     name: "",
     description: "",
+    salary_min: null,
+    salary_max: null,
+    salary_currency: "USD",
+    role_type: "",
     requirements: [],
     technology_requirements: [],
   };
@@ -857,14 +966,20 @@ export function RoleTemplatesPage() {
     ? {
         name: editingTemplate.name,
         description: editingTemplate.description ?? "",
+        salary_min: editingTemplate.salary_min ?? null,
+        salary_max: editingTemplate.salary_max ?? null,
+        salary_currency: editingTemplate.salary_currency ?? "USD",
+        role_type: editingTemplate.role_type ?? "",
         requirements: editingTemplate.requirements.map((r) => ({
           capability_id: r.capability_id,
           required_level: r.required_level,
+          survey_level: r.survey_level ?? r.required_level * 2,
         })),
         technology_requirements: editingTemplate.technology_requirements.map(
           (tr) => ({
             technology_id: tr.technology_id,
             required_level: tr.required_level,
+            priority: (tr.priority ?? "must_have") as TechPriority,
           })
         ),
       }
@@ -877,8 +992,20 @@ export function RoleTemplatesPage() {
         venture_id: ventureId,
         name: draft.name,
         description: draft.description || null,
-        requirements: draft.requirements,
-        technology_requirements: draft.technology_requirements,
+        salary_min: draft.salary_min,
+        salary_max: draft.salary_max,
+        salary_currency: draft.salary_currency,
+        role_type: draft.role_type || null,
+        requirements: draft.requirements.map((r) => ({
+          capability_id: r.capability_id,
+          required_level: r.required_level,
+          survey_level: r.survey_level ?? r.required_level * 2,
+        })),
+        technology_requirements: draft.technology_requirements.map((tr) => ({
+          technology_id: tr.technology_id,
+          required_level: tr.required_level,
+          priority: tr.priority ?? "must_have",
+        })),
       });
       setMode("list");
       refetch();
@@ -896,8 +1023,20 @@ export function RoleTemplatesPage() {
       await api.put(`/role-templates/${editingTemplate.id}`, {
         name: draft.name,
         description: draft.description || null,
-        requirements: draft.requirements,
-        technology_requirements: draft.technology_requirements,
+        salary_min: draft.salary_min,
+        salary_max: draft.salary_max,
+        salary_currency: draft.salary_currency,
+        role_type: draft.role_type || null,
+        requirements: draft.requirements.map((r) => ({
+          capability_id: r.capability_id,
+          required_level: r.required_level,
+          survey_level: r.survey_level ?? r.required_level * 2,
+        })),
+        technology_requirements: draft.technology_requirements.map((tr) => ({
+          technology_id: tr.technology_id,
+          required_level: tr.required_level,
+          priority: tr.priority ?? "must_have",
+        })),
       });
       setMode("list");
       setEditingTemplate(null);

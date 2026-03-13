@@ -1,7 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Capability, Technology } from "@/types/capability";
+import type { Capability, Technology, TechPriority } from "@/types/capability";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -10,6 +10,7 @@ import type { Capability, Technology } from "@/types/capability";
 export interface TechRequirementDraft {
   technology_id: string;
   required_level: number;
+  priority: TechPriority;
 }
 
 interface TechnologyRequirementsProps {
@@ -18,7 +19,14 @@ interface TechnologyRequirementsProps {
   capabilities: Capability[];
   onRemove: (techId: string) => void;
   onLevelChange: (techId: string, level: number) => void;
+  onPriorityChange: (techId: string, priority: TechPriority) => void;
 }
+
+const PRIORITY_OPTIONS: { value: TechPriority; label: string; color: string }[] = [
+  { value: "must_have", label: "Must", color: "bg-red-100 text-red-700 border-red-200" },
+  { value: "should_have", label: "Should", color: "bg-amber-100 text-amber-700 border-amber-200" },
+  { value: "nice_to_have", label: "Nice", color: "bg-slate-100 text-slate-600 border-slate-200" },
+];
 
 // ---------------------------------------------------------------------------
 // Color map (consistent with palette)
@@ -85,18 +93,46 @@ function LevelDots({
 // Requirement Row
 // ---------------------------------------------------------------------------
 
+function PrioritySelector({
+  value,
+  onChange,
+}: {
+  value: TechPriority;
+  onChange: (priority: TechPriority) => void;
+}) {
+  return (
+    <div className="flex items-center rounded-full border border-slate-200 overflow-hidden">
+      {PRIORITY_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={cn(
+            "px-2 py-0.5 text-[10px] font-medium transition-colors",
+            value === opt.value ? opt.color : "bg-white text-slate-400 hover:bg-slate-50"
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function RequirementRow({
   req,
   allTechnologies,
   capabilities,
   onRemove,
   onLevelChange,
+  onPriorityChange,
 }: {
   req: TechRequirementDraft;
   allTechnologies: Technology[];
   capabilities: Capability[];
   onRemove: (techId: string) => void;
   onLevelChange: (techId: string, level: number) => void;
+  onPriorityChange: (techId: string, priority: TechPriority) => void;
 }) {
   const tech = findTech(allTechnologies, req.technology_id);
   const parentCap = tech
@@ -128,6 +164,12 @@ function RequirementRow({
       {/* Spacer */}
       <div className="flex-1" />
 
+      {/* Priority selector */}
+      <PrioritySelector
+        value={req.priority}
+        onChange={(p) => onPriorityChange(req.technology_id, p)}
+      />
+
       {/* Level dots */}
       <LevelDots
         level={req.required_level}
@@ -157,6 +199,7 @@ export function TechnologyRequirements({
   capabilities,
   onRemove,
   onLevelChange,
+  onPriorityChange,
 }: TechnologyRequirementsProps) {
   const { setNodeRef, isOver } = useDroppable({ id: "tech-drop-zone" });
 
@@ -184,6 +227,7 @@ export function TechnologyRequirements({
               capabilities={capabilities}
               onRemove={onRemove}
               onLevelChange={onLevelChange}
+              onPriorityChange={onPriorityChange}
             />
           ))}
         </div>

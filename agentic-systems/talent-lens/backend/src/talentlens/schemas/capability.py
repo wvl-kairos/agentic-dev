@@ -1,9 +1,10 @@
 """Schemas for capabilities, role templates, and skills tracking."""
 
+import math
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 # ---------------------------------------------------------------------------
@@ -53,18 +54,32 @@ class CapabilityResponse(BaseModel):
 
 class RoleCapabilityRequirementCreate(BaseModel):
     capability_id: uuid.UUID
-    required_level: int  # 1-5
+    required_level: int | None = None  # 1-5 (auto-computed from survey_level if not provided)
+    survey_level: int | None = None  # 1-10 from survey
+
+    @model_validator(mode="after")
+    def compute_required_level(self):
+        if self.survey_level is not None and self.required_level is None:
+            self.required_level = math.ceil(self.survey_level / 2)
+        if self.required_level is None:
+            self.required_level = 3  # default
+        return self
 
 
 class RoleTechnologyRequirementCreate(BaseModel):
     technology_id: uuid.UUID
     required_level: int  # 1-5
+    priority: str = "must_have"  # must_have | should_have | nice_to_have
 
 
 class RoleTemplateCreate(BaseModel):
     venture_id: uuid.UUID
     name: str
     description: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    salary_currency: str = "USD"
+    role_type: str | None = None
     requirements: list[RoleCapabilityRequirementCreate] = []
     technology_requirements: list[RoleTechnologyRequirementCreate] = []
 
@@ -72,6 +87,10 @@ class RoleTemplateCreate(BaseModel):
 class RoleTemplateUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    salary_currency: str | None = None
+    role_type: str | None = None
     requirements: list[RoleCapabilityRequirementCreate] | None = None
     technology_requirements: list[RoleTechnologyRequirementCreate] | None = None
 
@@ -81,6 +100,7 @@ class RoleCapabilityRequirementResponse(BaseModel):
     capability_id: uuid.UUID
     capability: CapabilityResponse | None = None
     required_level: int
+    survey_level: int | None = None
 
     model_config = {"from_attributes": True}
 
@@ -90,6 +110,7 @@ class RoleTechnologyRequirementResponse(BaseModel):
     technology_id: uuid.UUID
     technology: TechnologyResponse | None = None
     required_level: int
+    priority: str = "must_have"
 
     model_config = {"from_attributes": True}
 
@@ -99,6 +120,10 @@ class RoleTemplateResponse(BaseModel):
     venture_id: uuid.UUID
     name: str
     description: str | None
+    salary_min: int | None = None
+    salary_max: int | None = None
+    salary_currency: str = "USD"
+    role_type: str | None = None
     requirements: list[RoleCapabilityRequirementResponse] = []
     technology_requirements: list[RoleTechnologyRequirementResponse] = []
     created_at: datetime

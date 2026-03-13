@@ -30,13 +30,17 @@ export interface RoleCapabilityRequirement {
   capability_id: string;
   capability: Capability | null;
   required_level: number;
+  survey_level: number | null;
 }
+
+export type TechPriority = "must_have" | "should_have" | "nice_to_have";
 
 export interface RoleTechnologyRequirement {
   id: string;
   technology_id: string;
   technology: Technology | null;
   required_level: number;
+  priority: TechPriority;
 }
 
 export interface RoleTemplate {
@@ -44,6 +48,10 @@ export interface RoleTemplate {
   venture_id: string;
   name: string;
   description: string | null;
+  salary_min: number | null;
+  salary_max: number | null;
+  salary_currency: string;
+  role_type: string | null;
   requirements: RoleCapabilityRequirement[];
   technology_requirements: RoleTechnologyRequirement[];
   created_at: string;
