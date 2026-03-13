@@ -270,10 +270,15 @@ async def _compute_orientation(candidate_id: uuid.UUID, db: AsyncSession) -> str
 
     slug_avgs = {slug: sum(scores) / len(scores) for slug, scores in slug_scores.items()}
 
-    has_frontend = "frontend" in slug_avgs
-    has_backend = "backend" in slug_avgs
-    has_data = "data-engineering" in slug_avgs or "data-science-ml" in slug_avgs
-    has_devops = "devops" in slug_avgs
+    # Require a minimum score to consider a capability area "present"
+    ORIENTATION_THRESHOLD = 2.5
+    has_frontend = slug_avgs.get("frontend", 0) >= ORIENTATION_THRESHOLD
+    has_backend = slug_avgs.get("backend", 0) >= ORIENTATION_THRESHOLD
+    has_data = (
+        slug_avgs.get("data-engineering", 0) >= ORIENTATION_THRESHOLD
+        or slug_avgs.get("data-science-ml", 0) >= ORIENTATION_THRESHOLD
+    )
+    has_devops = slug_avgs.get("devops", 0) >= ORIENTATION_THRESHOLD
 
     if has_frontend and has_backend:
         return "fullstack"

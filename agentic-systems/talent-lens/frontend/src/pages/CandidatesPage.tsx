@@ -6,36 +6,9 @@ import { useCandidateStore } from "@/stores/candidateStore";
 import { useRoleTemplates } from "@/hooks/useRoleTemplates";
 import { api } from "@/utils/api";
 import type { Candidate, PipelineStage } from "@/types/candidate";
+import { OrientationBadge } from "@/components/OrientationBadge";
 
 /** Stage badge styling map. */
-const ORIENTATION_STYLES: Record<string, { label: string; bg: string; text: string }> = {
-  frontend: { label: "Frontend", bg: "bg-blue-100", text: "text-blue-700" },
-  backend: { label: "Backend", bg: "bg-green-100", text: "text-green-700" },
-  fullstack: { label: "Fullstack", bg: "bg-purple-100", text: "text-purple-700" },
-  data: { label: "Data", bg: "bg-orange-100", text: "text-orange-700" },
-  devops: { label: "DevOps", bg: "bg-cyan-100", text: "text-cyan-700" },
-};
-
-function OrientationBadge({ orientation }: { orientation: string | null }) {
-  if (!orientation) return null;
-  const style = ORIENTATION_STYLES[orientation] ?? {
-    label: orientation,
-    bg: "bg-slate-100",
-    text: "text-slate-600",
-  };
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-        style.bg,
-        style.text
-      )}
-    >
-      {style.label}
-    </span>
-  );
-}
-
 const STAGE_BADGE: Record<
   PipelineStage,
   { label: string; bg: string; text: string }
@@ -435,7 +408,7 @@ export function CandidatesPage() {
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <OrientationBadge orientation={c.orientation} />
+                    <OrientationBadge orientation={c.orientation} size="sm" />
                   </td>
                   <td className="px-4 py-3">
                     <StageBadge stage={c.stage} />
