@@ -35,7 +35,16 @@ async def get_candidate(candidate_id: uuid.UUID, db: DBSession):
     candidate = await db.get(Candidate, candidate_id)
     if not candidate:
         raise HTTPException(status_code=404, detail="Candidate not found")
-    return candidate
+    # Enrich with role template salary range
+    resp = CandidateResponse.model_validate(candidate)
+    if candidate.role_template_id:
+        from talentlens.models.database.capability import RoleTemplate
+        rt = await db.get(RoleTemplate, candidate.role_template_id)
+        if rt:
+            resp.role_salary_min = rt.salary_min
+            resp.role_salary_max = rt.salary_max
+            resp.role_salary_currency = rt.salary_currency
+    return resp
 
 
 @router.patch("/{candidate_id}", response_model=CandidateResponse)

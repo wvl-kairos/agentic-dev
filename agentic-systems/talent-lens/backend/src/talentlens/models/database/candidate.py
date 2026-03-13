@@ -34,6 +34,7 @@ class Candidate(Base, UUIDMixin, TimestampMixin):
         UUID(as_uuid=True), ForeignKey("role_templates.id"), nullable=True
     )
     salary_expected: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    orientation: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cv_url: Mapped[str | None] = mapped_column(Text)
     notes: Mapped[str | None] = mapped_column(Text)
 

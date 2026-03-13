@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -15,6 +15,84 @@ import { CompactStageCard } from "@/components/CompactStageCard";
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import { SkillsRadar } from "@/components/SkillsRadar";
 import type { CandidateSkills } from "@/types/capability";
+
+// ---------------------------------------------------------------------------
+// Orientation Badge
+// ---------------------------------------------------------------------------
+
+const ORIENTATION_STYLES: Record<string, { label: string; bg: string; text: string }> = {
+  frontend: { label: "Frontend", bg: "bg-blue-100", text: "text-blue-700" },
+  backend: { label: "Backend", bg: "bg-green-100", text: "text-green-700" },
+  fullstack: { label: "Fullstack", bg: "bg-purple-100", text: "text-purple-700" },
+  data: { label: "Data", bg: "bg-orange-100", text: "text-orange-700" },
+  devops: { label: "DevOps", bg: "bg-cyan-100", text: "text-cyan-700" },
+};
+
+function OrientationBadge({ orientation }: { orientation: string | null }) {
+  if (!orientation) return null;
+  const style = ORIENTATION_STYLES[orientation] ?? {
+    label: orientation,
+    bg: "bg-slate-100",
+    text: "text-slate-600",
+  };
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+        style.bg,
+        style.text
+      )}
+    >
+      {style.label}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Salary Display
+// ---------------------------------------------------------------------------
+
+function SalaryDisplay({
+  expected,
+  rangeMin,
+  rangeMax,
+  currency,
+}: {
+  expected: number | null;
+  rangeMin: number | null;
+  rangeMax: number | null;
+  currency: string | null;
+}) {
+  if (!expected && !rangeMin) return null;
+  const fmt = (n: number) => {
+    if (n >= 1000) return `${Math.round(n / 1000)}K`;
+    return n.toLocaleString();
+  };
+  const cur = currency ?? "USD";
+  const sym = cur === "USD" ? "$" : cur;
+
+  return (
+    <div className="flex items-center gap-1.5 text-sm text-slate-500">
+      <DollarSign className="h-3.5 w-3.5" />
+      {expected ? (
+        <span>
+          <span className="font-medium text-slate-700">
+            {sym}{expected.toLocaleString()}
+          </span>
+          {rangeMin != null && rangeMax != null && (
+            <span className="text-slate-400">
+              {" "}(range: {sym}{fmt(rangeMin)}–{sym}{fmt(rangeMax)})
+            </span>
+          )}
+        </span>
+      ) : rangeMin != null && rangeMax != null ? (
+        <span className="text-slate-400">
+          Range: {sym}{fmt(rangeMin)}–{sym}{fmt(rangeMax)}
+        </span>
+      ) : null}
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Skills Matrix Section (unchanged)
@@ -67,6 +145,32 @@ function SkillsMatrixSection({ candidateId }: { candidateId: string }) {
 
   const hasRoleTemplate = skills.role_template != null;
 
+  // Build Key Strengths: top capabilities with avg_score >= 3.5
+  const COLOR_MAP: Record<string, string> = {
+    frontend: "bg-blue-100 text-blue-700",
+    backend: "bg-green-100 text-green-700",
+    "data-engineering": "bg-purple-100 text-purple-700",
+    "data-science-ml": "bg-orange-100 text-orange-700",
+    analytics: "bg-pink-100 text-pink-700",
+    devops: "bg-cyan-100 text-cyan-700",
+    leadership: "bg-amber-100 text-amber-700",
+  };
+
+  const strengths = skills.capabilities
+    .filter((c) => c.avg_score != null && c.avg_score >= 3.5)
+    .sort((a, b) => (b.avg_score ?? 0) - (a.avg_score ?? 0))
+    .slice(0, 3)
+    .map((capScore) => {
+      const cap = capabilities.find((c) => c.id === capScore.capability_id);
+      const techs = cap?.technologies?.map((t) => t.name) ?? [];
+      return {
+        name: capScore.capability_name,
+        slug: capScore.capability_slug,
+        score: capScore.avg_score!,
+        technologies: techs.slice(0, 5),
+      };
+    });
+
   return (
     <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
       <div className="border-b px-5 py-4">
@@ -102,6 +206,32 @@ function SkillsMatrixSection({ candidateId }: { candidateId: string }) {
           <SkillsRadar skills={skills.capabilities} />
         )}
       </div>
+      {strengths.length > 0 && (
+        <div className="border-t px-5 py-4">
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            Key Strengths
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {strengths.map((s) => (
+              <div
+                key={s.slug}
+                className={cn(
+                  "rounded-lg px-3 py-1.5 text-xs font-medium",
+                  COLOR_MAP[s.slug] ?? "bg-slate-100 text-slate-600"
+                )}
+              >
+                <span className="font-semibold">{s.name}</span>
+                {s.technologies.length > 0 && (
+                  <span className="ml-1 opacity-75">
+                    ({s.technologies.join(", ")})
+                  </span>
+                )}
+                <span className="ml-1.5 opacity-60">{s.score.toFixed(1)}/5</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -403,12 +533,15 @@ export function AssessmentPage() {
       {/* Top section: Candidate info + Decision + Stats */}
       {candidate && (
         <div className="rounded-lg border bg-white p-5 shadow-sm">
-          {/* Candidate name / role / email + upload button */}
+          {/* Candidate name / role / email / salary + upload button */}
           <div className="mb-4 flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                {candidate.name}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-bold text-slate-900">
+                  {candidate.name}
+                </h2>
+                <OrientationBadge orientation={candidate.orientation} />
+              </div>
               <div className="flex items-center gap-3 mt-0.5">
                 {candidate.role && (
                   <span className="text-sm text-slate-500">
@@ -420,6 +553,14 @@ export function AssessmentPage() {
                     {candidate.email}
                   </span>
                 )}
+              </div>
+              <div className="mt-1">
+                <SalaryDisplay
+                  expected={candidate.salary_expected}
+                  rangeMin={candidate.role_salary_min}
+                  rangeMax={candidate.role_salary_max}
+                  currency={candidate.role_salary_currency}
+                />
               </div>
             </div>
             <button

@@ -239,6 +239,66 @@ async def _find_rubric(candidate: Candidate, db: AsyncSession) -> list[dict]:
     ], None
 
 
+async def _compute_orientation(candidate_id: uuid.UUID, db: AsyncSession) -> str | None:
+    """Compute candidate orientation (frontend/backend/fullstack/data/devops) from capability scores."""
+    from talentlens.models.database.assessment import Assessment, CriterionScore as CriterionScoreModel
+
+    # Get all criterion scores for this candidate
+    result = await db.execute(
+        select(CriterionScoreModel)
+        .join(Assessment, CriterionScoreModel.assessment_id == Assessment.id)
+        .where(Assessment.candidate_id == candidate_id)
+    )
+    all_scores = result.scalars().all()
+    if not all_scores:
+        return None
+
+    # Get all capabilities to map criterion names → slugs
+    cap_result = await db.execute(select(Capability))
+    capabilities = cap_result.scalars().all()
+    name_to_slug = {cap.name: cap.slug for cap in capabilities}
+
+    # Aggregate scores by capability slug
+    slug_scores: dict[str, list[float]] = {}
+    for cs in all_scores:
+        slug = name_to_slug.get(cs.criterion_name)
+        if slug:
+            slug_scores.setdefault(slug, []).append(cs.score)
+
+    if not slug_scores:
+        return None
+
+    slug_avgs = {slug: sum(scores) / len(scores) for slug, scores in slug_scores.items()}
+
+    has_frontend = "frontend" in slug_avgs
+    has_backend = "backend" in slug_avgs
+    has_data = "data-engineering" in slug_avgs or "data-science-ml" in slug_avgs
+    has_devops = "devops" in slug_avgs
+
+    if has_frontend and has_backend:
+        return "fullstack"
+    if has_frontend:
+        return "frontend"
+    if has_backend:
+        return "backend"
+    if has_data:
+        return "data"
+    if has_devops:
+        return "devops"
+
+    # Fallback: highest-scoring slug
+    best_slug = max(slug_avgs, key=slug_avgs.get)  # type: ignore[arg-type]
+    orientation_map = {
+        "frontend": "frontend",
+        "backend": "backend",
+        "data-engineering": "data",
+        "data-science-ml": "data",
+        "devops": "devops",
+        "analytics": "data",
+    }
+    return orientation_map.get(best_slug)
+
+
 async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> uuid.UUID:
     """Run the full assessment pipeline for an interview.
     Returns the created Assessment ID."""
@@ -413,6 +473,13 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
                     "Skipped stage advancement for %s: current %s is already at or past %s",
                     candidate.name, candidate.stage.value, next_stage.value,
                 )
+
+    # 6b. Compute orientation from capability scores
+    if candidate:
+        orientation = await _compute_orientation(candidate.id, db)
+        if orientation:
+            candidate.orientation = orientation
+            logger.info("Set orientation for %s: %s", candidate.name, orientation)
 
     await db.commit()
 

@@ -1,4 +1,4 @@
-import { TrendingUp, Layers, Mic, Award } from "lucide-react";
+import { TrendingUp, Layers, Mic, Award, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assessment } from "@/types/assessment";
 import type { Candidate } from "@/types/candidate";
@@ -48,6 +48,21 @@ export function AggregateStatsCard({
     }
   }
 
+  // Derive communication score from "Soft Skills", "Communication", or "Communication & Presence"
+  const commNames = new Set(["soft skills", "communication", "communication & presence"]);
+  const commScores: number[] = [];
+  for (const a of assessments) {
+    for (const cs of a.criterion_scores) {
+      if (commNames.has(cs.criterion_name.toLowerCase())) {
+        commScores.push(cs.score);
+      }
+    }
+  }
+  const avgComm =
+    commScores.length > 0
+      ? commScores.reduce((s, v) => s + v, 0) / commScores.length
+      : null;
+
   const stats = [
     {
       label: "Avg Score",
@@ -62,6 +77,13 @@ export function AggregateStatsCard({
       sub: `/ ${totalStages}`,
       icon: Layers,
       colorClass: "text-slate-700",
+    },
+    {
+      label: "Communication",
+      value: avgComm != null ? avgComm.toFixed(1) : "--",
+      sub: avgComm != null ? "/ 5.0" : null,
+      icon: MessageSquare,
+      colorClass: scoreColorClass(avgComm),
     },
     {
       label: "Avg Talk Ratio",
@@ -80,7 +102,7 @@ export function AggregateStatsCard({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {stats.map((stat) => (
         <div
           key={stat.label}
@@ -95,9 +117,11 @@ export function AggregateStatsCard({
           <div className="mt-1 flex items-baseline gap-1">
             <span
               className={cn(
-                "text-xl font-bold tabular-nums truncate",
-                stat.colorClass
+                "font-bold tabular-nums truncate",
+                stat.colorClass,
+                stat.label === "Strongest Area" ? "text-sm" : "text-xl"
               )}
+              title={stat.value}
             >
               {stat.value}
             </span>

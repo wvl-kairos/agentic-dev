@@ -16,7 +16,12 @@ export interface Candidate {
   role: string | null;
   role_template_id: string | null;
   salary_expected: number | null;
+  orientation: string | null;
   stage: PipelineStage;
   created_at: string;
   updated_at: string;
+  /** Populated from linked role template (not stored on candidate). */
+  role_salary_min: number | null;
+  role_salary_max: number | null;
+  role_salary_currency: string | null;
 }
