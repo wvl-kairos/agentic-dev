@@ -41,6 +41,11 @@ SCORING CALIBRATION:
 - Score 4: Candidate demonstrates practical depth with specific examples and trade-off awareness
 - Score 5: Candidate shows expert-level understanding, can design systems and compare alternatives
 
+CONFIDENCE LEVELS — For each criterion, classify evidence quality:
+- "demonstrated": Concrete examples, problem-solving, hands-on depth shown
+- "mentioned": Referenced the concept/tool with some context but no deep evidence
+- "claimed": Stated familiarity without supporting evidence or examples
+
 You MUST respond with valid JSON only, no markdown formatting."""
 
 USER_PROMPT_TEMPLATE = """Evaluate this {interview_type} interview transcript against the rubric criteria below.
@@ -67,6 +72,7 @@ USER_PROMPT_TEMPLATE = """Evaluate this {interview_type} interview transcript ag
       "criterion_name": "<exact criterion name>",
       "score": <0-max_score>,
       "max_score": <from rubric>,
+      "confidence_level": "<demonstrated|mentioned|claimed>",
       "reasoning": "<why this score>",
       "evidence": [
         {{"quote": "<exact substring from transcript>", "speaker": "<speaker name>"}}

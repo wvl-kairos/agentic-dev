@@ -36,11 +36,12 @@ export function AggregateStatsCard({
         withTalkRatio.length
       : null;
 
-  // Find strongest area: highest-scored criterion across all assessments
+  // Find strongest area: highest-scored criterion across all assessments (exclude not_assessed)
   let strongestArea: string | null = null;
   let highestCriterionScore = -1;
   for (const a of assessments) {
     for (const cs of a.criterion_scores) {
+      if (cs.assessment_status === "not_assessed") continue;
       if (cs.score > highestCriterionScore) {
         highestCriterionScore = cs.score;
         strongestArea = cs.criterion_name;
@@ -53,6 +54,7 @@ export function AggregateStatsCard({
   const commScores: number[] = [];
   for (const a of assessments) {
     for (const cs of a.criterion_scores) {
+      if (cs.assessment_status === "not_assessed") continue;
       if (commNames.has(cs.criterion_name.toLowerCase())) {
         commScores.push(cs.score);
       }

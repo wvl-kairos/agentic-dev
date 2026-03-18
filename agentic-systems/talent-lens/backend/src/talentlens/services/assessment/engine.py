@@ -69,6 +69,8 @@ INITIAL_CRITERIA = [
 
 LEVEL_LABELS = {1: "Beginner", 2: "Junior", 3: "Mid-level", 4: "Senior", 5: "Expert"}
 
+CONFIDENCE_MULTIPLIERS = {"demonstrated": 1.0, "mentioned": 0.6, "claimed": 0.3}
+
 # Criteria always included in non-initial assessments — ensures cultural alignment
 # and communication are evaluated even when not explicitly in the role template.
 ALWAYS_INCLUDE_CRITERIA = [
@@ -408,6 +410,69 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         role_context=role_context,
     )
 
+    # 4b. Gap analysis — identify criteria not scored by Claude and add not_assessed entries
+    scored_names = {
+        cs.get("criterion_name", "") for cs in scoring_result.get("criteria_scores", [])
+    }
+    all_required_names = {c["name"] for c in criteria}
+    missing = all_required_names - scored_names
+
+    for name in missing:
+        scoring_result.setdefault("criteria_scores", []).append({
+            "criterion_name": name,
+            "score": 0,
+            "max_score": 5,
+            "confidence_level": "claimed",
+            "assessment_status": "not_assessed",
+            "reasoning": "Not evaluated in this interview stage.",
+            "evidence": [],
+        })
+
+    # 4c. Classify assessment_status and normalize confidence_level for Claude-scored criteria
+    for cs_data in scoring_result.get("criteria_scores", []):
+        # Ensure confidence_level has a valid value
+        if cs_data.get("confidence_level") not in ("demonstrated", "mentioned", "claimed"):
+            cs_data["confidence_level"] = "demonstrated"
+        # Set assessment_status for Claude-scored criteria
+        if cs_data.get("assessment_status") != "not_assessed":
+            score = cs_data.get("score", 0)
+            max_score = cs_data.get("max_score", 5)
+            cs_data["assessment_status"] = (
+                "assessed_positive" if (score / max_score) >= 0.5 else "assessed_negative"
+            )
+
+    # 4d. Recompute overall_score with confidence multipliers, excluding not_assessed
+    assessed_scores = [
+        cs for cs in scoring_result.get("criteria_scores", [])
+        if cs.get("assessment_status") != "not_assessed"
+    ]
+    if assessed_scores:
+        # Build weight map from criteria list
+        weight_map = {c["name"]: c.get("weight", 1.0) for c in criteria}
+        weighted_sum = 0.0
+        total_weight = 0.0
+        for cs_data in assessed_scores:
+            multiplier = CONFIDENCE_MULTIPLIERS.get(cs_data.get("confidence_level", "demonstrated"), 1.0)
+            weight = weight_map.get(cs_data.get("criterion_name", ""), 1.0)
+            effective_score = cs_data.get("score", 0) * multiplier
+            weighted_sum += effective_score * weight
+            total_weight += cs_data.get("max_score", 5) * weight
+        scoring_result["overall_score"] = round(
+            (weighted_sum / total_weight) * 5.0 if total_weight > 0 else 0.0, 2
+        )
+
+    # 4e. Compute coverage stats
+    assessed_count = len([
+        cs for cs in scoring_result.get("criteria_scores", [])
+        if cs.get("assessment_status") != "not_assessed"
+    ])
+    total_required = len(scoring_result.get("criteria_scores", []))
+    scoring_result["coverage"] = {
+        "assessed_count": assessed_count,
+        "total_required": total_required,
+        "coverage_ratio": round(assessed_count / total_required, 2) if total_required > 0 else 1.0,
+    }
+
     # 5. Persist Assessment
     stage = interview.interview_type.value
     assessment = Assessment(
@@ -430,6 +495,8 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
             criterion_name=cs_data.get("criterion_name", ""),
             score=cs_data.get("score", 0),
             max_score=cs_data.get("max_score", 5),
+            confidence_level=cs_data.get("confidence_level", "demonstrated"),
+            assessment_status=cs_data.get("assessment_status", "assessed_positive"),
             reasoning=cs_data.get("reasoning"),
         )
         db.add(criterion_score)

@@ -28,18 +28,24 @@ export function useAssessments(candidateId: string): UseAssessmentsReturn {
       api.get<Interview[]>(`/interviews/candidate/${candidateId}`).catch(() => [] as Interview[]),
     ])
       .then(([assessmentData, candidateData, interviews]) => {
-        // Build a lookup of interview_id -> talk_ratio
+        // Build lookups of interview_id -> talk_ratio / recording_url
         const ratioMap = new Map<string, number | null>();
+        const recordingMap = new Map<string, string | null>();
         for (const iv of interviews) {
           ratioMap.set(iv.id, iv.talk_ratio);
+          recordingMap.set(iv.id, iv.recording_url);
         }
 
-        // Enrich assessments with talk_ratio from their linked interview
+        // Enrich assessments with talk_ratio and recording_url from their linked interview
         const enriched = assessmentData.map((a) => ({
           ...a,
           talk_ratio:
             a.interview_id && ratioMap.has(a.interview_id)
               ? ratioMap.get(a.interview_id) ?? null
+              : null,
+          recording_url:
+            a.interview_id && recordingMap.has(a.interview_id)
+              ? recordingMap.get(a.interview_id) ?? null
               : null,
         }));
 

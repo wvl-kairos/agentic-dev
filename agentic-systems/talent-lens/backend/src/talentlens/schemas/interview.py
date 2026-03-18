@@ -13,6 +13,13 @@ class InterviewResponse(BaseModel):
     source: str | None
     talk_ratio: float | None
     duration_seconds: int | None
+    recording_url: str | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class InterviewDetailResponse(InterviewResponse):
+    """Extended response including transcript text."""
+
+    transcript: str | None = None

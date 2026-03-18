@@ -75,7 +75,9 @@ async def get_interview(interview_id: uuid.UUID, db: DBSession):
         "source": interview.source,
         "talk_ratio": interview.talk_ratio,
         "duration_seconds": interview.duration_seconds,
+        "recording_url": interview.recording_url,
         "diarization": interview.diarization,
+        "transcript": interview.transcript,
         "transcript_length": len(interview.transcript) if interview.transcript else 0,
         "created_at": interview.created_at.isoformat(),
     }

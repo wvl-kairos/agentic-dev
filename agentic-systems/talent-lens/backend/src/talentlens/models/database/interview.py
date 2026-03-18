@@ -28,6 +28,7 @@ class Interview(Base, UUIDMixin, TimestampMixin):
     transcript: Mapped[str | None] = mapped_column(Text)
     diarization: Mapped[dict | None] = mapped_column(JSON)  # speaker-labeled segments
     talk_ratio: Mapped[float | None] = mapped_column(Float)  # candidate talk time ratio
+    recording_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_seconds: Mapped[int | None]
 
     candidate = relationship("Candidate", back_populates="interviews")

@@ -31,6 +31,7 @@ query Transcript($id: String!) {
     id
     title
     duration
+    audio_url
     speakers {
       name
     }
@@ -120,6 +121,8 @@ async def ingest_fireflies_transcript(
         full_transcript = None
         duration = None
 
+    recording_url = transcript_data.get("audio_url") if transcript_data else None
+
     interview = Interview(
         candidate_id=candidate_id,
         interview_type=interview_type,
@@ -127,6 +130,7 @@ async def ingest_fireflies_transcript(
         external_id=meeting_id,
         transcript=full_transcript,
         diarization=diarization,
+        recording_url=recording_url,
         duration_seconds=int(duration) if duration else None,
     )
     db.add(interview)

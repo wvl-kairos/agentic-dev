@@ -36,6 +36,8 @@ class CriterionScore(Base, UUIDMixin, TimestampMixin):
     criterion_name: Mapped[str] = mapped_column(String(200))
     score: Mapped[int] = mapped_column(Integer)
     max_score: Mapped[int] = mapped_column(Integer, default=5)
+    confidence_level: Mapped[str] = mapped_column(String(20), default="demonstrated", server_default="demonstrated")
+    assessment_status: Mapped[str] = mapped_column(String(20), default="assessed_positive", server_default="assessed_positive")
     reasoning: Mapped[str | None] = mapped_column(Text)
 
     assessment = relationship("Assessment", back_populates="criterion_scores")

@@ -1,8 +1,10 @@
-import { useState } from "react";
-import { ChevronDown, ChevronUp, Mic, Quote } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreBar } from "@/components/ScoreBar";
-import type { Assessment, CriterionScore } from "@/types/assessment";
+import type { Assessment, CriterionScore, ConfidenceLevel, AssessmentStatus } from "@/types/assessment";
+import type { InterviewDetail } from "@/types/interview";
+import { api } from "@/utils/api";
 
 // ---------------------------------------------------------------------------
 // Helpers (duplicated from AssessmentPage to avoid circular imports)
@@ -54,6 +56,40 @@ function recommendationBadge(rec: string | null) {
 }
 
 // ---------------------------------------------------------------------------
+// Confidence Badge
+// ---------------------------------------------------------------------------
+
+const CONFIDENCE_STYLES: Record<ConfidenceLevel, { label: string; className: string } | null> = {
+  demonstrated: null, // default — no badge
+  mentioned: { label: "Mentioned", className: "bg-amber-100 text-amber-700" },
+  claimed: { label: "Claimed", className: "bg-red-100 text-red-700" },
+};
+
+function ConfidenceBadge({ level }: { level?: ConfidenceLevel }) {
+  if (!level) return null;
+  const style = CONFIDENCE_STYLES[level];
+  if (!style) return null;
+  return (
+    <span className={cn("inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold", style.className)}>
+      {style.label}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Assessment Status Badge
+// ---------------------------------------------------------------------------
+
+function AssessmentStatusBadge({ status }: { status?: AssessmentStatus }) {
+  if (!status || status === "assessed_positive" || status === "assessed_negative") return null;
+  return (
+    <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
+      Not Assessed
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // TalkRatioBar (extracted from AssessmentPage)
 // ---------------------------------------------------------------------------
 
@@ -86,22 +122,72 @@ function TalkRatioBar({ ratio }: { ratio: number }) {
 }
 
 // ---------------------------------------------------------------------------
+// TranscriptViewer — lazy-fetches transcript on demand
+// ---------------------------------------------------------------------------
+
+function TranscriptViewer({ interviewId }: { interviewId: string }) {
+  const [transcript, setTranscript] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api
+      .get<InterviewDetail>(`/interviews/${interviewId}`)
+      .then((data) => setTranscript(data.transcript))
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [interviewId]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-4">
+        <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+        <span className="text-xs text-slate-500">Loading transcript...</span>
+      </div>
+    );
+  }
+
+  if (error || !transcript) {
+    return (
+      <p className="py-2 text-xs text-slate-400">
+        {error ?? "No transcript available."}
+      </p>
+    );
+  }
+
+  return (
+    <div className="max-h-80 overflow-y-auto rounded-md bg-slate-50 px-3 py-2">
+      <pre className="whitespace-pre-wrap text-xs text-slate-600 leading-relaxed font-sans">
+        {transcript}
+      </pre>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // CriterionRow (extracted from AssessmentPage)
 // ---------------------------------------------------------------------------
 
 function CriterionRow({ cs }: { cs: CriterionScore }) {
   const [expanded, setExpanded] = useState(false);
   const hasEvidence = cs.evidence && cs.evidence.length > 0;
+  const isNotAssessed = cs.assessment_status === "not_assessed";
 
   return (
-    <div className="border-t border-slate-100 py-3 first:border-t-0">
+    <div className={cn("border-t border-slate-100 py-3 first:border-t-0", isNotAssessed && "opacity-50")}>
       <div className="flex items-center gap-3">
-        <span className="flex-1 text-sm font-medium text-slate-700">
+        <span className="flex-1 text-sm font-medium text-slate-700 flex items-center gap-1.5">
           {cs.criterion_name}
+          <ConfidenceBadge level={cs.confidence_level} />
+          <AssessmentStatusBadge status={cs.assessment_status} />
         </span>
-        <div className="w-40">
-          <ScoreBar score={cs.score} maxScore={cs.max_score} />
-        </div>
+        {isNotAssessed ? (
+          <span className="w-40 text-xs text-slate-400 text-right">Not Assessed</span>
+        ) : (
+          <div className="w-40">
+            <ScoreBar score={cs.score} maxScore={cs.max_score} />
+          </div>
+        )}
         {(hasEvidence || cs.reasoning) && (
           <button
             onClick={() => setExpanded(!expanded)}
@@ -159,6 +245,7 @@ interface CompactStageCardProps {
 
 export function CompactStageCard({ assessment }: CompactStageCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [showTranscript, setShowTranscript] = useState(false);
   const label = STAGE_LABELS[assessment.stage] ?? assessment.stage;
   const talkPct =
     assessment.talk_ratio != null
@@ -210,6 +297,36 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
       {/* Expanded detail */}
       {expanded && (
         <div className="border-t px-4 py-4 space-y-4">
+          {/* Action links: Recording + Transcript */}
+          <div className="flex items-center gap-3">
+            {assessment.recording_url && (
+              <a
+                href={assessment.recording_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Recording
+              </a>
+            )}
+            {assessment.interview_id && (
+              <button
+                type="button"
+                onClick={() => setShowTranscript(!showTranscript)}
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                {showTranscript ? "Hide Transcript" : "View Transcript"}
+              </button>
+            )}
+          </div>
+
+          {/* Inline transcript viewer */}
+          {showTranscript && assessment.interview_id && (
+            <TranscriptViewer interviewId={assessment.interview_id} />
+          )}
+
           {assessment.summary && (
             <p className="text-sm leading-relaxed text-slate-600">
               {assessment.summary}
