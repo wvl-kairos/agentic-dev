@@ -21,7 +21,7 @@ RULES:
 - Score ONLY based on evidence from the transcript
 - Every score MUST be supported by a direct quote from the transcript
 - Quotes must be EXACT substrings from the transcript — do not paraphrase
-- If a criterion cannot be evaluated from the transcript, score it as 0 with reasoning "Not enough evidence in transcript"
+- If a criterion cannot be evaluated from the transcript, score it as 0 with confidence_level "not_assessed" and reasoning "Not enough evidence in transcript"
 - Be culturally sensitive: LATAM candidates may use "we" modestly even for individual work
 - Distinguish between genuine team references and cultural humility
 - Consider talk ratio and contribution patterns as additional signals, not primary scoring factors
@@ -45,6 +45,7 @@ CONFIDENCE LEVELS — For each criterion, classify evidence quality:
 - "demonstrated": Concrete examples, problem-solving, hands-on depth shown
 - "mentioned": Referenced the concept/tool with some context but no deep evidence
 - "claimed": Stated familiarity without supporting evidence or examples
+- "not_assessed": Criterion could not be evaluated from the transcript — use this when scoring 0
 
 You MUST respond with valid JSON only, no markdown formatting."""
 
@@ -72,7 +73,7 @@ USER_PROMPT_TEMPLATE = """Evaluate this {interview_type} interview transcript ag
       "criterion_name": "<exact criterion name>",
       "score": <0-max_score>,
       "max_score": <from rubric>,
-      "confidence_level": "<demonstrated|mentioned|claimed>",
+      "confidence_level": "<demonstrated|mentioned|claimed|not_assessed>",
       "reasoning": "<why this score>",
       "evidence": [
         {{"quote": "<exact substring from transcript>", "speaker": "<speaker name>"}}

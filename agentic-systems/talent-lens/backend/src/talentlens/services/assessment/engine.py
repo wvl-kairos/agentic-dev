@@ -12,7 +12,7 @@ Pipeline per interview:
 import logging
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -69,7 +69,7 @@ INITIAL_CRITERIA = [
 
 LEVEL_LABELS = {1: "Beginner", 2: "Junior", 3: "Mid-level", 4: "Senior", 5: "Expert"}
 
-CONFIDENCE_MULTIPLIERS = {"demonstrated": 1.0, "mentioned": 0.6, "claimed": 0.3}
+CONFIDENCE_MULTIPLIERS = {"demonstrated": 1.0, "mentioned": 0.6, "claimed": 0.3, "not_assessed": 0.0}
 
 # Criteria always included in non-initial assessments — ensures cultural alignment
 # and communication are evaluated even when not explicitly in the role template.
@@ -422,7 +422,7 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
             "criterion_name": name,
             "score": 0,
             "max_score": 5,
-            "confidence_level": "claimed",
+            "confidence_level": "not_assessed",
             "assessment_status": "not_assessed",
             "reasoning": "Not evaluated in this interview stage.",
             "evidence": [],
@@ -431,7 +431,7 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
     # 4c. Classify assessment_status and normalize confidence_level for Claude-scored criteria
     for cs_data in scoring_result.get("criteria_scores", []):
         # Ensure confidence_level has a valid value
-        if cs_data.get("confidence_level") not in ("demonstrated", "mentioned", "claimed"):
+        if cs_data.get("confidence_level") not in ("demonstrated", "mentioned", "claimed", "not_assessed"):
             cs_data["confidence_level"] = "demonstrated"
         # Set assessment_status for Claude-scored criteria
         if cs_data.get("assessment_status") != "not_assessed":
@@ -473,8 +473,24 @@ async def run_assessment_pipeline(interview_id: uuid.UUID, db: AsyncSession) -> 
         "coverage_ratio": round(assessed_count / total_required, 2) if total_required > 0 else 1.0,
     }
 
-    # 5. Persist Assessment
+    # 5. Clean up failed assessments for same candidate+stage before persisting
     stage = interview.interview_type.value
+    if interview.candidate_id:
+        failed_result = await db.execute(
+            select(Assessment).where(
+                Assessment.candidate_id == interview.candidate_id,
+                Assessment.stage == stage,
+                Assessment.overall_score == 0,
+            )
+        )
+        failed_assessments = failed_result.scalars().all()
+        for fa in failed_assessments:
+            logger.info("Deleting failed assessment %s (score=0) for candidate %s stage %s", fa.id, interview.candidate_id, stage)
+            await db.delete(fa)
+        if failed_assessments:
+            await db.flush()
+
+    # 5b. Persist Assessment
     assessment = Assessment(
         candidate_id=interview.candidate_id,
         interview_id=interview.id,

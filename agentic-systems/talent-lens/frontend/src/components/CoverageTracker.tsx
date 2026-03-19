@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertTriangle, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CoverageReport } from "@/types/assessment";
 import { api } from "@/utils/api";
@@ -54,8 +54,14 @@ export function CoverageTracker({ candidateId }: CoverageTrackerProps) {
       {/* Header with progress bar */}
       <div className="px-5 py-4 border-b">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-slate-800">
+          <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
             Coverage Tracker
+            <span className="group relative">
+              <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+              <span className="invisible group-hover:visible absolute left-1/2 -translate-x-1/2 top-full mt-1.5 w-64 rounded-md bg-slate-800 px-3 py-2 text-xs font-normal text-white shadow-lg z-50">
+                Tracks which role capabilities have been evaluated across interview stages. The score shows the <strong>best result</strong> across all stages. Stage labels (e.g. "Screening, Technical") indicate where that skill was assessed.
+              </span>
+            </span>
           </h3>
           <span className="text-sm font-bold tabular-nums text-slate-700">
             {pct}%{" "}

@@ -63,6 +63,7 @@ const CONFIDENCE_STYLES: Record<ConfidenceLevel, { label: string; className: str
   demonstrated: null, // default — no badge
   mentioned: { label: "Mentioned", className: "bg-amber-100 text-amber-700" },
   claimed: { label: "Claimed", className: "bg-red-100 text-red-700" },
+  not_assessed: { label: "Not Assessed", className: "bg-slate-100 text-slate-500" },
 };
 
 function ConfidenceBadge({ level }: { level?: ConfidenceLevel }) {
@@ -363,7 +364,7 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
             {showScoring && (
               <div className="mt-2 rounded-md bg-slate-50 p-2.5 text-xs text-slate-500 space-y-1">
                 <p>Each criterion is scored 1-5 based on interview evidence by Claude.</p>
-                <p>Confidence: <strong>Demonstrated</strong> (1.0x) &gt; <strong>Mentioned</strong> (0.6x) &gt; <strong>Claimed</strong> (0.3x).</p>
+                <p>Confidence: <strong>Demonstrated</strong> (1.0x) &gt; <strong>Mentioned</strong> (0.6x) &gt; <strong>Claimed</strong> (0.3x). <strong>Not Assessed</strong> = not evaluated.</p>
                 <p>Overall = weighted average of assessed criteria (not-assessed excluded).</p>
               </div>
             )}

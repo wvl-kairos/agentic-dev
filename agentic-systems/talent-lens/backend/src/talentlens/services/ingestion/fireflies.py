@@ -123,24 +123,47 @@ async def ingest_fireflies_transcript(
 
     recording_url = transcript_data.get("audio_url") if transcript_data else None
 
-    interview = Interview(
-        candidate_id=candidate_id,
-        interview_type=interview_type,
-        source="fireflies",
-        external_id=meeting_id,
-        transcript=full_transcript,
-        diarization=diarization,
-        recording_url=recording_url,
-        duration_seconds=int(duration) if duration else None,
+    # Check for existing interview with same external_id (re-upload dedup)
+    existing_result = await db.execute(
+        select(Interview).where(
+            Interview.external_id == meeting_id,
+            Interview.candidate_id == candidate_id,
+        )
     )
-    db.add(interview)
+    interview = existing_result.scalar_one_or_none()
+
+    if interview:
+        # Update existing interview with fresh transcript data
+        interview.transcript = full_transcript
+        interview.diarization = diarization
+        interview.recording_url = recording_url
+        interview.duration_seconds = int(duration) if duration else None
+        interview.talk_ratio = None  # reset — will be recomputed by pipeline
+        logger.info(
+            "Updated existing interview %s from Fireflies meeting %s (%d segments)",
+            interview.id,
+            meeting_id,
+            len(diarization),
+        )
+    else:
+        interview = Interview(
+            candidate_id=candidate_id,
+            interview_type=interview_type,
+            source="fireflies",
+            external_id=meeting_id,
+            transcript=full_transcript,
+            diarization=diarization,
+            recording_url=recording_url,
+            duration_seconds=int(duration) if duration else None,
+        )
+        db.add(interview)
+        logger.info(
+            "Ingested new interview %s from Fireflies meeting %s (%d segments)",
+            interview.id,
+            meeting_id,
+            len(diarization),
+        )
+
     await db.commit()
     await db.refresh(interview)
-
-    logger.info(
-        "Ingested interview %s from Fireflies meeting %s (%d segments)",
-        interview.id,
-        meeting_id,
-        len(diarization),
-    )
     return interview

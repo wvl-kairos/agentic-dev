@@ -1,4 +1,4 @@
-export type ConfidenceLevel = "demonstrated" | "mentioned" | "claimed";
+export type ConfidenceLevel = "demonstrated" | "mentioned" | "claimed" | "not_assessed";
 export type AssessmentStatus = "assessed_positive" | "assessed_negative" | "not_assessed";
 
 export interface Evidence {
