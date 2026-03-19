@@ -32,19 +32,3 @@ export interface Assessment {
   /** Populated client-side by joining interview data. */
   recording_url?: string | null;
 }
-
-export interface CoverageCriterion {
-  criterion_name: string;
-  status: AssessmentStatus;
-  best_score: number | null;
-  max_score: number;
-  confidence_level: ConfidenceLevel | null;
-  stages: string[];
-}
-
-export interface CoverageReport {
-  assessed_count: number;
-  total_required: number;
-  coverage_ratio: number;
-  criteria: CoverageCriterion[];
-}

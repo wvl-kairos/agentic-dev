@@ -12,7 +12,7 @@ import { FinalDecisionBox } from "@/components/FinalDecisionBox";
 import { AggregateStatsCard } from "@/components/AggregateStatsCard";
 import { StageScoreTimeline } from "@/components/StageScoreTimeline";
 import { CompactStageCard } from "@/components/CompactStageCard";
-import { CoverageTracker } from "@/components/CoverageTracker";
+import { StageEvaluationSummary } from "@/components/StageEvaluationSummary";
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import { SkillsRadar } from "@/components/SkillsRadar";
 import { OrientationBadge } from "@/components/OrientationBadge";
@@ -714,8 +714,8 @@ export function AssessmentPage() {
         </div>
       )}
 
-      {/* Coverage Tracker */}
-      {id && <CoverageTracker candidateId={id} />}
+      {/* Evaluation Summary */}
+      {assessments.length > 0 && <StageEvaluationSummary assessments={assessments} />}
 
       {/* Skills Matrix */}
       {id && <SkillsMatrixSection candidateId={id} />}

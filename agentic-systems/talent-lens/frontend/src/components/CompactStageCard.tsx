@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreBar } from "@/components/ScoreBar";
-import type { Assessment, CriterionScore, ConfidenceLevel, AssessmentStatus } from "@/types/assessment";
+import { ConfidenceBadge, AssessmentStatusBadge } from "@/components/assessment-badges";
+import type { Assessment, CriterionScore } from "@/types/assessment";
 import type { InterviewDetail } from "@/types/interview";
 import { api } from "@/utils/api";
 
@@ -51,41 +52,6 @@ function recommendationBadge(rec: string | null) {
       )}
     >
       {rec}
-    </span>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Confidence Badge
-// ---------------------------------------------------------------------------
-
-const CONFIDENCE_STYLES: Record<ConfidenceLevel, { label: string; className: string } | null> = {
-  demonstrated: null, // default — no badge
-  mentioned: { label: "Mentioned", className: "bg-amber-100 text-amber-700" },
-  claimed: { label: "Claimed", className: "bg-red-100 text-red-700" },
-  not_assessed: { label: "Not Assessed", className: "bg-slate-100 text-slate-500" },
-};
-
-function ConfidenceBadge({ level }: { level?: ConfidenceLevel }) {
-  if (!level) return null;
-  const style = CONFIDENCE_STYLES[level];
-  if (!style) return null;
-  return (
-    <span className={cn("inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold", style.className)}>
-      {style.label}
-    </span>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Assessment Status Badge
-// ---------------------------------------------------------------------------
-
-function AssessmentStatusBadge({ status }: { status?: AssessmentStatus }) {
-  if (!status || status === "assessed_positive" || status === "assessed_negative") return null;
-  return (
-    <span className="inline-flex items-center rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-500">
-      Not Assessed
     </span>
   );
 }
