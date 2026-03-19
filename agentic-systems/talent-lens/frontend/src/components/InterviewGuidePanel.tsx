@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, X, ChevronDown, ChevronRight, Clock, Lightbulb } from "lucide-react";
+import { Loader2, X, ChevronDown, ChevronRight, Clock, Lightbulb, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { InterviewGuide, InterviewGuideQuestion } from "@/types/capability";
@@ -145,8 +145,9 @@ export function InterviewGuidePanel({
       <div className="rounded-lg border bg-white shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-4 shrink-0">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Interview Guide
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
+            <Sparkles className="h-5 w-5 text-blue-500" />
+            AI Interview Guide
           </h3>
           <button
             onClick={onClose}

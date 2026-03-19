@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink, BookOpen } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -641,15 +641,15 @@ export function AssessmentPage() {
                 onClick={() => setShowGuidePanel(true)}
                 disabled={!candidate.role_template_id}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                  "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                   candidate.role_template_id
-                    ? "text-slate-600 hover:bg-slate-50"
-                    : "text-slate-300 cursor-not-allowed"
+                    ? "bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
+                    : "bg-slate-50 text-slate-300 border border-slate-200 cursor-not-allowed"
                 )}
                 title={!candidate.role_template_id ? "Assign a role template first" : undefined}
               >
-                <BookOpen className="h-4 w-4" />
-                Interview Guide
+                <Sparkles className="h-4 w-4" />
+                AI Interview Guide
               </button>
               <button
                 onClick={() => setShowUploadModal(true)}
