@@ -3,6 +3,12 @@ set -euo pipefail
 
 # TalentLens - GCP Cloud Run Deployment
 # Usage: ./deploy.sh <PROJECT_ID> <REGION>
+#
+# Env vars (DATABASE_URL, ANTHROPIC_API_KEY, etc.) are only updated when set
+# in the local shell. If unset, the existing Cloud Run values are preserved.
+# To set them for the first time or update them, export before running:
+#   export DATABASE_URL="postgresql+asyncpg://..." ANTHROPIC_API_KEY="sk-..."
+#   ./deploy.sh up-gpt-468817 us-central1
 
 PROJECT_ID="${1:?Usage: ./deploy.sh <PROJECT_ID> <REGION>}"
 REGION="${2:-us-central1}"
@@ -29,6 +35,18 @@ echo "=== Building backend ==="
 docker build --platform linux/amd64 -t "${REGISTRY}/${BACKEND_SERVICE}" -f infrastructure/backend/Dockerfile .
 docker push "${REGISTRY}/${BACKEND_SERVICE}"
 
+# Build env var flags — only include vars that are set locally.
+# Uses --update-env-vars so existing Cloud Run values are preserved.
+ENV_VARS="ENV=production"
+for var in DATABASE_URL ANTHROPIC_API_KEY DEEPGRAM_API_KEY FIREFLIES_WEBHOOK_SECRET SLACK_BOT_TOKEN SLACK_DEFAULT_CHANNEL; do
+  if [ -n "${!var:-}" ]; then
+    ENV_VARS="${ENV_VARS}||${var}=${!var}"
+    echo "  -> $var will be updated"
+  else
+    echo "  -> $var not set locally, keeping existing Cloud Run value"
+  fi
+done
+
 # Deploy backend
 echo "=== Deploying backend ==="
 gcloud run deploy "$BACKEND_SERVICE" \
@@ -41,13 +59,7 @@ gcloud run deploy "$BACKEND_SERVICE" \
   --cpu 1 \
   --min-instances 0 \
   --max-instances 3 \
-  --set-env-vars "ENV=production" \
-  --set-env-vars "DATABASE_URL=${DATABASE_URL:-}" \
-  --set-env-vars "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}" \
-  --set-env-vars "DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY:-}" \
-  --set-env-vars "FIREFLIES_WEBHOOK_SECRET=${FIREFLIES_WEBHOOK_SECRET:-}" \
-  --set-env-vars "SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}" \
-  --set-env-vars "SLACK_DEFAULT_CHANNEL=${SLACK_DEFAULT_CHANNEL:-}"
+  --update-env-vars "^||^${ENV_VARS}"
 
 BACKEND_URL=$(gcloud run services describe "$BACKEND_SERVICE" --region "$REGION" --format 'value(status.url)')
 echo "Backend URL: $BACKEND_URL"
