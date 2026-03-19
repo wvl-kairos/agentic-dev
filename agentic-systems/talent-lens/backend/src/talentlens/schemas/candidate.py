@@ -13,6 +13,7 @@ class CandidateCreate(BaseModel):
     role: str | None = None
     role_template_id: uuid.UUID | None = None
     salary_expected: int | None = None
+    recruiter_name: str | None = None
 
 
 class CandidateUpdate(BaseModel):
@@ -22,6 +23,8 @@ class CandidateUpdate(BaseModel):
     role_template_id: uuid.UUID | None = None
     stage: PipelineStage | None = None
     salary_expected: int | None = None
+    recruiter_name: str | None = None
+    cv_url: str | None = None
     notes: str | None = None
 
 
@@ -34,6 +37,8 @@ class CandidateResponse(BaseModel):
     role_template_id: uuid.UUID | None = None
     salary_expected: int | None = None
     orientation: str | None = None
+    recruiter_name: str | None = None
+    cv_url: str | None = None
     stage: PipelineStage
     created_at: datetime
     updated_at: datetime

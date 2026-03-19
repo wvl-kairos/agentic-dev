@@ -104,10 +104,20 @@ async def list_technologies(db: DBSession, capability_id: uuid.UUID | None = Non
 
 
 @router.get("/role-templates/", response_model=list[RoleTemplateResponse])
-async def list_role_templates(db: DBSession, venture_id: uuid.UUID | None = None):
+async def list_role_templates(
+    db: DBSession,
+    venture_id: uuid.UUID | None = None,
+    status: str | None = None,
+    search: str | None = None,
+):
     query = select(RoleTemplate).options(*_role_template_load_options())
     if venture_id:
         query = query.where(RoleTemplate.venture_id == venture_id)
+    if status:
+        query = query.where(RoleTemplate.status == status)
+    if search:
+        pattern = f"%{search}%"
+        query = query.where(RoleTemplate.name.ilike(pattern))
     result = await db.execute(query.order_by(RoleTemplate.created_at.desc()))
     return result.scalars().all()
 
@@ -122,6 +132,7 @@ async def create_role_template(data: RoleTemplateCreate, db: DBSession):
         salary_max=data.salary_max,
         salary_currency=data.salary_currency,
         role_type=data.role_type,
+        status=data.status,
     )
     db.add(template)
     await db.flush()
@@ -188,6 +199,8 @@ async def update_role_template(
         template.salary_currency = data.salary_currency
     if data.role_type is not None:
         template.role_type = data.role_type
+    if data.status is not None:
+        template.status = data.status
 
     # Replace capability requirements if provided
     if data.requirements is not None:

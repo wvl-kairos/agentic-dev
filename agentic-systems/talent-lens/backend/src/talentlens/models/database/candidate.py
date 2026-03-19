@@ -36,6 +36,7 @@ class Candidate(Base, UUIDMixin, TimestampMixin):
     salary_expected: Mapped[int | None] = mapped_column(Integer, nullable=True)
     orientation: Mapped[str | None] = mapped_column(String(20), nullable=True)
     cv_url: Mapped[str | None] = mapped_column(Text)
+    recruiter_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text)
 
     venture = relationship("Venture", back_populates="candidates")

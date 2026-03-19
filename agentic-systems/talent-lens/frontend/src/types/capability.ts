@@ -52,6 +52,7 @@ export interface RoleTemplate {
   salary_max: number | null;
   salary_currency: string;
   role_type: string | null;
+  status: "open" | "closed";
   requirements: RoleCapabilityRequirement[];
   technology_requirements: RoleTechnologyRequirement[];
   created_at: string;

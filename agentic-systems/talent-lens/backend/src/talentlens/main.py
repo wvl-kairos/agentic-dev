@@ -12,6 +12,8 @@ from talentlens.api.routes import (
     health,
     interviews,
     rubrics,
+    shared_links,
+    surveys,
     ventures,
     webhooks,
 )
@@ -47,7 +49,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
 )
 
@@ -59,4 +61,6 @@ app.include_router(interviews.router, prefix="/api")
 app.include_router(assessments.router, prefix="/api")
 app.include_router(rubrics.router, prefix="/api")
 app.include_router(capabilities.router, prefix="/api")
+app.include_router(shared_links.router, prefix="/api")
+app.include_router(surveys.router, prefix="/api")
 app.include_router(dashboard.router, prefix="/api")

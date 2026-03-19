@@ -15,10 +15,28 @@ router = APIRouter(prefix="/candidates", tags=["candidates"])
 
 
 @router.get("/", response_model=list[CandidateResponse])
-async def list_candidates(db: DBSession, venture_id: uuid.UUID | None = None):
+async def list_candidates(
+    db: DBSession,
+    venture_id: uuid.UUID | None = None,
+    stage: str | None = None,
+    role_template_id: uuid.UUID | None = None,
+    recruiter_name: str | None = None,
+    search: str | None = None,
+):
     query = select(Candidate)
     if venture_id:
         query = query.where(Candidate.venture_id == venture_id)
+    if stage:
+        query = query.where(Candidate.stage == stage)
+    if role_template_id:
+        query = query.where(Candidate.role_template_id == role_template_id)
+    if recruiter_name:
+        query = query.where(Candidate.recruiter_name == recruiter_name)
+    if search:
+        pattern = f"%{search}%"
+        query = query.where(
+            Candidate.name.ilike(pattern) | Candidate.email.ilike(pattern)
+        )
     result = await db.execute(query.order_by(Candidate.created_at.desc()))
     return result.scalars().all()
 

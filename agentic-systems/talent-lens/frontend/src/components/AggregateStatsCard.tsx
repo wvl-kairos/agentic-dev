@@ -1,4 +1,5 @@
-import { TrendingUp, Layers, Mic, Award, MessageSquare } from "lucide-react";
+import { useState } from "react";
+import { TrendingUp, Layers, Mic, Award, MessageSquare, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Assessment } from "@/types/assessment";
 import type { Candidate } from "@/types/candidate";
@@ -103,36 +104,56 @@ export function AggregateStatsCard({
     },
   ];
 
+  const [showInfo, setShowInfo] = useState(false);
+
   return (
-    <div className="grid grid-cols-3 gap-3">
-      {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="flex flex-col rounded-lg border bg-white px-3 py-2.5"
-        >
-          <div className="flex items-center gap-1.5">
-            <stat.icon className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-              {stat.label}
-            </span>
-          </div>
-          <div className="mt-1 flex items-baseline gap-1">
-            <span
-              className={cn(
-                "font-bold tabular-nums truncate",
-                stat.colorClass,
-                stat.label === "Strongest Area" ? "text-sm" : "text-xl"
+    <div className="relative">
+      <div className="grid grid-cols-3 gap-3">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="flex flex-col rounded-lg border bg-white px-3 py-2.5"
+          >
+            <div className="flex items-center gap-1.5">
+              <stat.icon className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                {stat.label}
+              </span>
+              {stat.label === "Avg Score" && (
+                <button
+                  onClick={() => setShowInfo(!showInfo)}
+                  className="text-slate-300 hover:text-slate-500 transition-colors"
+                  title="Score methodology"
+                >
+                  <Info className="h-3 w-3" />
+                </button>
               )}
-              title={stat.value}
-            >
-              {stat.value}
-            </span>
-            {stat.sub && (
-              <span className="text-xs text-slate-400">{stat.sub}</span>
-            )}
+            </div>
+            <div className="mt-1 flex items-baseline gap-1">
+              <span
+                className={cn(
+                  "font-bold tabular-nums truncate",
+                  stat.colorClass,
+                  stat.label === "Strongest Area" ? "text-sm" : "text-xl"
+                )}
+                title={stat.value}
+              >
+                {stat.value}
+              </span>
+              {stat.sub && (
+                <span className="text-xs text-slate-400">{stat.sub}</span>
+              )}
+            </div>
           </div>
+        ))}
+      </div>
+      {showInfo && (
+        <div className="absolute top-full left-0 mt-1 z-10 w-72 rounded-md bg-white border border-slate-200 shadow-lg p-3 text-xs text-slate-600 space-y-1">
+          <p><strong>Avg Score</strong> = mean of all assessed criteria across all stages.</p>
+          <p>Confidence: demonstrated (1.0x), mentioned (0.6x), claimed (0.3x).</p>
+          <p>Not-assessed criteria are excluded.</p>
         </div>
-      ))}
+      )}
     </div>
   );
 }

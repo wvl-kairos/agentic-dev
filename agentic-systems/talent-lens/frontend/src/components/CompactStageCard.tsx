@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreBar } from "@/components/ScoreBar";
 import type { Assessment, CriterionScore, ConfidenceLevel, AssessmentStatus } from "@/types/assessment";
@@ -246,6 +246,7 @@ interface CompactStageCardProps {
 export function CompactStageCard({ assessment }: CompactStageCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [showScoring, setShowScoring] = useState(false);
   const label = STAGE_LABELS[assessment.stage] ?? assessment.stage;
   const talkPct =
     assessment.talk_ratio != null
@@ -349,6 +350,24 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
               </div>
             </div>
           )}
+
+          {/* Scoring explanation */}
+          <div className="border-t pt-3">
+            <button
+              onClick={() => setShowScoring(!showScoring)}
+              className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <Info className="h-3 w-3" />
+              {showScoring ? "Hide scoring details" : "How is this scored?"}
+            </button>
+            {showScoring && (
+              <div className="mt-2 rounded-md bg-slate-50 p-2.5 text-xs text-slate-500 space-y-1">
+                <p>Each criterion is scored 1-5 based on interview evidence by Claude.</p>
+                <p>Confidence: <strong>Demonstrated</strong> (1.0x) &gt; <strong>Mentioned</strong> (0.6x) &gt; <strong>Claimed</strong> (0.3x).</p>
+                <p>Overall = weighted average of assessed criteria (not-assessed excluded).</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

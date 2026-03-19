@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   Users,
   UserCheck,
@@ -57,6 +58,7 @@ function StatCard({ label, value, icon: Icon, accent = "text-slate-700" }: StatC
 }
 
 export function DashboardPage() {
+  const navigate = useNavigate();
   const { metrics, loading, error } = useDashboard();
 
   if (loading) {
@@ -140,9 +142,15 @@ export function DashboardPage() {
             return (
               <div
                 key={stage}
+                onClick={() => navigate(`/candidates?stage=${stage}`)}
                 className={cn(
-                  "flex items-center justify-between rounded-lg border px-4 py-3",
-                  meta.bg
+                  "flex items-center justify-between rounded-lg border px-4 py-3 cursor-pointer transition-all hover:ring-2 hover:ring-offset-1",
+                  meta.bg,
+                  stage === "hired"
+                    ? "hover:ring-emerald-300"
+                    : stage === "rejected"
+                      ? "hover:ring-red-300"
+                      : "hover:ring-blue-300"
                 )}
               >
                 <span className={cn("text-sm font-medium", meta.text)}>

@@ -72,19 +72,20 @@ function LevelDots({
   onChange: (level: number) => void;
 }) {
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((n) => (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
         <button
           key={n}
           type="button"
           onClick={() => onChange(n === level ? 0 : n)}
           className={cn(
-            "h-4 w-4 rounded-full transition-colors cursor-pointer hover:ring-2 hover:ring-blue-400",
+            "h-3 w-3 rounded-full transition-colors cursor-pointer hover:ring-2 hover:ring-blue-400",
             n <= level ? "bg-blue-500" : "bg-slate-200"
           )}
-          title={`Level ${n}`}
+          title={`Level ${n}/10`}
         />
       ))}
+      <span className="ml-1 text-xs text-slate-400 tabular-nums">{level}/10</span>
     </div>
   );
 }

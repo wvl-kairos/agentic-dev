@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -440,6 +440,13 @@ export function AssessmentPage() {
   const { id } = useParams<{ id: string }>();
   const { assessments, candidate, loading, error, refetch } = useAssessments(id!);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [cvUrl, setCvUrl] = useState("");
+  const [showCvInput, setShowCvInput] = useState(false);
+  const [savingCv, setSavingCv] = useState(false);
+  const [shareLink, setShareLink] = useState<string | null>(null);
+  const [creatingLink, setCreatingLink] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [showScoreInfo, setShowScoreInfo] = useState(false);
 
   if (loading) {
     return (
@@ -533,13 +540,109 @@ export function AssessmentPage() {
                 />
               </div>
             </div>
-            <button
-              onClick={() => setShowUploadModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-            >
-              <Upload className="h-4 w-4" />
-              Upload Interview
-            </button>
+            <div className="flex items-center gap-2">
+              {/* CV URL */}
+              {candidate.cv_url ? (
+                <a
+                  href={candidate.cv_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View CV
+                </a>
+              ) : showCvInput ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="url"
+                    value={cvUrl}
+                    onChange={(e) => setCvUrl(e.target.value)}
+                    placeholder="Paste CV URL..."
+                    className="rounded-md border border-slate-300 px-2 py-1 text-xs w-48 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    onClick={async () => {
+                      if (!cvUrl) return;
+                      setSavingCv(true);
+                      try {
+                        await api.patch(`/candidates/${candidate.id}`, { cv_url: cvUrl });
+                        refetch();
+                        setShowCvInput(false);
+                      } finally {
+                        setSavingCv(false);
+                      }
+                    }}
+                    disabled={savingCv || !cvUrl}
+                    className="rounded-md bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700 disabled:bg-slate-300"
+                  >
+                    {savingCv ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                  </button>
+                  <button onClick={() => setShowCvInput(false)} className="text-slate-400 hover:text-slate-600">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowCvInput(true)}
+                  className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Upload CV
+                </button>
+              )}
+
+              {/* Share Profile */}
+              {shareLink ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    readOnly
+                    value={shareLink}
+                    className="rounded-md border border-slate-300 px-2 py-1 text-xs w-48 bg-slate-50"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareLink);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className="rounded-md border px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                  >
+                    {copied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+                  </button>
+                  <button onClick={() => setShareLink(null)} className="text-slate-400 hover:text-slate-600">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={async () => {
+                    setCreatingLink(true);
+                    try {
+                      const resp = await api.post<{ token: string }>("/shared-links/", {
+                        candidate_id: candidate.id,
+                      });
+                      setShareLink(`${window.location.origin}/shared/${resp.token}`);
+                    } finally {
+                      setCreatingLink(false);
+                    }
+                  }}
+                  disabled={creatingLink}
+                  className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  {creatingLink ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                  Share Profile
+                </button>
+              )}
+
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                <Upload className="h-4 w-4" />
+                Upload Interview
+              </button>
+            </div>
           </div>
 
           {/* Decision box + Aggregate stats side by side */}
@@ -555,6 +658,25 @@ export function AssessmentPage() {
                 candidate={candidate}
               />
             </div>
+          </div>
+
+          {/* Score methodology */}
+          <div className="mt-3">
+            <button
+              onClick={() => setShowScoreInfo(!showScoreInfo)}
+              className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <Info className="h-3.5 w-3.5" />
+              How are scores calculated?
+            </button>
+            {showScoreInfo && (
+              <div className="mt-2 rounded-md bg-slate-50 border border-slate-200 p-3 text-xs text-slate-600 space-y-1.5">
+                <p><strong>Scoring Scale:</strong> Each criterion is scored 1-5 by Claude based on interview evidence.</p>
+                <p><strong>Confidence Multipliers:</strong> Demonstrated (1.0x) = directly shown in interview. Mentioned (0.6x) = discussed but not demonstrated. Claimed (0.3x) = self-reported without evidence.</p>
+                <p><strong>Overall Score:</strong> Weighted average of assessed criteria. Not-assessed criteria are excluded from the average.</p>
+                <p><strong>Coverage Ratio:</strong> (Assessed criteria / Total required criteria). Higher coverage = more reliable overall score.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

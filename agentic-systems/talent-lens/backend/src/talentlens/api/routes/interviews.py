@@ -10,7 +10,7 @@ from sqlalchemy import select
 from talentlens.dependencies import DBSession
 from talentlens.models.database.candidate import Candidate
 from talentlens.models.database.interview import Interview, InterviewType
-from talentlens.schemas.interview import InterviewResponse
+from talentlens.schemas.interview import InterviewListResponse, InterviewResponse
 from talentlens.services.assessment.talk_ratio import compute_talk_ratio, parse_transcript_to_segments
 from talentlens.tasks.assessment import process_interview
 
@@ -50,6 +50,46 @@ async def create_interview(data: ManualInterviewCreate, bg: BackgroundTasks, db:
         "status": "processing",
         "message": "Interview created, analysis running in background",
     }
+
+
+@router.get("/", response_model=list[InterviewListResponse])
+async def list_interviews(
+    db: DBSession,
+    candidate_id: uuid.UUID | None = None,
+):
+    """List all interviews, optionally filtered by candidate."""
+    from sqlalchemy.orm import selectinload as _sel
+
+    query = select(Interview)
+    if candidate_id:
+        query = query.where(Interview.candidate_id == candidate_id)
+    result = await db.execute(query.order_by(Interview.created_at.desc()))
+    interviews = result.scalars().all()
+
+    # Batch-fetch candidate names
+    candidate_ids = {iv.candidate_id for iv in interviews if iv.candidate_id}
+    name_map: dict[uuid.UUID, str] = {}
+    if candidate_ids:
+        cand_result = await db.execute(
+            select(Candidate).where(Candidate.id.in_(candidate_ids))
+        )
+        for c in cand_result.scalars().all():
+            name_map[c.id] = c.name
+
+    items = []
+    for iv in interviews:
+        items.append(InterviewListResponse(
+            id=iv.id,
+            candidate_id=iv.candidate_id,
+            candidate_name=name_map.get(iv.candidate_id) if iv.candidate_id else None,
+            interview_type=iv.interview_type,
+            source=iv.source,
+            talk_ratio=iv.talk_ratio,
+            duration_seconds=iv.duration_seconds,
+            recording_url=iv.recording_url,
+            created_at=iv.created_at,
+        ))
+    return items
 
 
 @router.get("/candidate/{candidate_id}", response_model=list[InterviewResponse])

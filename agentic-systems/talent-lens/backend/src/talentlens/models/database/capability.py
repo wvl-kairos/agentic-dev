@@ -52,6 +52,7 @@ class RoleTemplate(Base, UUIDMixin, TimestampMixin):
     salary_max: Mapped[int | None] = mapped_column(Integer, nullable=True)
     salary_currency: Mapped[str] = mapped_column(String(10), server_default="USD", default="USD")
     role_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), server_default="open", default="open")
 
     venture = relationship("Venture")
     requirements = relationship(

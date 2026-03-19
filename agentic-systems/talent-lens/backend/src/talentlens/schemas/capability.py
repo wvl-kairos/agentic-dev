@@ -80,6 +80,7 @@ class RoleTemplateCreate(BaseModel):
     salary_max: int | None = None
     salary_currency: str = "USD"
     role_type: str | None = None
+    status: str = "open"
     requirements: list[RoleCapabilityRequirementCreate] = []
     technology_requirements: list[RoleTechnologyRequirementCreate] = []
 
@@ -91,6 +92,7 @@ class RoleTemplateUpdate(BaseModel):
     salary_max: int | None = None
     salary_currency: str | None = None
     role_type: str | None = None
+    status: str | None = None
     requirements: list[RoleCapabilityRequirementCreate] | None = None
     technology_requirements: list[RoleTechnologyRequirementCreate] | None = None
 
@@ -124,6 +126,7 @@ class RoleTemplateResponse(BaseModel):
     salary_max: int | None = None
     salary_currency: str = "USD"
     role_type: str | None = None
+    status: str = "open"
     requirements: list[RoleCapabilityRequirementResponse] = []
     technology_requirements: list[RoleTechnologyRequirementResponse] = []
     created_at: datetime

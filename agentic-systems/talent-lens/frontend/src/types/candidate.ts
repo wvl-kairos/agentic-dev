@@ -17,6 +17,8 @@ export interface Candidate {
   role_template_id: string | null;
   salary_expected: number | null;
   orientation: string | null;
+  recruiter_name: string | null;
+  cv_url: string | null;
   stage: PipelineStage;
   created_at: string;
   updated_at: string;

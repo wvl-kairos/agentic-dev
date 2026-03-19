@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Loader2, AlertCircle, User, ChevronRight, Briefcase, Plus, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Loader2, AlertCircle, User, ChevronRight, Briefcase, Plus, X, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCandidateStore } from "@/stores/candidateStore";
 import { useRoleTemplates } from "@/hooks/useRoleTemplates";
@@ -120,6 +120,7 @@ function AddCandidateModal({
   const [role, setRole] = useState("");
   const [salaryExpected, setSalaryExpected] = useState("");
   const [roleTemplateId, setRoleTemplateId] = useState("");
+  const [recruiterName, setRecruiterName] = useState("");
   const [ventureId, setVentureId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -143,6 +144,7 @@ function AddCandidateModal({
         role: role || undefined,
         salary_expected: salaryExpected ? parseInt(salaryExpected, 10) : undefined,
         role_template_id: roleTemplateId || undefined,
+        recruiter_name: recruiterName || undefined,
       });
       onCreated();
       onClose();
@@ -234,6 +236,18 @@ function AddCandidateModal({
               ))}
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Recruiter
+            </label>
+            <input
+              type="text"
+              value={recruiterName}
+              onChange={(e) => setRecruiterName(e.target.value)}
+              placeholder="e.g. Clara"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
           <div className="flex items-center gap-2 pt-2">
             <button
               type="submit"
@@ -270,10 +284,59 @@ export function CandidatesPage() {
   const { candidates, loading, error, fetchCandidates } = useCandidateStore();
   const { templates, loading: tplLoading } = useRoleTemplates();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchText, setSearchText] = useState("");
+
+  // Read initial filters from URL params
+  const stageFilter = searchParams.get("stage") || "";
+  const roleFilter = searchParams.get("role_template_id") || "";
+  const recruiterFilter = searchParams.get("recruiter") || "";
+
+  const setStageFilter = (v: string) => {
+    const p = new URLSearchParams(searchParams);
+    if (v) p.set("stage", v); else p.delete("stage");
+    setSearchParams(p, { replace: true });
+  };
+  const setRoleFilter = (v: string) => {
+    const p = new URLSearchParams(searchParams);
+    if (v) p.set("role_template_id", v); else p.delete("role_template_id");
+    setSearchParams(p, { replace: true });
+  };
+  const setRecruiterFilter = (v: string) => {
+    const p = new URLSearchParams(searchParams);
+    if (v) p.set("recruiter", v); else p.delete("recruiter");
+    setSearchParams(p, { replace: true });
+  };
 
   useEffect(() => { fetchCandidates(); }, [fetchCandidates]);
 
   const templateOptions = templates.map((t) => ({ id: t.id, name: t.name }));
+
+  // Unique recruiter names for filter dropdown
+  const recruiterNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const c of candidates) {
+      if (c.recruiter_name) names.add(c.recruiter_name);
+    }
+    return Array.from(names).sort();
+  }, [candidates]);
+
+  // Client-side filtering
+  const filtered = useMemo(() => {
+    let list = candidates;
+    if (stageFilter) list = list.filter((c) => c.stage === stageFilter);
+    if (roleFilter) list = list.filter((c) => c.role_template_id === roleFilter);
+    if (recruiterFilter) list = list.filter((c) => c.recruiter_name === recruiterFilter);
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.email && c.email.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  }, [candidates, stageFilter, roleFilter, recruiterFilter, searchText]);
 
   const handleAssignTemplate = async (
     candidateId: string,
@@ -310,8 +373,7 @@ export function CandidatesPage() {
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Candidates</h2>
           <p className="mt-1 text-sm text-slate-500">
-            {candidates.length} candidate{candidates.length !== 1 && "s"} in
-            the pipeline
+            {filtered.length} of {candidates.length} candidate{candidates.length !== 1 && "s"}
           </p>
         </div>
         <button
@@ -323,7 +385,64 @@ export function CandidatesPage() {
         </button>
       </div>
 
-      {candidates.length === 0 ? (
+      {/* Filter bar */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[200px] max-w-xs">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="Search by name or email..."
+            className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+        <select
+          value={stageFilter}
+          onChange={(e) => setStageFilter(e.target.value)}
+          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="">All Stages</option>
+          {(Object.keys(STAGE_BADGE) as PipelineStage[]).map((s) => (
+            <option key={s} value={s}>{STAGE_BADGE[s].label}</option>
+          ))}
+        </select>
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        >
+          <option value="">All Roles</option>
+          {templateOptions.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        {recruiterNames.length > 0 && (
+          <select
+            value={recruiterFilter}
+            onChange={(e) => setRecruiterFilter(e.target.value)}
+            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="">All Recruiters</option>
+            {recruiterNames.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        )}
+        {(stageFilter || roleFilter || recruiterFilter || searchText) && (
+          <button
+            onClick={() => {
+              setSearchText("");
+              setSearchParams({}, { replace: true });
+            }}
+            className="text-xs text-slate-500 hover:text-slate-700 underline"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="rounded-lg border border-dashed p-8 text-center">
           <User className="mx-auto h-10 w-10 text-slate-300" />
           <p className="mt-2 text-sm text-slate-500">
@@ -352,6 +471,9 @@ export function CandidatesPage() {
                   </div>
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Recruiter
+                </th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
                   Orientation
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -364,7 +486,7 @@ export function CandidatesPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {candidates.map((c) => (
+              {filtered.map((c) => (
                 <tr
                   key={c.id}
                   className="group transition-colors hover:bg-slate-50"
@@ -406,6 +528,9 @@ export function CandidatesPage() {
                       templates={templateOptions}
                       onAssign={handleAssignTemplate}
                     />
+                  </td>
+                  <td className="px-4 py-3 text-sm text-slate-600">
+                    {c.recruiter_name ?? <span className="text-slate-300">--</span>}
                   </td>
                   <td className="px-4 py-3">
                     <OrientationBadge orientation={c.orientation} size="sm" />

@@ -19,6 +19,12 @@ import {
   FileText,
   Copy,
   Check,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  ClipboardList,
+  Archive,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
@@ -148,7 +154,7 @@ function TemplateForm({
     if (usedTechIds.has(techId)) return;
     setTechRequirements((prev) => [
       ...prev,
-      { technology_id: techId, required_level: 3, priority: "must_have" as TechPriority },
+      { technology_id: techId, required_level: 5, priority: "must_have" as TechPriority },
     ]);
   };
 
@@ -459,11 +465,11 @@ function TechBadge({
     >
       {tech.name}
       <span className="inline-flex items-center gap-0.5">
-        {[1, 2, 3, 4, 5].map((n) => (
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
           <span
             key={n}
             className={cn(
-              "h-1.5 w-1.5 rounded-full",
+              "h-1 w-1 rounded-full",
               n <= level ? "bg-current opacity-80" : "bg-current opacity-20"
             )}
           />
@@ -489,6 +495,11 @@ function TemplateCard({
   onDelete,
   onGenerateJD,
   generatingJD,
+  onToggleStatus,
+  onCopySurveyUrl,
+  surveyCount,
+  onApplySurvey,
+  applyingSurvey,
 }: {
   template: RoleTemplate;
   capabilities: import("@/types/capability").Capability[];
@@ -496,7 +507,14 @@ function TemplateCard({
   onDelete: () => void;
   onGenerateJD: () => void;
   generatingJD: boolean;
+  onToggleStatus: () => void;
+  onCopySurveyUrl: () => void;
+  surveyCount: number;
+  onApplySurvey: () => void;
+  applyingSurvey: boolean;
 }) {
+  const [descExpanded, setDescExpanded] = useState(false);
+
   const requirements = template.requirements.map((r) => ({
     capability_id: r.capability_id,
     required_level: r.required_level,
@@ -540,14 +558,15 @@ function TemplateCard({
       const capName = parentCap?.name ?? "Other";
       const key = capSlug || "other";
 
+      const displayLevel = Math.min(tr.required_level * 2, 10);
       const existing = groups.get(key);
       if (existing) {
-        existing.items.push({ tech, level: tr.required_level, priority: tr.priority ?? "must_have" });
+        existing.items.push({ tech, level: displayLevel, priority: tr.priority ?? "must_have" });
       } else {
         groups.set(key, {
           capName,
           capSlug,
-          items: [{ tech, level: tr.required_level, priority: tr.priority ?? "must_have" }],
+          items: [{ tech, level: displayLevel, priority: tr.priority ?? "must_have" }],
         });
       }
     }
@@ -555,9 +574,9 @@ function TemplateCard({
   }, [template.technology_requirements, techMap, capSlugByTechId, capabilities]);
 
   return (
-    <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
+    <div className={cn("rounded-lg border bg-white shadow-sm overflow-hidden", template.status === "closed" && "opacity-70")}>
       <div className="flex items-center justify-between border-b px-5 py-4">
-        <div>
+        <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-semibold text-slate-800">
               {template.name}
@@ -567,11 +586,31 @@ function TemplateCard({
                 {template.role_type}
               </span>
             )}
+            <span className={cn(
+              "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+              template.status === "open" ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-500"
+            )}>
+              {template.status === "open" ? "Open" : "Closed"}
+            </span>
           </div>
           {template.description && (
-            <p className="mt-0.5 text-sm text-slate-500">
-              {template.description}
-            </p>
+            <div className="mt-0.5">
+              <p className={cn("text-sm text-slate-500", !descExpanded && "line-clamp-2")}>
+                {template.description}
+              </p>
+              {template.description.length > 120 && (
+                <button
+                  onClick={() => setDescExpanded(!descExpanded)}
+                  className="mt-0.5 text-xs text-blue-600 hover:text-blue-700 inline-flex items-center gap-0.5"
+                >
+                  {descExpanded ? (
+                    <>Show less <ChevronUp className="h-3 w-3" /></>
+                  ) : (
+                    <>Learn more <ChevronDown className="h-3 w-3" /></>
+                  )}
+                </button>
+              )}
+            </div>
           )}
           {(template.salary_min || template.salary_max) && (
             <p className="mt-0.5 text-xs text-slate-400">
@@ -582,7 +621,31 @@ function TemplateCard({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 flex-shrink-0 ml-3">
+          <button
+            onClick={onCopySurveyUrl}
+            className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+            title="Copy survey link"
+          >
+            <ClipboardList className="h-3.5 w-3.5" />
+            Survey{surveyCount > 0 && ` (${surveyCount})`}
+          </button>
+          {surveyCount > 0 && (
+            <button
+              onClick={onApplySurvey}
+              disabled={applyingSurvey}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                applyingSurvey
+                  ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                  : "bg-green-50 text-green-600 hover:bg-green-100"
+              )}
+              title="Apply survey results to requirements"
+            >
+              {applyingSurvey ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              Apply
+            </button>
+          )}
           <button
             onClick={onGenerateJD}
             disabled={generatingJD}
@@ -599,7 +662,19 @@ function TemplateCard({
             ) : (
               <FileText className="h-3.5 w-3.5" />
             )}
-            {generatingJD ? "Generating..." : "Generate JD"}
+            JD
+          </button>
+          <button
+            onClick={onToggleStatus}
+            className={cn(
+              "rounded-md p-1.5 transition-colors",
+              template.status === "open"
+                ? "text-slate-400 hover:bg-amber-50 hover:text-amber-600"
+                : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"
+            )}
+            title={template.status === "open" ? "Close role" : "Reopen role"}
+          >
+            {template.status === "open" ? <Archive className="h-4 w-4" /> : <RotateCcw className="h-4 w-4" />}
           </button>
           <button
             onClick={onEdit}
@@ -914,6 +989,10 @@ export function RoleTemplatesPage() {
   const [ventureId, setVentureId] = useState<string | null>(null);
   const [generatingJDFor, setGeneratingJDFor] = useState<string | null>(null);
   const [jobDescription, setJobDescription] = useState<JobDescription | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">("open");
+  const [surveyCounts, setSurveyCounts] = useState<Record<string, number>>({});
+  const [applyingSurveyFor, setApplyingSurveyFor] = useState<string | null>(null);
 
   // Fetch first venture for creating templates
   useEffect(() => {
@@ -978,7 +1057,7 @@ export function RoleTemplatesPage() {
         technology_requirements: editingTemplate.technology_requirements.map(
           (tr) => ({
             technology_id: tr.technology_id,
-            required_level: tr.required_level,
+            required_level: Math.min(tr.required_level * 2, 10),
             priority: (tr.priority ?? "must_have") as TechPriority,
           })
         ),
@@ -1003,7 +1082,7 @@ export function RoleTemplatesPage() {
         })),
         technology_requirements: draft.technology_requirements.map((tr) => ({
           technology_id: tr.technology_id,
-          required_level: tr.required_level,
+          required_level: Math.ceil(tr.required_level / 2),
           priority: tr.priority ?? "must_have",
         })),
       });
@@ -1034,7 +1113,7 @@ export function RoleTemplatesPage() {
         })),
         technology_requirements: draft.technology_requirements.map((tr) => ({
           technology_id: tr.technology_id,
-          required_level: tr.required_level,
+          required_level: Math.ceil(tr.required_level / 2),
           priority: tr.priority ?? "must_have",
         })),
       });
@@ -1059,6 +1138,54 @@ export function RoleTemplatesPage() {
       // Keep modal open on error
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // Fetch survey counts for all templates
+  useEffect(() => {
+    for (const tpl of templates) {
+      api
+        .get<{ id: string }[]>(`/surveys/role-template/${tpl.id}`)
+        .then((data) => {
+          setSurveyCounts((prev) => ({ ...prev, [tpl.id]: data.length }));
+        })
+        .catch(() => {});
+    }
+  }, [templates]);
+
+  // Filter templates
+  const filteredTemplates = useMemo(() => {
+    let list = templates;
+    if (statusFilter !== "all") {
+      list = list.filter((t) => t.status === statusFilter);
+    }
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      list = list.filter((t) => t.name.toLowerCase().includes(q));
+    }
+    return list;
+  }, [templates, statusFilter, searchText]);
+
+  const handleToggleStatus = async (tpl: RoleTemplate) => {
+    const newStatus = tpl.status === "open" ? "closed" : "open";
+    await api.put(`/role-templates/${tpl.id}`, { status: newStatus });
+    refetch();
+  };
+
+  const handleCopySurveyUrl = (templateId: string) => {
+    const url = `${window.location.origin}/survey/${templateId}`;
+    navigator.clipboard.writeText(url);
+  };
+
+  const handleApplySurvey = async (templateId: string) => {
+    setApplyingSurveyFor(templateId);
+    try {
+      await api.post(`/surveys/role-template/${templateId}/apply`, {});
+      refetch();
+    } catch (_e) {
+      // handled by API layer
+    } finally {
+      setApplyingSurveyFor(null);
     }
   };
 
@@ -1098,6 +1225,38 @@ export function RoleTemplatesPage() {
         )}
       </div>
 
+      {/* Search + Status Filter */}
+      {mode === "list" && (
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-xs">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search templates..."
+              className="w-full rounded-md border border-slate-300 pl-9 pr-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex rounded-md border border-slate-300 overflow-hidden text-sm">
+            {(["open", "closed", "all"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={cn(
+                  "px-3 py-1.5 font-medium capitalize transition-colors",
+                  statusFilter === s
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-slate-600 hover:bg-slate-50"
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Create form */}
       {mode === "create" && (
         <TemplateForm
@@ -1126,17 +1285,18 @@ export function RoleTemplatesPage() {
       {/* Template list */}
       {mode === "list" && (
         <>
-          {templates.length === 0 ? (
+          {filteredTemplates.length === 0 ? (
             <div className="rounded-lg border border-dashed p-8 text-center">
               <Briefcase className="mx-auto h-10 w-10 text-slate-300" />
               <p className="mt-2 text-sm text-slate-500">
-                No role templates yet. Create one to define capability
-                requirements.
+                {templates.length === 0
+                  ? "No role templates yet. Create one to define capability requirements."
+                  : "No templates match your filters."}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {templates.map((tpl) => (
+              {filteredTemplates.map((tpl) => (
                 <TemplateCard
                   key={tpl.id}
                   template={tpl}
@@ -1148,6 +1308,11 @@ export function RoleTemplatesPage() {
                   onDelete={() => setDeleteTarget(tpl)}
                   onGenerateJD={() => handleGenerateJD(tpl.id)}
                   generatingJD={generatingJDFor === tpl.id}
+                  onToggleStatus={() => handleToggleStatus(tpl)}
+                  onCopySurveyUrl={() => handleCopySurveyUrl(tpl.id)}
+                  surveyCount={surveyCounts[tpl.id] ?? 0}
+                  onApplySurvey={() => handleApplySurvey(tpl.id)}
+                  applyingSurvey={applyingSurveyFor === tpl.id}
                 />
               ))}
             </div>
