@@ -1,11 +1,20 @@
 import { useEffect, useState } from "react";
-import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, Mic, Quote, ExternalLink, FileText, Loader2, Info, Circle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScoreBar } from "@/components/ScoreBar";
 import { ConfidenceBadge, AssessmentStatusBadge } from "@/components/assessment-badges";
 import type { Assessment, CriterionScore } from "@/types/assessment";
 import type { InterviewDetail } from "@/types/interview";
 import { api } from "@/utils/api";
+
+// ---------------------------------------------------------------------------
+// Coverage helpers
+// ---------------------------------------------------------------------------
+
+function isNotAssessed(cs: CriterionScore): boolean {
+  return cs.assessment_status === "not_assessed"
+    || cs.confidence_level === "not_assessed";
+}
 
 // ---------------------------------------------------------------------------
 // Helpers (duplicated from AssessmentPage to avoid circular imports)
@@ -140,17 +149,17 @@ function TranscriptViewer({ interviewId }: { interviewId: string }) {
 function CriterionRow({ cs }: { cs: CriterionScore }) {
   const [expanded, setExpanded] = useState(false);
   const hasEvidence = cs.evidence && cs.evidence.length > 0;
-  const isNotAssessed = cs.assessment_status === "not_assessed";
+  const notAssessed = isNotAssessed(cs);
 
   return (
-    <div className={cn("border-t border-slate-100 py-3 first:border-t-0", isNotAssessed && "opacity-50")}>
+    <div className={cn("border-t border-slate-100 py-3 first:border-t-0", notAssessed && "opacity-50")}>
       <div className="flex items-center gap-3">
         <span className="flex-1 text-sm font-medium text-slate-700 flex items-center gap-1.5">
           {cs.criterion_name}
           <ConfidenceBadge level={cs.confidence_level} />
           <AssessmentStatusBadge status={cs.assessment_status} />
         </span>
-        {isNotAssessed ? (
+        {notAssessed ? (
           <span className="w-40 text-xs text-slate-400 text-right">Not Assessed</span>
         ) : (
           <div className="w-40">
@@ -222,6 +231,16 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
       ? `${Math.round(assessment.talk_ratio * 100)}%`
       : null;
 
+  // Coverage computation
+  const totalCriteria = assessment.criterion_scores.length;
+  const assessedCriteria = assessment.criterion_scores.filter(
+    (cs) => !isNotAssessed(cs)
+  );
+  const notAssessedCriteria = assessment.criterion_scores.filter(isNotAssessed);
+  const assessedCount = assessedCriteria.length;
+  const coveragePct = totalCriteria > 0 ? Math.round((assessedCount / totalCriteria) * 100) : 0;
+  const hasGaps = notAssessedCriteria.length > 0;
+
   return (
     <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
       {/* Collapsed header row */}
@@ -254,6 +273,20 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
           <span className="flex items-center gap-1 text-xs text-slate-500">
             <Mic className="h-3 w-3" />
             {talkPct}
+          </span>
+        )}
+
+        {/* Coverage pill — only shown when there are gaps */}
+        {hasGaps && totalCriteria > 0 && (
+          <span
+            className={cn(
+              "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums",
+              coveragePct >= 70
+                ? "bg-amber-100 text-amber-700"
+                : "bg-red-100 text-red-700"
+            )}
+          >
+            {assessedCount}/{totalCriteria}
           </span>
         )}
 
@@ -307,14 +340,62 @@ export function CompactStageCard({ assessment }: CompactStageCardProps) {
             <TalkRatioBar ratio={assessment.talk_ratio} />
           )}
 
-          {assessment.criterion_scores.length > 0 && (
+          {/* Coverage bar — shown when there are criteria */}
+          {totalCriteria > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-slate-500">
+                  Assessed: {assessedCount}/{totalCriteria} criteria
+                </span>
+                <span className="text-xs font-medium text-slate-500 tabular-nums">
+                  {coveragePct}%
+                </span>
+              </div>
+              <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className={cn(
+                    "transition-all rounded-full",
+                    coveragePct === 100
+                      ? "bg-emerald-500"
+                      : coveragePct >= 70
+                        ? "bg-amber-500"
+                        : "bg-red-400"
+                  )}
+                  style={{ width: `${coveragePct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Assessed criteria */}
+          {assessedCriteria.length > 0 && (
             <div>
               <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 Criteria Breakdown
               </h4>
               <div>
-                {assessment.criterion_scores.map((cs) => (
+                {assessedCriteria.map((cs) => (
                   <CriterionRow key={cs.criterion_name} cs={cs} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Not-assessed criteria */}
+          {notAssessedCriteria.length > 0 && (
+            <div>
+              <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Not Evaluated ({notAssessedCriteria.length})
+              </h4>
+              <div className="space-y-1.5">
+                {notAssessedCriteria.map((cs) => (
+                  <div
+                    key={cs.criterion_name}
+                    className="flex items-center gap-2 text-sm text-slate-400"
+                  >
+                    <Circle className="h-3 w-3 flex-shrink-0" />
+                    <span>{cs.criterion_name}</span>
+                  </div>
                 ))}
               </div>
             </div>

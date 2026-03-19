@@ -16,8 +16,8 @@ class CriterionScoreResponse(BaseModel):
     criterion_name: str
     score: int
     max_score: int
-    confidence_level: str = "demonstrated"
-    assessment_status: str = "assessed_positive"
+    confidence_level: str
+    assessment_status: str
     reasoning: str | None
     evidence: list[EvidenceResponse] = []
 
