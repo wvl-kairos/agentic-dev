@@ -1012,6 +1012,32 @@ export function RoleTemplatesPage() {
   const loading = capsLoading || tplLoading;
   const error = capsError || tplError;
 
+  // Fetch survey counts for all templates
+  // NOTE: all hooks must be before any early returns
+  useEffect(() => {
+    for (const tpl of templates) {
+      api
+        .get<{ id: string }[]>(`/surveys/role-template/${tpl.id}`)
+        .then((data) => {
+          setSurveyCounts((prev) => ({ ...prev, [tpl.id]: data.length }));
+        })
+        .catch(() => {});
+    }
+  }, [templates]);
+
+  // Filter templates
+  const filteredTemplates = useMemo(() => {
+    let list = templates;
+    if (statusFilter !== "all") {
+      list = list.filter((t) => t.status === statusFilter);
+    }
+    if (searchText) {
+      const q = searchText.toLowerCase();
+      list = list.filter((t) => t.name.toLowerCase().includes(q));
+    }
+    return list;
+  }, [templates, statusFilter, searchText]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -1140,31 +1166,6 @@ export function RoleTemplatesPage() {
       setDeleting(false);
     }
   };
-
-  // Fetch survey counts for all templates
-  useEffect(() => {
-    for (const tpl of templates) {
-      api
-        .get<{ id: string }[]>(`/surveys/role-template/${tpl.id}`)
-        .then((data) => {
-          setSurveyCounts((prev) => ({ ...prev, [tpl.id]: data.length }));
-        })
-        .catch(() => {});
-    }
-  }, [templates]);
-
-  // Filter templates
-  const filteredTemplates = useMemo(() => {
-    let list = templates;
-    if (statusFilter !== "all") {
-      list = list.filter((t) => t.status === statusFilter);
-    }
-    if (searchText) {
-      const q = searchText.toLowerCase();
-      list = list.filter((t) => t.name.toLowerCase().includes(q));
-    }
-    return list;
-  }, [templates, statusFilter, searchText]);
 
   const handleToggleStatus = async (tpl: RoleTemplate) => {
     const newStatus = tpl.status === "open" ? "closed" : "open";
