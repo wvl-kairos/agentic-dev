@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { AppShell } from "@/components/layout/AppShell";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { CandidatesPage } from "@/pages/CandidatesPage";
@@ -8,6 +8,14 @@ import { InterviewsPage } from "@/pages/InterviewsPage";
 import { PublicCandidatePage } from "@/pages/PublicCandidatePage";
 import { SurveyPage } from "@/pages/SurveyPage";
 
+function AppLayout() {
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  );
+}
+
 export default function App() {
   return (
     <Routes>
@@ -16,20 +24,13 @@ export default function App() {
       <Route path="/survey/:roleTemplateId" element={<SurveyPage />} />
 
       {/* App pages — with AppShell layout */}
-      <Route
-        path="*"
-        element={
-          <AppShell>
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/candidates" element={<CandidatesPage />} />
-              <Route path="/assessment/:id" element={<AssessmentPage />} />
-              <Route path="/role-templates" element={<RoleTemplatesPage />} />
-              <Route path="/interviews" element={<InterviewsPage />} />
-            </Routes>
-          </AppShell>
-        }
-      />
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/candidates" element={<CandidatesPage />} />
+        <Route path="/assessment/:id" element={<AssessmentPage />} />
+        <Route path="/role-templates" element={<RoleTemplatesPage />} />
+        <Route path="/interviews" element={<InterviewsPage />} />
+      </Route>
     </Routes>
   );
 }
