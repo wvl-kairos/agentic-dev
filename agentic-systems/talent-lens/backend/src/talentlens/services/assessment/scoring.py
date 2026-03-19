@@ -188,16 +188,22 @@ async def score_interview(
         messages=[{"role": "user", "content": user_prompt}],
     )
 
-    # Parse response
+    # Parse response — strip markdown code fences if present
     response_text = message.content[0].text
+    cleaned = response_text.strip()
+    if cleaned.startswith("```"):
+        cleaned = cleaned.split("\n", 1)[1] if "\n" in cleaned else cleaned[3:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
     try:
-        result = json.loads(response_text)
+        result = json.loads(cleaned)
     except json.JSONDecodeError:
-        logger.error("Claude returned invalid JSON: %.200s", response_text)
+        logger.error("Claude returned invalid JSON: %.500s", response_text)
         return {
             "overall_score": 0,
             "recommendation": "no",
-            "summary": f"Assessment failed: could not parse Claude response.",
+            "summary": "Assessment failed: could not parse Claude response.",
             "criteria_scores": [],
             "raw_response": response_text,
         }
