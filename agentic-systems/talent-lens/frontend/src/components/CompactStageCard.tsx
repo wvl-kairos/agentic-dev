@@ -15,7 +15,9 @@ const STAGE_LABELS: Record<string, string> = {
   initial: "Initial Interview with Talent Team",
   screening: "Screening",
   coderpad: "CoderPad",
+  technical: "Technical Interview",
   technical_interview: "Technical Interview",
+  final: "Final Interview",
   final_interview: "Final Interview",
   decision: "Decision",
 };

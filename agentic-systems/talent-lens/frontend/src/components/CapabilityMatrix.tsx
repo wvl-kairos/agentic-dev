@@ -173,9 +173,9 @@ function ScoreComparisonRow({
   const baseline = isRequired ? reqLevel : 5;
   const barPct = hasScore ? Math.min((capScore / baseline) * 100, 100) : 0;
 
-  // Percentage label for how well the candidate meets the requirement
+  // Percentage label capped at 100% — beyond that the check icon suffices
   const fulfillmentPct = isRequired && hasScore
-    ? Math.round((capScore / reqLevel) * 100)
+    ? Math.min(Math.round((capScore / reqLevel) * 100), 100)
     : null;
 
   return (
@@ -224,7 +224,7 @@ function ScoreComparisonRow({
             </span>
           ) : (
             <span className="text-xs text-slate-400 italic">
-              {isRequired ? "Pending" : ""}
+              {isRequired ? "Not Assessed" : ""}
             </span>
           )}
 

@@ -5,8 +5,8 @@ const STAGES = [
   { key: "initial", label: "Initial" },
   { key: "screening", label: "Screen" },
   { key: "coderpad", label: "Coder" },
-  { key: "technical_interview", label: "Tech" },
-  { key: "final_interview", label: "Final" },
+  { key: "technical", label: "Tech" },
+  { key: "final", label: "Final" },
 ] as const;
 
 function barColor(score: number): string {
@@ -20,11 +20,14 @@ interface StageScoreTimelineProps {
 }
 
 export function StageScoreTimeline({ assessments }: StageScoreTimelineProps) {
-  const scoreMap = new Map(
-    assessments
-      .filter((a) => a.overall_score != null)
-      .map((a) => [a.stage, a.overall_score!])
-  );
+  const scoreMap = new Map<string, number>();
+  for (const a of assessments) {
+    if (a.overall_score == null) continue;
+    const prev = scoreMap.get(a.stage);
+    if (prev == null || a.overall_score > prev) {
+      scoreMap.set(a.stage, a.overall_score);
+    }
+  }
 
   return (
     <div className="rounded-lg border bg-white px-5 py-4">
