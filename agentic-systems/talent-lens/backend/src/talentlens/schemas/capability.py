@@ -177,3 +177,37 @@ class CandidateSkillsResponse(BaseModel):
     candidate_name: str
     role_template: RoleTemplateResponse | None
     capabilities: list[CandidateCapabilityScore]
+
+
+# ---------------------------------------------------------------------------
+# Interview Guide
+# ---------------------------------------------------------------------------
+
+class InterviewGuideFollowUp(BaseModel):
+    probe: str
+    targets: str
+
+
+class InterviewGuideQuestionEvaluates(BaseModel):
+    capabilities: list[str] = []
+    technologies: list[str] = []
+
+
+class InterviewGuideQuestion(BaseModel):
+    number: int
+    question: str
+    evaluates: InterviewGuideQuestionEvaluates
+    difficulty: str  # easy | medium | hard
+    expected_duration_minutes: int
+    what_good_looks_like: str
+    follow_ups: list[InterviewGuideFollowUp] = []
+
+
+class InterviewGuideResponse(BaseModel):
+    """Generated interview guide for a role template + stage."""
+    stage: str
+    stage_name: str
+    role_name: str
+    estimated_duration_minutes: int
+    questions: list[InterviewGuideQuestion] = []
+    interviewer_tips: list[str] = []

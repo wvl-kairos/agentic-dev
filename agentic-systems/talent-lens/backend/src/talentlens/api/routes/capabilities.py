@@ -18,6 +18,7 @@ from talentlens.schemas.capability import (
     CapabilityResponse,
     CandidateCapabilityScore,
     CandidateSkillsResponse,
+    InterviewGuideResponse,
     JobDescriptionResponse,
     RoleTemplateCreate,
     RoleTemplateResponse,
@@ -25,6 +26,7 @@ from talentlens.schemas.capability import (
     TechnologyResponse,
 )
 from talentlens.services.job_description import generate_job_description
+from talentlens.services.interview_guide import generate_interview_guide
 from talentlens.models.database.candidate import Candidate
 from talentlens.models.database.assessment import Assessment, CriterionScore
 from talentlens.models.database.rubric import RubricCriterion
@@ -323,6 +325,82 @@ async def generate_jd_from_template(template_id: uuid.UUID, db: DBSession):
         technologies=technologies,
     )
     return jd
+
+
+# ---------------------------------------------------------------------------
+# Interview Guide Generation
+# ---------------------------------------------------------------------------
+
+VALID_STAGES = {"initial", "screening", "coderpad", "technical", "final"}
+
+
+@router.post(
+    "/role-templates/{template_id}/generate-interview-guide",
+    response_model=InterviewGuideResponse,
+)
+async def generate_interview_guide_from_template(
+    template_id: uuid.UUID,
+    db: DBSession,
+    stage: str = "technical",
+):
+    """Generate an interview guide for a role template and stage using Claude."""
+    if stage not in VALID_STAGES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid stage '{stage}'. Must be one of: {', '.join(sorted(VALID_STAGES))}",
+        )
+
+    result = await db.execute(
+        select(RoleTemplate)
+        .where(RoleTemplate.id == template_id)
+        .options(*_role_template_load_options())
+    )
+    template = result.scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=404, detail="Role template not found")
+
+    # Build capability data for the generator
+    capabilities = []
+    for req in template.requirements:
+        cap = req.capability
+        capabilities.append({
+            "name": cap.name if cap else "Unknown",
+            "description": cap.description if cap else None,
+            "required_level": req.required_level,
+        })
+
+    # Build technology data for the generator
+    technologies = []
+    for treq in template.technology_requirements:
+        tech = treq.technology
+        cap_name = ""
+        if tech:
+            for req in template.requirements:
+                if req.capability and req.capability.id == tech.capability_id:
+                    cap_name = req.capability.name
+                    break
+            if not cap_name:
+                cap_result = await db.execute(
+                    select(Capability).where(Capability.id == tech.capability_id)
+                )
+                parent_cap = cap_result.scalar_one_or_none()
+                cap_name = parent_cap.name if parent_cap else ""
+
+        technologies.append({
+            "name": tech.name if tech else "Unknown",
+            "capability_name": cap_name,
+            "required_level": treq.required_level,
+            "priority": treq.priority if hasattr(treq, "priority") else "must_have",
+        })
+
+    guide = await generate_interview_guide(
+        role_name=template.name,
+        role_description=template.description,
+        stage=stage,
+        capabilities=capabilities,
+        technologies=technologies,
+    )
+    return guide
 
 
 # ---------------------------------------------------------------------------

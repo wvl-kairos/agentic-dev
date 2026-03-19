@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -16,6 +16,7 @@ import { CompactStageCard } from "@/components/CompactStageCard";
 import { CapabilityMatrix } from "@/components/CapabilityMatrix";
 import { SkillsRadar } from "@/components/SkillsRadar";
 import { OrientationBadge } from "@/components/OrientationBadge";
+import { InterviewGuidePanel } from "@/components/InterviewGuidePanel";
 import type { CandidateSkills } from "@/types/capability";
 
 // ---------------------------------------------------------------------------
@@ -440,6 +441,7 @@ export function AssessmentPage() {
   const { id } = useParams<{ id: string }>();
   const { assessments, candidate, loading, error, refetch } = useAssessments(id!);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showGuidePanel, setShowGuidePanel] = useState(false);
   const [cvUrl, setCvUrl] = useState("");
   const [showCvInput, setShowCvInput] = useState(false);
   const [savingCv, setSavingCv] = useState(false);
@@ -636,6 +638,20 @@ export function AssessmentPage() {
               )}
 
               <button
+                onClick={() => setShowGuidePanel(true)}
+                disabled={!candidate.role_template_id}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                  candidate.role_template_id
+                    ? "text-slate-600 hover:bg-slate-50"
+                    : "text-slate-300 cursor-not-allowed"
+                )}
+                title={!candidate.role_template_id ? "Assign a role template first" : undefined}
+              >
+                <BookOpen className="h-4 w-4" />
+                Interview Guide
+              </button>
+              <button
                 onClick={() => setShowUploadModal(true)}
                 className="inline-flex items-center gap-1.5 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
               >
@@ -723,6 +739,14 @@ export function AssessmentPage() {
           defaultType={stageToInterviewType(candidate.stage)}
           onClose={() => setShowUploadModal(false)}
           onUploaded={() => refetch()}
+        />
+      )}
+
+      {showGuidePanel && candidate?.role_template_id && (
+        <InterviewGuidePanel
+          roleTemplateId={candidate.role_template_id}
+          defaultStage={stageToInterviewType(candidate.stage)}
+          onClose={() => setShowGuidePanel(false)}
         />
       )}
     </div>

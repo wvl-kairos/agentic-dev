@@ -74,3 +74,34 @@ export interface CandidateSkills {
   role_template: RoleTemplate | null;
   capabilities: CandidateCapabilityScore[];
 }
+
+// ---------------------------------------------------------------------------
+// Interview Guide
+// ---------------------------------------------------------------------------
+
+export interface InterviewGuideFollowUp {
+  probe: string;
+  targets: string;
+}
+
+export interface InterviewGuideQuestion {
+  number: number;
+  question: string;
+  evaluates: {
+    capabilities: string[];
+    technologies: string[];
+  };
+  difficulty: "easy" | "medium" | "hard";
+  expected_duration_minutes: number;
+  what_good_looks_like: string;
+  follow_ups: InterviewGuideFollowUp[];
+}
+
+export interface InterviewGuide {
+  stage: string;
+  stage_name: string;
+  role_name: string;
+  estimated_duration_minutes: number;
+  questions: InterviewGuideQuestion[];
+  interviewer_tips: string[];
+}
