@@ -29,6 +29,14 @@ gcloud artifacts repositories describe "$REPO" --location="$REGION" 2>/dev/null 
     --description="TalentLens containers"
 
 REGISTRY="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}"
+GCS_BUCKET="${PROJECT_ID}-talentlens-uploads"
+
+# Create GCS bucket for CV uploads if needed
+if ! gsutil ls -b "gs://${GCS_BUCKET}" 2>/dev/null; then
+  echo "=== Creating GCS bucket ${GCS_BUCKET} ==="
+  gsutil mb -l "$REGION" "gs://${GCS_BUCKET}"
+  gsutil iam ch allUsers:objectViewer "gs://${GCS_BUCKET}"
+fi
 
 # Build and push backend
 echo "=== Building backend ==="
@@ -37,7 +45,7 @@ docker push "${REGISTRY}/${BACKEND_SERVICE}"
 
 # Build env var flags — only include vars that are set locally.
 # Uses --update-env-vars so existing Cloud Run values are preserved.
-ENV_VARS="ENV=production"
+ENV_VARS="ENV=production||GCS_BUCKET=${GCS_BUCKET}"
 for var in DATABASE_URL ANTHROPIC_API_KEY DEEPGRAM_API_KEY FIREFLIES_WEBHOOK_SECRET SLACK_BOT_TOKEN SLACK_DEFAULT_CHANNEL; do
   if [ -n "${!var:-}" ]; then
     ENV_VARS="${ENV_VARS}||${var}=${!var}"

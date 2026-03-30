@@ -13,6 +13,17 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json();
 }
 
+async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status} ${res.statusText}`);
+  }
+  return res.json();
+}
+
 export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) =>
@@ -25,4 +36,5 @@ export const api = {
     fetch(`${BASE}${path}`, { method: "DELETE" }).then((res) => {
       if (!res.ok) throw new Error(`API error: ${res.status}`);
     }),
+  upload: <T>(path: string, formData: FormData) => uploadRequest<T>(path, formData),
 };

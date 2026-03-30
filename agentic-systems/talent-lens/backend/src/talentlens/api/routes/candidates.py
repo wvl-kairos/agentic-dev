@@ -1,17 +1,30 @@
 """Candidate CRUD endpoints."""
 
+import base64
+import logging
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
+from talentlens.config import settings
 from talentlens.dependencies import DBSession
 from talentlens.models.database.assessment import Assessment, CriterionScore
 from talentlens.models.database.candidate import Candidate
 from talentlens.schemas.candidate import CandidateCreate, CandidateResponse, CandidateUpdate
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/candidates", tags=["candidates"])
+
+ALLOWED_CV_TYPES = {
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/msword",
+    "image/png",
+    "image/jpeg",
+}
+MAX_CV_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 @router.get("/", response_model=list[CandidateResponse])
@@ -77,6 +90,41 @@ async def update_candidate(candidate_id: uuid.UUID, data: CandidateUpdate, db: D
     await db.commit()
     await db.refresh(candidate)
     return candidate
+
+
+@router.post("/{candidate_id}/upload-cv")
+async def upload_cv(candidate_id: uuid.UUID, file: UploadFile, db: DBSession):
+    """Upload a CV file (PDF, DOCX, PNG, JPEG). Stores in GCS or as data URL fallback."""
+    candidate = await db.get(Candidate, candidate_id)
+    if not candidate:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+
+    if file.content_type not in ALLOWED_CV_TYPES:
+        raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}")
+
+    contents = await file.read()
+    if len(contents) > MAX_CV_SIZE:
+        raise HTTPException(status_code=400, detail="File too large (max 10MB)")
+
+    if settings.gcs_bucket:
+        from google.cloud import storage
+
+        client = storage.Client()
+        bucket = client.bucket(settings.gcs_bucket)
+        blob_name = f"cvs/{candidate_id}/{file.filename}"
+        blob = bucket.blob(blob_name)
+        blob.upload_from_string(contents, content_type=file.content_type)
+        blob.make_public()
+        cv_url = blob.public_url
+    else:
+        # Data URL fallback for local dev
+        b64 = base64.b64encode(contents).decode()
+        cv_url = f"data:{file.content_type};base64,{b64}"
+
+    candidate.cv_url = cv_url
+    await db.commit()
+    await db.refresh(candidate)
+    return {"cv_url": cv_url}
 
 
 @router.get("/{candidate_id}/coverage")

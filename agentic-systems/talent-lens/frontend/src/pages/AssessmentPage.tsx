@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink, Sparkles } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft, Upload, X, FileText, DollarSign, Link2, Copy, Check, Info, ExternalLink, Sparkles, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { PipelineStage } from "@/types/candidate";
@@ -449,6 +449,11 @@ export function AssessmentPage() {
   const [creatingLink, setCreatingLink] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showScoreInfo, setShowScoreInfo] = useState(false);
+  const [recruiterName, setRecruiterName] = useState("");
+  const [showRecruiterInput, setShowRecruiterInput] = useState(false);
+  const [savingRecruiter, setSavingRecruiter] = useState(false);
+  const [uploadingCv, setUploadingCv] = useState(false);
+  const cvFileRef = useRef<HTMLInputElement>(null);
 
   if (loading) {
     return (
@@ -533,6 +538,62 @@ export function AssessmentPage() {
                   </span>
                 )}
               </div>
+              {/* Recruiter name */}
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <UserCircle className="h-3.5 w-3.5 text-slate-400" />
+                {showRecruiterInput ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      value={recruiterName}
+                      onChange={(e) => setRecruiterName(e.target.value)}
+                      placeholder="Recruiter name..."
+                      className="rounded-md border border-slate-300 px-2 py-0.5 text-xs w-36 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      onClick={async () => {
+                        if (!recruiterName.trim()) return;
+                        setSavingRecruiter(true);
+                        try {
+                          await api.patch(`/candidates/${candidate.id}`, { recruiter_name: recruiterName.trim() });
+                          refetch();
+                          setShowRecruiterInput(false);
+                        } finally {
+                          setSavingRecruiter(false);
+                        }
+                      }}
+                      disabled={savingRecruiter || !recruiterName.trim()}
+                      className="rounded-md bg-blue-600 px-2 py-0.5 text-xs text-white hover:bg-blue-700 disabled:bg-slate-300"
+                    >
+                      {savingRecruiter ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                    </button>
+                    <button onClick={() => setShowRecruiterInput(false)} className="text-slate-400 hover:text-slate-600">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ) : candidate.recruiter_name ? (
+                  <button
+                    onClick={() => {
+                      setRecruiterName(candidate.recruiter_name ?? "");
+                      setShowRecruiterInput(true);
+                    }}
+                    className="text-sm text-slate-500 hover:text-blue-600 transition-colors"
+                  >
+                    Recruiter: {candidate.recruiter_name}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setRecruiterName("");
+                      setShowRecruiterInput(true);
+                    }}
+                    className="text-xs text-blue-500 hover:text-blue-700 transition-colors"
+                  >
+                    + Add recruiter
+                  </button>
+                )}
+              </div>
               <div className="mt-1">
                 <SalaryDisplay
                   expected={candidate.salary_expected}
@@ -585,13 +646,43 @@ export function AssessmentPage() {
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setShowCvInput(true)}
-                  className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  Upload CV
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowCvInput(true)}
+                    className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    <Link2 className="h-3.5 w-3.5" />
+                    Paste URL
+                  </button>
+                  <button
+                    onClick={() => cvFileRef.current?.click()}
+                    disabled={uploadingCv}
+                    className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                  >
+                    {uploadingCv ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                    Upload File
+                  </button>
+                  <input
+                    ref={cvFileRef}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !candidate) return;
+                      setUploadingCv(true);
+                      try {
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        await api.upload(`/candidates/${candidate.id}/upload-cv`, formData);
+                        refetch();
+                      } finally {
+                        setUploadingCv(false);
+                        if (cvFileRef.current) cvFileRef.current.value = "";
+                      }
+                    }}
+                  />
+                </div>
               )}
 
               {/* Share Profile */}

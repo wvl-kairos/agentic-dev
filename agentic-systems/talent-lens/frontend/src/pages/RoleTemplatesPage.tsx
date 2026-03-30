@@ -25,6 +25,7 @@ import {
   ClipboardList,
   Archive,
   RotateCcw,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
@@ -53,6 +54,13 @@ const COLOR_MAP: Record<string, string> = {
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+interface SurveyAggregate {
+  capability_id: string;
+  capability_name: string;
+  avg_score: number;
+  response_count: number;
+}
 
 interface RequirementDraft {
   capability_id: string;
@@ -500,6 +508,7 @@ function TemplateCard({
   surveyCount,
   onApplySurvey,
   applyingSurvey,
+  surveyAggregates,
 }: {
   template: RoleTemplate;
   capabilities: import("@/types/capability").Capability[];
@@ -512,6 +521,7 @@ function TemplateCard({
   surveyCount: number;
   onApplySurvey: () => void;
   applyingSurvey: boolean;
+  surveyAggregates: SurveyAggregate[];
 }) {
   const [descExpanded, setDescExpanded] = useState(false);
 
@@ -625,7 +635,7 @@ function TemplateCard({
           <button
             onClick={onCopySurveyUrl}
             className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
-            title="Copy survey link"
+            title="Share this link to collect team input on skill levels. Click 'Apply' to update requirements."
           >
             <ClipboardList className="h-3.5 w-3.5" />
             Survey{surveyCount > 0 && ` (${surveyCount})`}
@@ -728,6 +738,38 @@ function TemplateCard({
             ))}
           </div>
         )}
+
+        {/* Survey-Informed Requirements */}
+        {surveyAggregates.length > 0 && (
+          <div className="space-y-2 pt-2 border-t">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+                Survey-Informed Requirements
+              </p>
+              <span title="Scores from team survey responses. Purple = has survey data, check = applied to requirements." className="cursor-help">
+                <Info className="h-3 w-3 text-slate-400" />
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {surveyAggregates.map((agg) => {
+                const applied = template.requirements.some(
+                  (r) => r.capability_id === agg.capability_id && r.survey_level != null
+                );
+                return (
+                  <span
+                    key={agg.capability_id}
+                    className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-medium text-purple-700"
+                    title={`${agg.response_count} response${agg.response_count !== 1 ? "s" : ""}`}
+                  >
+                    {agg.capability_name}
+                    <span className="text-purple-500">{agg.avg_score}/10</span>
+                    {applied && <Check className="h-3 w-3 text-green-600" />}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -750,6 +792,45 @@ interface JobDescription {
   level: string;
 }
 
+function EditableList({
+  items,
+  onChange,
+}: {
+  items: string[];
+  onChange: (items: string[]) => void;
+}) {
+  return (
+    <div className="space-y-1">
+      {items.map((item, i) => (
+        <div key={i} className="flex items-center gap-1">
+          <input
+            type="text"
+            value={item}
+            onChange={(e) => {
+              const next = [...items];
+              next[i] = e.target.value;
+              onChange(next);
+            }}
+            className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          />
+          <button
+            onClick={() => onChange(items.filter((_, j) => j !== i))}
+            className="rounded p-0.5 text-slate-400 hover:text-red-500"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...items, ""])}
+        className="text-xs text-blue-500 hover:text-blue-700"
+      >
+        + Add item
+      </button>
+    </div>
+  );
+}
+
 function JobDescriptionModal({
   jd,
   onClose,
@@ -758,32 +839,36 @@ function JobDescriptionModal({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedJd, setEditedJd] = useState<JobDescription>({ ...jd, responsibilities: [...jd.responsibilities], required_qualifications: [...jd.required_qualifications], preferred_qualifications: [...jd.preferred_qualifications], tech_stack: [...jd.tech_stack] });
+
+  const source = isEditing ? editedJd : jd;
 
   const plainText = [
-    `# ${jd.title}`,
-    `**Level:** ${jd.level}`,
-    ...(jd.location ? [`**Location:** ${jd.location}`] : []),
+    `# ${source.title}`,
+    `**Level:** ${source.level}`,
+    ...(source.location ? [`**Location:** ${source.location}`] : []),
     "",
-    ...(jd.company_summary ? ["## About UP Labs", jd.company_summary, ""] : []),
-    jd.summary,
+    ...(source.company_summary ? ["## About UP Labs", source.company_summary, ""] : []),
+    source.summary,
     "",
     "## About the Role",
-    jd.about_role,
+    source.about_role,
     "",
     "## Responsibilities",
-    ...jd.responsibilities.map((r) => `- ${r}`),
+    ...source.responsibilities.map((r) => `- ${r}`),
     "",
     "## Required Qualifications",
-    ...jd.required_qualifications.map((q) => `- ${q}`),
-    ...(jd.preferred_qualifications.length > 0
+    ...source.required_qualifications.map((q) => `- ${q}`),
+    ...(source.preferred_qualifications.length > 0
       ? [
           "",
           "## Preferred Qualifications",
-          ...jd.preferred_qualifications.map((q) => `- ${q}`),
+          ...source.preferred_qualifications.map((q) => `- ${q}`),
         ]
       : []),
-    ...(jd.tech_stack.length > 0
-      ? ["", "## Tech Stack", ...jd.tech_stack.map((t) => `- ${t}`)]
+    ...(source.tech_stack.length > 0
+      ? ["", "## Tech Stack", ...source.tech_stack.map((t) => `- ${t}`)]
       : []),
   ].join("\n");
 
@@ -793,16 +878,42 @@ function JobDescriptionModal({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleReset = () => {
+    setEditedJd({ ...jd, responsibilities: [...jd.responsibilities], required_qualifications: [...jd.required_qualifications], preferred_qualifications: [...jd.preferred_qualifications], tech_stack: [...jd.tech_stack] });
+  };
+
+  const update = (patch: Partial<JobDescription>) =>
+    setEditedJd((prev) => ({ ...prev, ...patch }));
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="rounded-lg border bg-white shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-5 py-4">
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <h3 className="text-lg font-semibold text-slate-900">{jd.title}</h3>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedJd.title}
+                onChange={(e) => update({ title: e.target.value })}
+                className="text-lg font-semibold text-slate-900 border-b border-blue-300 bg-transparent focus:outline-none focus:border-blue-500 w-full"
+              />
+            ) : (
+              <h3 className="text-lg font-semibold text-slate-900">{source.title}</h3>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isEditing && (
+              <button
+                onClick={handleReset}
+                className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                title="Reset to original"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+                Reset
+              </button>
+            )}
             <button
               onClick={handleCopy}
               className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
@@ -813,6 +924,16 @@ function JobDescriptionModal({
                 <Copy className="h-3.5 w-3.5" />
               )}
               {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                isEditing ? "bg-blue-50 text-blue-600 border-blue-200" : "text-slate-600 hover:bg-slate-50"
+              )}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+              {isEditing ? "Done" : "Edit"}
             </button>
             <button
               onClick={onClose}
@@ -827,71 +948,141 @@ function JobDescriptionModal({
         <div className="overflow-y-auto px-5 py-4 space-y-4 text-sm text-slate-700">
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-              {jd.level}
+              {source.level}
             </span>
-            {jd.location && (
+            {source.location && (
               <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-                {jd.location}
+                {source.location}
               </span>
             )}
           </div>
 
-          {jd.company_summary && (
+          {(source.company_summary || isEditing) && (
             <div className="rounded-md bg-blue-50 p-3 border border-blue-100">
               <h4 className="font-semibold text-blue-800 mb-1 text-xs uppercase tracking-wide">About UP Labs</h4>
-              <p className="text-blue-700 leading-relaxed text-sm">{jd.company_summary}</p>
+              {isEditing ? (
+                <textarea
+                  value={editedJd.company_summary ?? ""}
+                  onChange={(e) => update({ company_summary: e.target.value })}
+                  rows={3}
+                  className="w-full rounded-md border border-blue-200 bg-white px-2 py-1 text-sm text-blue-700 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+                />
+              ) : (
+                <p className="text-blue-700 leading-relaxed text-sm">{source.company_summary}</p>
+              )}
             </div>
           )}
 
-          <p className="text-slate-600 leading-relaxed">{jd.summary}</p>
+          {isEditing ? (
+            <textarea
+              value={editedJd.summary}
+              onChange={(e) => update({ summary: e.target.value })}
+              rows={3}
+              className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+            />
+          ) : (
+            <p className="text-slate-600 leading-relaxed">{source.summary}</p>
+          )}
 
           <div>
             <h4 className="font-semibold text-slate-800 mb-1">About the Role</h4>
-            <p className="leading-relaxed whitespace-pre-line">{jd.about_role}</p>
+            {isEditing ? (
+              <textarea
+                value={editedJd.about_role}
+                onChange={(e) => update({ about_role: e.target.value })}
+                rows={4}
+                className="w-full rounded-md border border-slate-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+              />
+            ) : (
+              <p className="leading-relaxed whitespace-pre-line">{source.about_role}</p>
+            )}
           </div>
 
-          {jd.responsibilities.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-1">Responsibilities</h4>
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-1">Responsibilities</h4>
+            {isEditing ? (
+              <EditableList
+                items={editedJd.responsibilities}
+                onChange={(items) => update({ responsibilities: items })}
+              />
+            ) : source.responsibilities.length > 0 ? (
               <ul className="list-disc list-inside space-y-0.5">
-                {jd.responsibilities.map((r, i) => (
+                {source.responsibilities.map((r, i) => (
                   <li key={i}>{r}</li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : null}
+          </div>
 
-          {jd.required_qualifications.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-1">
-                Required Qualifications
-              </h4>
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-1">Required Qualifications</h4>
+            {isEditing ? (
+              <EditableList
+                items={editedJd.required_qualifications}
+                onChange={(items) => update({ required_qualifications: items })}
+              />
+            ) : source.required_qualifications.length > 0 ? (
               <ul className="list-disc list-inside space-y-0.5">
-                {jd.required_qualifications.map((q, i) => (
+                {source.required_qualifications.map((q, i) => (
                   <li key={i}>{q}</li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : null}
+          </div>
 
-          {jd.preferred_qualifications.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-1">
-                Preferred Qualifications
-              </h4>
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-1">Preferred Qualifications</h4>
+            {isEditing ? (
+              <EditableList
+                items={editedJd.preferred_qualifications}
+                onChange={(items) => update({ preferred_qualifications: items })}
+              />
+            ) : source.preferred_qualifications.length > 0 ? (
               <ul className="list-disc list-inside space-y-0.5">
-                {jd.preferred_qualifications.map((q, i) => (
+                {source.preferred_qualifications.map((q, i) => (
                   <li key={i}>{q}</li>
                 ))}
               </ul>
-            </div>
-          )}
+            ) : null}
+          </div>
 
-          {jd.tech_stack.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-slate-800 mb-1">Tech Stack</h4>
+          <div>
+            <h4 className="font-semibold text-slate-800 mb-1">Tech Stack</h4>
+            {isEditing ? (
               <div className="flex flex-wrap gap-1.5">
-                {jd.tech_stack.map((t, i) => (
+                {editedJd.tech_stack.map((t, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 pl-2.5 pr-1 py-0.5 text-xs font-medium text-slate-600"
+                  >
+                    <input
+                      type="text"
+                      value={t}
+                      onChange={(e) => {
+                        const next = [...editedJd.tech_stack];
+                        next[i] = e.target.value;
+                        update({ tech_stack: next });
+                      }}
+                      className="bg-transparent border-none outline-none w-20 text-xs"
+                    />
+                    <button
+                      onClick={() => update({ tech_stack: editedJd.tech_stack.filter((_, j) => j !== i) })}
+                      className="rounded-full p-0.5 text-slate-400 hover:text-red-500"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                <button
+                  onClick={() => update({ tech_stack: [...editedJd.tech_stack, ""] })}
+                  className="rounded-full border border-dashed border-slate-300 px-2.5 py-0.5 text-xs text-blue-500 hover:text-blue-700"
+                >
+                  + Add
+                </button>
+              </div>
+            ) : source.tech_stack.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                {source.tech_stack.map((t, i) => (
                   <span
                     key={i}
                     className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
@@ -900,8 +1091,8 @@ function JobDescriptionModal({
                   </span>
                 ))}
               </div>
-            </div>
-          )}
+            ) : null}
+          </div>
         </div>
       </div>
     </div>
@@ -993,6 +1184,7 @@ export function RoleTemplatesPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "closed">("open");
   const [surveyCounts, setSurveyCounts] = useState<Record<string, number>>({});
   const [applyingSurveyFor, setApplyingSurveyFor] = useState<string | null>(null);
+  const [surveyAggregates, setSurveyAggregates] = useState<Record<string, SurveyAggregate[]>>({});
 
   // Fetch first venture for creating templates
   useEffect(() => {
@@ -1020,6 +1212,18 @@ export function RoleTemplatesPage() {
         .get<{ id: string }[]>(`/surveys/role-template/${tpl.id}`)
         .then((data) => {
           setSurveyCounts((prev) => ({ ...prev, [tpl.id]: data.length }));
+        })
+        .catch(() => {});
+    }
+  }, [templates]);
+
+  // Fetch survey aggregates for all templates
+  useEffect(() => {
+    for (const tpl of templates) {
+      api
+        .get<SurveyAggregate[]>(`/surveys/role-template/${tpl.id}/aggregate`)
+        .then((data) => {
+          setSurveyAggregates((prev) => ({ ...prev, [tpl.id]: data }));
         })
         .catch(() => {});
     }
@@ -1314,6 +1518,7 @@ export function RoleTemplatesPage() {
                   surveyCount={surveyCounts[tpl.id] ?? 0}
                   onApplySurvey={() => handleApplySurvey(tpl.id)}
                   applyingSurvey={applyingSurveyFor === tpl.id}
+                  surveyAggregates={surveyAggregates[tpl.id] ?? []}
                 />
               ))}
             </div>

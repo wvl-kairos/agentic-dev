@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from talentlens.dependencies import DBSession
+from talentlens.models.database.assessment import Assessment
 from talentlens.models.database.candidate import Candidate
 from talentlens.models.database.interview import Interview, InterviewType
 from talentlens.schemas.interview import InterviewListResponse, InterviewResponse
@@ -76,8 +77,20 @@ async def list_interviews(
         for c in cand_result.scalars().all():
             name_map[c.id] = c.name
 
+    # Batch-fetch assessments by interview_id
+    interview_ids = [iv.id for iv in interviews]
+    assessment_map: dict[uuid.UUID, Assessment] = {}
+    if interview_ids:
+        assess_result = await db.execute(
+            select(Assessment).where(Assessment.interview_id.in_(interview_ids))
+        )
+        for a in assess_result.scalars().all():
+            if a.interview_id:
+                assessment_map[a.interview_id] = a
+
     items = []
     for iv in interviews:
+        assessment = assessment_map.get(iv.id)
         items.append(InterviewListResponse(
             id=iv.id,
             candidate_id=iv.candidate_id,
@@ -88,6 +101,10 @@ async def list_interviews(
             duration_seconds=iv.duration_seconds,
             recording_url=iv.recording_url,
             created_at=iv.created_at,
+            overall_score=assessment.overall_score if assessment else None,
+            recommendation=assessment.recommendation if assessment else None,
+            assessment_id=assessment.id if assessment else None,
+            transcript_preview=iv.transcript[:500] if iv.transcript else None,
         ))
     return items
 

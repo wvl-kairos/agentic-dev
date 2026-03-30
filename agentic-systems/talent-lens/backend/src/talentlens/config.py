@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     # CoderPad
     coderpad_api_key: str = ""
 
+    # GCS (file uploads)
+    gcs_bucket: str = ""
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",")]

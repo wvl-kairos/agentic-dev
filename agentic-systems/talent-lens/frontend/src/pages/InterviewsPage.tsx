@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2, AlertCircle, ExternalLink, Search, Mic } from "lucide-react";
+import { Loader2, AlertCircle, ExternalLink, Search, Mic, ChevronDown, ChevronUp, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { api } from "@/utils/api";
 import type { InterviewType } from "@/types/interview";
@@ -15,6 +15,10 @@ interface InterviewListItem {
   duration_seconds: number | null;
   recording_url: string | null;
   created_at: string;
+  overall_score: number | null;
+  recommendation: string | null;
+  transcript_preview: string | null;
+  assessment_id: string | null;
 }
 
 const TYPE_LABELS: Record<InterviewType, string> = {
@@ -40,6 +44,7 @@ export function InterviewsPage() {
   const [searchText, setSearchText] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [sourceFilter, setSourceFilter] = useState("");
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -139,19 +144,22 @@ export function InterviewsPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b bg-slate-50">
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 w-8"></th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Candidate</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Type</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Source</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Date</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Duration</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Talk Ratio</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Score</th>
+                <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Assessment</th>
                 <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500">Recording</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {filtered.map((iv) => (
+                <Fragment key={iv.id}>
                 <tr
-                  key={iv.id}
                   onClick={() => {
                     if (iv.candidate_id) navigate(`/assessment/${iv.candidate_id}`);
                   }}
@@ -160,6 +168,23 @@ export function InterviewsPage() {
                     iv.candidate_id && "cursor-pointer hover:bg-slate-50"
                   )}
                 >
+                  <td className="px-4 py-3 text-sm">
+                    {iv.transcript_preview ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedRow(expandedRow === iv.id ? null : iv.id);
+                        }}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        {expandedRow === iv.id ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </button>
+                    ) : null}
+                  </td>
                   <td className="px-4 py-3 text-sm font-medium text-slate-900">
                     {iv.candidate_name ?? <span className="text-slate-400">Unlinked</span>}
                   </td>
@@ -186,6 +211,35 @@ export function InterviewsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-sm">
+                    {iv.overall_score != null ? (
+                      <span className={cn(
+                        "inline-flex items-center gap-1 font-medium tabular-nums",
+                        iv.overall_score >= 3.5 ? "text-green-600" :
+                        iv.overall_score >= 2.5 ? "text-amber-600" : "text-red-600"
+                      )}>
+                        {iv.overall_score.toFixed(1)}/5
+                      </span>
+                    ) : (
+                      <span className="text-slate-300">--</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {iv.assessment_id && iv.candidate_id ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/assessment/${iv.candidate_id}`);
+                        }}
+                        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700"
+                      >
+                        <BarChart3 className="h-3.5 w-3.5" />
+                        View
+                      </button>
+                    ) : (
+                      <span className="text-slate-300">--</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
                     {iv.recording_url ? (
                       <a
                         href={iv.recording_url}
@@ -202,6 +256,17 @@ export function InterviewsPage() {
                     )}
                   </td>
                 </tr>
+                {expandedRow === iv.id && iv.transcript_preview && (
+                  <tr key={`${iv.id}-preview`} className="bg-slate-50">
+                    <td colSpan={10} className="px-4 py-3">
+                      <p className="text-xs text-slate-500 font-medium mb-1">Transcript Preview</p>
+                      <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed max-h-40 overflow-y-auto">
+                        {iv.transcript_preview}
+                      </p>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>

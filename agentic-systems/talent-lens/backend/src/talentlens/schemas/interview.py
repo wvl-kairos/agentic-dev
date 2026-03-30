@@ -37,5 +37,9 @@ class InterviewListResponse(BaseModel):
     duration_seconds: int | None
     recording_url: str | None = None
     created_at: datetime
+    overall_score: float | None = None
+    recommendation: str | None = None
+    transcript_preview: str | None = None
+    assessment_id: uuid.UUID | None = None
 
     model_config = {"from_attributes": True}
