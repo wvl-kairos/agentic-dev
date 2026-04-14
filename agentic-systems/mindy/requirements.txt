@@ -1,0 +1,6 @@
+anthropic>=0.25.0
+requests>=2.31.0
+slack-sdk>=3.27.0
+PyGithub>=2.3.0
+python-dateutil>=2.9.0
+pytest>=8.0.0
