@@ -71,7 +71,7 @@ def load_config() -> Config:
         anthropic_api_key=_require_env("ANTHROPIC_API_KEY"),
         linear_api_key=_require_env("LINEAR_API_KEY"),
         fireflies_api_key=_require_env("FIREFLIES_API_KEY"),
-        github_token=_require_env("GITHUB_TOKEN"),
+        github_token=os.environ.get("GH_PAT") or _require_env("GITHUB_TOKEN"),
         slack_bot_token=_require_env("SLACK_BOT_TOKEN"),
         notion_token=_require_env("NOTION_TOKEN"),
         slack_channel_id=_require_env("SLACK_CHANNEL_ID"),

@@ -20,10 +20,10 @@ def _get_headers(token: str) -> dict:
 
 
 def _get_merged_prs(token: str, repo: str, since: datetime) -> list:
-    """Get PRs merged to develop since the given date."""
+    """Get PRs merged to main since the given date."""
     # Search for merged PRs using the search API
     since_str = since.strftime("%Y-%m-%d")
-    query = f"repo:{repo} is:pr is:merged base:develop merged:>={since_str}"
+    query = f"repo:{repo} is:pr is:merged base:main merged:>={since_str}"
 
     resp = retry_request("GET",
         f"{GITHUB_API}/search/issues",
