@@ -83,7 +83,7 @@ class TestCompileVaultUpdates:
 
         call_kwargs = MockClient.return_value.messages.create.call_args[1]
         assert call_kwargs["model"] == "claude-sonnet-4-20250514"
-        assert call_kwargs["max_tokens"] == 4096
+        assert call_kwargs["max_tokens"] == 16384
         assert "knowledge base compiler" in call_kwargs["system"]
 
 

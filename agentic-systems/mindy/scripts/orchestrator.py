@@ -81,8 +81,8 @@ def main():
     logger.info("Step 3/5: Compiling vault updates via Claude...")
     try:
         vault_updates = claude_client.compile_vault_updates(raw_data, vault_context, cfg)
-    except NotImplementedError:
-        logger.info("[SKIP] compile_vault_updates not yet implemented")
+    except Exception as exc:
+        logger.warning("Vault compilation failed (non-fatal): %s", exc)
         vault_updates = {}
 
     try:

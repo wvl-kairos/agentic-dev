@@ -145,7 +145,7 @@ Please compile the vault updates. Return ONLY the JSON object, no prose."""
     logger.info("Calling Claude for vault compilation...")
     message = client.messages.create(
         model=cfg.claude_model,
-        max_tokens=4096,
+        max_tokens=16384,
         system=VAULT_COMPILER_SYSTEM,
         messages=[{"role": "user", "content": user_content}],
     )

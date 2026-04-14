@@ -64,7 +64,7 @@ def _get_completed_issues(api_key: str, team_id: str, since: str) -> list:
                         state: { type: { eq: "completed" } }
                     }
                     first: 100
-                    orderBy: completedAt
+                    orderBy: updatedAt
                 ) {
                     nodes {
                         id
