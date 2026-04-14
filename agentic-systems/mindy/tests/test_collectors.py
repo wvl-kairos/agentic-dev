@@ -162,34 +162,59 @@ class TestFirefliesCollector:
 class TestNotionCollector:
     PATCH_TARGET = "collectors.notion_collector.retry_request"
 
-    def test_collect_extracts_title_and_url(self):
-        resp = _mock_resp({"results": [
+    def test_collect_returns_recent_pages_and_merge_docs(self):
+        search_resp = _mock_resp({"results": [
             {
                 "id": "page-1",
                 "url": "https://notion.so/page-1",
                 "created_time": "2026-04-10T12:00:00Z",
+                "last_edited_time": "2026-04-11T12:00:00Z",
                 "properties": {
-                    "Name": {
-                        "type": "title",
-                        "title": [{"plain_text": "Sprint 10 Merge Doc"}],
-                    }
+                    "Name": {"type": "title", "title": [{"plain_text": "New Spec Doc"}]},
+                },
+            }
+        ]})
+        db_resp = _mock_resp({"results": [
+            {
+                "id": "merge-1",
+                "url": "https://notion.so/merge-1",
+                "created_time": "2026-04-10T12:00:00Z",
+                "properties": {
+                    "Name": {"type": "title", "title": [{"plain_text": "[#42] Fix bug"}]},
                 },
             }
         ]})
 
-        with patch(self.PATCH_TARGET, return_value=resp):
+        with patch(self.PATCH_TARGET, side_effect=[search_resp, db_resp]):
             result = notion_collector.collect(_make_cfg())
 
+        assert len(result["recent_pages"]) == 1
+        assert result["recent_pages"][0]["title"] == "New Spec Doc"
+        assert result["recent_pages"][0]["is_new"] is True
         assert len(result["merge_docs"]) == 1
-        assert result["merge_docs"][0]["title"] == "Sprint 10 Merge Doc"
-        assert result["merge_docs"][0]["url"] == "https://notion.so/page-1"
+        assert result["merge_docs"][0]["title"] == "[#42] Fix bug"
 
-    def test_empty_database(self):
+    def test_merge_docs_failure_is_nonfatal(self):
+        search_resp = _mock_resp({"results": []})
+
+        def side_effects(*args, **kwargs):
+            if "/search" in args[1]:
+                return search_resp
+            raise RuntimeError("401 Unauthorized")
+
+        with patch(self.PATCH_TARGET, side_effect=side_effects):
+            result = notion_collector.collect(_make_cfg())
+
+        assert result["recent_pages"] == []
+        assert result["merge_docs"] == []
+
+    def test_empty_workspace(self):
         resp = _mock_resp({"results": []})
 
         with patch(self.PATCH_TARGET, return_value=resp):
             result = notion_collector.collect(_make_cfg())
 
+        assert result["recent_pages"] == []
         assert result["merge_docs"] == []
 
 
