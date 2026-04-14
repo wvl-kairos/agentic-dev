@@ -10,6 +10,18 @@ logger = logging.getLogger("mindy.collectors.linear")
 LINEAR_API = "https://api.linear.app/graphql"
 REQUEST_TIMEOUT = 30
 
+# Shared fragment for issue fields we care about
+ISSUE_FIELDS = """
+    id
+    identifier
+    title
+    completedAt
+    updatedAt
+    assignee { name }
+    state { name type }
+    project { name }
+"""
+
 
 def _query(api_key: str, query: str, variables: dict = None) -> dict:
     """Execute a Linear GraphQL query with retry."""
@@ -53,124 +65,36 @@ def _get_active_cycle(api_key: str, team_id: str) -> dict | None:
     return cycle
 
 
-def _get_completed_issues(api_key: str, team_id: str, since: str) -> list:
-    """Get issues completed since the given ISO date."""
-    result = _query(api_key, """
-        query($teamId: String!, $since: DateTime!) {
-            team(id: $teamId) {
+def _get_issues_by_state_type(api_key: str, team_id: str, state_type: str) -> list:
+    """Get issues filtered by state type (completed, started, unstarted, etc.)."""
+    result = _query(api_key, f"""
+        query($teamId: String!) {{
+            team(id: $teamId) {{
                 issues(
-                    filter: {
-                        completedAt: { gte: $since }
-                        state: { type: { eq: "completed" } }
-                    }
+                    filter: {{ state: {{ type: {{ eq: "{state_type}" }} }} }}
                     first: 100
                     orderBy: updatedAt
-                ) {
-                    nodes {
-                        id
-                        identifier
-                        title
-                        completedAt
-                        assignee { name }
-                        project { name }
-                    }
-                }
-            }
-        }
-    """, {"teamId": team_id, "since": since})
-
-    issues = result.get("team", {}).get("issues", {}).get("nodes", [])
-    logger.info("Completed issues since %s: %d", since, len(issues))
-    return [
-        {
-            "id": i["id"],
-            "identifier": i["identifier"],
-            "title": i["title"],
-            "completedAt": i["completedAt"],
-            "assignee": (i.get("assignee") or {}).get("name", "Unassigned"),
-            "project": (i.get("project") or {}).get("name", ""),
-        }
-        for i in issues
-    ]
-
-
-def _get_in_progress_issues(api_key: str, team_id: str) -> list:
-    """Get issues currently in progress (started or unstarted with assignee)."""
-    result = _query(api_key, """
-        query($teamId: String!) {
-            team(id: $teamId) {
-                issues(
-                    filter: {
-                        state: { type: { in: ["started"] } }
-                        assignee: { null: false }
-                    }
-                    first: 100
-                ) {
-                    nodes {
-                        id
-                        identifier
-                        title
-                        assignee { name }
-                        state { name }
-                        project { name }
-                    }
-                }
-            }
-        }
+                ) {{
+                    nodes {{ {ISSUE_FIELDS} }}
+                }}
+            }}
+        }}
     """, {"teamId": team_id})
 
-    issues = result.get("team", {}).get("issues", {}).get("nodes", [])
-    logger.info("In-progress issues: %d", len(issues))
-    return [
-        {
-            "id": i["id"],
-            "identifier": i["identifier"],
-            "title": i["title"],
-            "assignee": (i.get("assignee") or {}).get("name", "Unassigned"),
-            "state": (i.get("state") or {}).get("name", ""),
-            "project": (i.get("project") or {}).get("name", ""),
-        }
-        for i in issues
-    ]
+    return result.get("team", {}).get("issues", {}).get("nodes", [])
 
 
-def _get_ready_for_dev(api_key: str, team_id: str) -> list:
-    """Get issues in 'Ready for Dev' state."""
-    result = _query(api_key, """
-        query($teamId: String!) {
-            team(id: $teamId) {
-                issues(
-                    filter: {
-                        state: { name: { eq: "Ready for Dev" } }
-                    }
-                    first: 100
-                ) {
-                    nodes {
-                        id
-                        identifier
-                        title
-                        assignee { name }
-                        state { name }
-                        project { name }
-                    }
-                }
-            }
-        }
-    """, {"teamId": team_id})
-
-    issues = result.get("team", {}).get("issues", {}).get("nodes", [])
-    logger.info("Ready for dev issues: %d", len(issues))
-    return [
-        {
-            "id": i["id"],
-            "identifier": i["identifier"],
-            "title": i["title"],
-            "assignee": (i.get("assignee") or {}).get("name", "Unassigned"),
-            "state": (i.get("state") or {}).get("name", ""),
-            "project": (i.get("project") or {}).get("name", ""),
-        }
-        for i in issues
-    ]
+def _format_issue(issue: dict) -> dict:
+    """Normalize a raw Linear issue into our standard format."""
+    return {
+        "id": issue["id"],
+        "identifier": issue["identifier"],
+        "title": issue["title"],
+        "completedAt": issue.get("completedAt", ""),
+        "assignee": (issue.get("assignee") or {}).get("name", "Unassigned"),
+        "state": (issue.get("state") or {}).get("name", ""),
+        "project": (issue.get("project") or {}).get("name", ""),
+    }
 
 
 def collect(cfg) -> dict:
@@ -178,9 +102,27 @@ def collect(cfg) -> dict:
     since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
 
     cycle = _get_active_cycle(cfg.linear_api_key, cfg.linear_team_id)
-    completed = _get_completed_issues(cfg.linear_api_key, cfg.linear_team_id, since)
-    in_progress = _get_in_progress_issues(cfg.linear_api_key, cfg.linear_team_id)
-    ready_for_dev = _get_ready_for_dev(cfg.linear_api_key, cfg.linear_team_id)
+
+    # Get completed issues, filter by date in Python (avoids GraphQL filter issues)
+    raw_completed = _get_issues_by_state_type(cfg.linear_api_key, cfg.linear_team_id, "completed")
+    completed = [
+        _format_issue(i) for i in raw_completed
+        if (i.get("completedAt") or "") >= since
+    ]
+    logger.info("Completed issues since %s: %d (of %d total)", since[:10], len(completed), len(raw_completed))
+
+    # Get in-progress issues
+    raw_started = _get_issues_by_state_type(cfg.linear_api_key, cfg.linear_team_id, "started")
+    in_progress = [_format_issue(i) for i in raw_started]
+    logger.info("In-progress issues: %d", len(in_progress))
+
+    # Get unstarted issues, filter for "Ready for Dev" in Python
+    raw_unstarted = _get_issues_by_state_type(cfg.linear_api_key, cfg.linear_team_id, "unstarted")
+    ready_for_dev = [
+        _format_issue(i) for i in raw_unstarted
+        if (i.get("state") or {}).get("name") == "Ready for Dev"
+    ]
+    logger.info("Ready for dev issues: %d", len(ready_for_dev))
 
     return {
         "current_cycle": cycle,
