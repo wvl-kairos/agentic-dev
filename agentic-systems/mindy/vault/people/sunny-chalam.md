@@ -6,12 +6,14 @@
 Product Operations Lead
 
 ## Recent work
-- Sprint 10: driving Wabash coordination and onboarding walkthroughs
-- Planning user onboarding at Moreno Valley with spot QA testing
+- Sprint 10: planning user onboarding at Moreno Valley with spot QA testing
+- Coordinating user email lists and provisioning requirements
 - Leading stakeholder coordination and use case prioritization
+- Facilitating onboarding walkthroughs and validation sessions
+- Managing Wabash communication and future release planning
 
 ## Patterns
-Focuses on customer coordination and product validation. Handles onboarding processes and stakeholder management. Active in QA validation and user experience testing.
+Focuses on customer coordination and product validation. Handles onboarding processes and stakeholder management. Active in QA validation and user experience testing. Drives operational coordination.
 
 ## Backlinks
-- [[sprints/2026-15]]
+- [[sprints/2026-16]]
