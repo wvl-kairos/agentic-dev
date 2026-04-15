@@ -16,6 +16,7 @@
 - [[projects/timeline-view]] — Timeline visualization system
 - [[projects/talentlens]] — Interview intelligence platform
 - [[projects/data-tools]] — Ontology and analysis tools
+- [[projects/strategic-buffer-positioning]] — Lead time estimation and buffer management
 
 ## Team
 - [[people/alex-maramaldo]] — Infrastructure Engineer
@@ -29,12 +30,12 @@
 - [[people/luis-suarez]] — Software Engineer
 
 ## Recent decisions
+- Manual user provisioning with Clerk authentication for precise role control
 - Trunk-based development workflow adopted for main branch
 - Staging and production CI/CD environments established
-- Clerk authentication selected for user management
-- Manual user provisioning approach for precise role control
+- Data QA process as shared responsibility across agents and engineers
 
 ## Recent standups
-- [[standups/2026-04-15]] — Production deployment and user onboarding coordination
-- [[standups/2026-04-14]] — AS400 API integration and authentication planning
+- [[standups/2026-04-15]] — User provisioning and production deployment coordination
+- [[standups/2026-04-14]] — AS400 API integration and deployment infrastructure
 - [[standups/2026-04-11]] — Data QA process and pipeline completion
