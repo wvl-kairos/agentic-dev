@@ -37,6 +37,11 @@ class Config:
     github_repo: str = "kairos"
     fireflies_organizer: str = "sunny.chalam@uplabs.us"
     notion_merges_db: str = "30a4f5abefac80f39bd7d2c67a970383"
+    slack_read_channels: list = field(default_factory=lambda: [
+        "C0A0JHS0LSE",   # #engineering
+        "C0A0MUSMHFE",   # #all-kairos
+        "C0AB0GUBX3K",   # #meeting-summaries
+    ])
     notion_merge_docs_url: str = (
         "https://www.notion.so/30a4f5abefac80f39bd7d2c67a970383"
         "?v=30a4f5abefac80e3ba44000c7655213d"

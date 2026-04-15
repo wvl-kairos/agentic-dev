@@ -39,6 +39,7 @@ def _get_channel_history(token: str, channel_id: str, since: datetime) -> list:
             "ts": msg.get("ts", ""),
             "user": msg.get("user", ""),
             "text": msg.get("text", ""),
+            "channel": channel_id,
         }
         for msg in messages
         if msg.get("type") == "message" and not msg.get("subtype")
@@ -46,8 +47,16 @@ def _get_channel_history(token: str, channel_id: str, since: datetime) -> list:
 
 
 def collect(cfg) -> dict:
-    """Collect recent messages from the reporting channel."""
+    """Collect recent messages from multiple read channels."""
     since = datetime.now(timezone.utc) - timedelta(days=7)
-    messages = _get_channel_history(cfg.slack_bot_token, cfg.slack_channel_id, since)
+    all_messages = []
 
-    return {"messages": messages}
+    for channel_id in cfg.slack_read_channels:
+        try:
+            msgs = _get_channel_history(cfg.slack_bot_token, channel_id, since)
+            all_messages.extend(msgs)
+        except Exception as exc:
+            logger.warning("Failed to read channel %s: %s", channel_id, exc)
+
+    logger.info("Total Slack messages collected: %d", len(all_messages))
+    return {"messages": all_messages}

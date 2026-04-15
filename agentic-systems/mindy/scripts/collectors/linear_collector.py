@@ -1,5 +1,7 @@
 """Linear collector — fetches sprint data via GraphQL API."""
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime, timedelta, timezone
 

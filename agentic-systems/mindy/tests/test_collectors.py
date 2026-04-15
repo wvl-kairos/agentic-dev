@@ -27,6 +27,7 @@ def _make_cfg():
     cfg.notion_merges_db = "db-123"
     cfg.slack_bot_token = "xoxb-test"
     cfg.slack_channel_id = "C-test"
+    cfg.slack_read_channels = ["C-eng", "C-kairos", "C-meetings"]
     return cfg
 
 
@@ -223,7 +224,7 @@ class TestNotionCollector:
 class TestSlackCollector:
     PATCH_TARGET = "collectors.slack_collector.retry_request"
 
-    def test_collect_filters_user_messages(self):
+    def test_collect_reads_multiple_channels(self):
         resp = _mock_resp({
             "ok": True,
             "messages": [
@@ -236,13 +237,40 @@ class TestSlackCollector:
         with patch(self.PATCH_TARGET, return_value=resp):
             result = slack_collector.collect(_make_cfg())
 
+        # 3 channels × 2 user messages each = 6
+        assert len(result["messages"]) == 6
+        assert result["messages"][0]["channel"] == "C-eng"
+
+    def test_channel_failure_is_nonfatal(self):
+        ok_resp = _mock_resp({
+            "ok": True,
+            "messages": [
+                {"type": "message", "ts": "1234.5678", "user": "U1", "text": "hello"},
+            ],
+        })
+
+        call_count = 0
+        def side_effects(*args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 2:
+                raise RuntimeError("channel_not_found")
+            return ok_resp
+
+        with patch(self.PATCH_TARGET, side_effect=side_effects):
+            result = slack_collector.collect(_make_cfg())
+
+        # 2 channels succeed with 1 message each, 1 fails
         assert len(result["messages"]) == 2
-        assert result["messages"][0]["text"] == "hello"
-        assert result["messages"][1]["text"] == "world"
 
     def test_raises_on_slack_error(self):
         resp = _mock_resp({"ok": False, "error": "channel_not_found"})
 
+        cfg = _make_cfg()
+        cfg.slack_read_channels = ["C-single"]
+
         with patch(self.PATCH_TARGET, return_value=resp):
-            with pytest.raises(RuntimeError, match="channel_not_found"):
-                slack_collector.collect(_make_cfg())
+            # Single channel failure still captured gracefully
+            result = slack_collector.collect(cfg)
+
+        assert len(result["messages"]) == 0
