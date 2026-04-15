@@ -1,25 +1,36 @@
 # Kairos Knowledge Base — Index
 
-*Last updated: 2026-04-13 by mindy[bot]*
+*Last updated: 2026-04-15 by mindy[bot]*
 
 ## Active sprint
-- (pending first run)
+- [[sprints/2026-15]] — Sprint 10 (Week 2026-15)
 
 ## Projects
-- (auto-populated on first run)
+- [[projects/order-visibility]] — Data pipeline and order management
+- [[projects/application-infrastructure]] — CI/CD, testing, and deployment
+- [[projects/schedule-change-request]] — SCR approval workflows
+- [[projects/schedule-manager]] — Production scheduling system
+- [[projects/order-intelligence-layer-v2]] — Order detail chat and intelligence
+- [[projects/cerebro]] — Intelligence fabric platform
+- [[projects/production-health-metrics]] — Metrics collection infrastructure
 
 ## Team
-- [[people/rob-patrick]] — (role TBD)
-- [[people/alex-maramaldo]] — (role TBD)
+- [[people/alex-maramaldo]] — Infrastructure Engineer
+- [[people/evandro-machado]] — Full-Stack Engineer
 - [[people/antwoine-flowers]] — CPTO
-- [[people/tomas-palomo]] — (role TBD)
+- [[people/tomas-palomo]] — Systems Architect
 - [[people/armando-lopez]] — Head of Agentic Development
-- [[people/evandro-machado]] — (role TBD)
-- [[people/amanda-cunha]] — (role TBD)
-- [[people/sunny-chalam]] — (role TBD)
+- [[people/amanda-cunha]] — Design Systems Engineer
+- [[people/rob-patrick]] — Engineering Manager
+- [[people/sunny-chalam]] — Product Operations Lead
 
 ## Recent decisions
-- (none yet)
+- Trunk-based development workflow adopted for main branch
+- Staging and production CI/CD environments established
+- Clerk authentication selected for user management
+- Manual user provisioning approach for precise role control
 
 ## Recent standups
-- (none yet)
+- [[standups/2026-04-14]] — Production deployment planning
+- [[standups/2026-04-11]] — AS400 API integration coordination
+- [[standups/2026-04-10]] — QA process and data validation
