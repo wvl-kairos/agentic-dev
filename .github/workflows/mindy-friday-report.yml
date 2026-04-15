@@ -53,7 +53,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          SLACK_CHANNEL_ID: C0AB0GUBX3K
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
           REPORT_TYPE: friday
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python scripts/orchestrator.py
@@ -73,8 +73,9 @@ jobs:
         working-directory: .
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: |
           curl -s -X POST https://slack.com/api/chat.postMessage \
             -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"channel\": \"C0AB0GUBX3K\", \"text\": \"⚠️ *Mindy Friday report failed*\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\nPlease check the logs.\"}"
+            -d "{\"channel\": \"$SLACK_CHANNEL_ID\", \"text\": \"⚠️ *Mindy Friday report failed*\nWorkflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\nPlease check the logs.\"}"
