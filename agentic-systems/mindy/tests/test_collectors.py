@@ -359,13 +359,17 @@ class TestFirefliesCollector:
 class TestNotionCollector:
     PATCH_TARGET = "collectors.notion_collector.retry_request"
 
+    # Use recent dates so time-window filters always pass
+    RECENT_TS = (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    RECENT_TS_EDIT = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     def test_collect_returns_recent_pages_and_merge_docs(self):
         search_resp = _mock_resp({"results": [
             {
                 "id": "page-1",
                 "url": "https://notion.so/page-1",
-                "created_time": "2026-04-10T12:00:00Z",
-                "last_edited_time": "2026-04-11T12:00:00Z",
+                "created_time": self.RECENT_TS,
+                "last_edited_time": self.RECENT_TS_EDIT,
                 "properties": {
                     "Name": {"type": "title", "title": [{"plain_text": "New Spec Doc"}]},
                 },
@@ -375,7 +379,7 @@ class TestNotionCollector:
             {
                 "id": "merge-1",
                 "url": "https://notion.so/merge-1",
-                "created_time": "2026-04-10T12:00:00Z",
+                "created_time": self.RECENT_TS,
                 "properties": {
                     "Name": {"type": "title", "title": [{"plain_text": "[#42] Fix bug"}]},
                 },

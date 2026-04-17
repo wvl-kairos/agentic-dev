@@ -63,7 +63,7 @@ class TestSplitAndPost:
         mock_post.assert_called_once()
 
     def test_long_message_splits_on_newline(self):
-        part1 = "A" * 1800 + "\n"
+        part1 = "A" * 2900 + "\n"
         part2 = "B" * 200
         text = part1 + part2
         with patch("slack_poster._make_session") as mock_sess:
@@ -75,7 +75,7 @@ class TestSplitAndPost:
         assert m_reply.call_count == 1
 
     def test_no_newline_forces_hard_cut(self):
-        text = "X" * 2500  # no newlines
+        text = "X" * 4000  # no newlines
         with patch("slack_poster._make_session") as mock_sess:
             mock_sess.return_value = _mock_session()
             with patch("slack_poster.post_message", return_value="ts-004") as m_post, \
