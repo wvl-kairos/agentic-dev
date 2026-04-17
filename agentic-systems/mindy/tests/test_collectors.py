@@ -1,5 +1,6 @@
 """Tests for all 5 collectors with mocked HTTP responses."""
 
+import json
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
 
@@ -16,6 +17,7 @@ from collectors import (
 
 def _make_cfg():
     cfg = MagicMock()
+    cfg.anthropic_api_key = "sk-ant-test"
     cfg.linear_api_key = "lin-test"
     cfg.linear_team_id = "team-123"
     cfg.github_token = "gh-test"
@@ -130,16 +132,49 @@ class TestGitHubCollector:
 
 # === Fireflies collector ===
 
+def _mock_haiku_response(sensitive: bool, reason: str = "test"):
+    """Create a mock Anthropic message response for sensitivity check."""
+    msg = MagicMock()
+    msg.content = [MagicMock(text=json.dumps({"sensitive": sensitive, "reason": reason}))]
+    return msg
+
+
+def _ff_transcript(
+    id="t1", title="Sprint Planning", organizer="sunny@test.com",
+    participants=None, overview="Discussed sprint goals",
+):
+    """Build a Fireflies transcript dict for testing."""
+    if participants is None:
+        participants = ["Rob", "Alex", "Sunny"]
+    return {
+        "id": id, "title": title, "date": "2026-04-10",
+        "organizer_email": organizer,
+        "participants": participants,
+        "summary": {
+            "action_items": ["Fix bug"],
+            "overview": overview,
+            "shorthand_bullet": ["Fix bug"],
+        },
+    }
+
+
 class TestFirefliesCollector:
     PATCH_TARGET = "collectors.fireflies_collector.retry_request"
+    LLM_PATCH = "collectors.fireflies_collector.anthropic.Anthropic"
+
+    def _api_resp(self, transcripts):
+        return _mock_resp({"data": {"transcripts": transcripts}})
 
     def test_collect_filters_by_organizer(self):
-        resp = _mock_resp({"data": {"transcripts": [
-            {"id": "t1", "title": "Standup", "date": "2026-04-10", "organizer_email": "sunny@test.com", "participants": ["Rob", "Alex"], "summary": {"action_items": ["Fix bug"], "overview": "Discussed sprint", "shorthand_bullet": ["Fix bug"]}},
-            {"id": "t2", "title": "Other meeting", "date": "2026-04-10", "organizer_email": "other@test.com", "participants": [], "summary": None},
-        ]}})
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Standup"),
+            _ff_transcript(id="t2", title="Other meeting", organizer="other@test.com"),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(False)
 
-        with patch(self.PATCH_TARGET, return_value=resp):
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
             result = fireflies_collector.collect(_make_cfg())
 
         assert len(result["standups"]) == 1
@@ -147,15 +182,173 @@ class TestFirefliesCollector:
         assert result["standups"][0]["action_items"] == ["Fix bug"]
 
     def test_handles_null_summary(self):
-        resp = _mock_resp({"data": {"transcripts": [
-            {"id": "t3", "title": "Standup", "date": "2026-04-10", "organizer_email": "sunny@test.com", "participants": [], "summary": None},
-        ]}})
+        t = _ff_transcript(id="t3", title="Standup")
+        t["summary"] = None
+        resp = self._api_resp([t])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(False)
 
-        with patch(self.PATCH_TARGET, return_value=resp):
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
             result = fireflies_collector.collect(_make_cfg())
 
         assert result["standups"][0]["action_items"] == []
         assert result["standups"][0]["overview"] == ""
+
+    # --- Layer 1: Participant count ---
+
+    def test_layer1_skips_meetings_with_fewer_than_3_participants(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="1:1 chat", participants=["Rob", "Alex"]),
+        ])
+
+        with patch(self.PATCH_TARGET, return_value=resp):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == []
+
+    def test_layer1_allows_3_or_more_participants(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", participants=["Rob", "Alex", "Sunny"]),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(False)
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert len(result["standups"]) == 1
+
+    # --- Layer 2: Title keywords ---
+
+    @pytest.mark.parametrize("title", [
+        "Weekly 1:1 with Rob",
+        "One-on-One Sync",
+        "Performance Review Q2",
+        "Salary Discussion",
+        "HR Meeting",
+        "Exit Interview - Alex",
+        "PIP Follow-up",
+        "Confidential: Restructuring",
+    ])
+    def test_layer2_blocks_sensitive_titles(self, title):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title=title, participants=["A", "B", "C"]),
+        ])
+
+        with patch(self.PATCH_TARGET, return_value=resp):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == [], f"Should have blocked title: {title}"
+
+    def test_layer2_allows_normal_titles(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Planning"),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(False)
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert len(result["standups"]) == 1
+
+    # --- Layer 3: LLM sensitivity check ---
+
+    def test_layer3_excludes_when_llm_says_sensitive(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Team Sync"),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(True, "discusses personal matters")
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == []
+
+    def test_layer3_includes_when_llm_says_not_sensitive(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Retro"),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = _mock_haiku_response(False, "standard team meeting")
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert len(result["standups"]) == 1
+
+    def test_layer3_failsafe_excludes_on_api_error(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Retro"),
+        ])
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.side_effect = Exception("API down")
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == []
+
+    def test_layer3_failsafe_excludes_on_bad_json(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Retro"),
+        ])
+        msg = MagicMock()
+        msg.content = [MagicMock(text="not valid json")]
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = msg
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == []
+
+    def test_layer3_failsafe_excludes_on_missing_key(self):
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Retro"),
+        ])
+        msg = MagicMock()
+        msg.content = [MagicMock(text=json.dumps({"reason": "no sensitive key"}))]
+        mock_client = MagicMock()
+        mock_client.return_value.messages.create.return_value = msg
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert result["standups"] == []
+
+    # --- Integration: filters compose correctly ---
+
+    def test_filters_compose_multiple_transcripts(self):
+        """Mix of passing and failing transcripts across different layers."""
+        resp = self._api_resp([
+            _ff_transcript(id="t1", title="Sprint Planning", participants=["A", "B", "C"]),  # passes all
+            _ff_transcript(id="t2", title="Quick chat", participants=["A", "B"]),  # fails L1
+            _ff_transcript(id="t3", title="1:1 with Rob", participants=["A", "B", "C"]),  # fails L2
+            _ff_transcript(id="t4", title="Team Sync", participants=["A", "B", "C"]),  # fails L3
+        ])
+        mock_client = MagicMock()
+        # LLM called only for t1 and t4 (t2 filtered by L1, t3 by L2)
+        mock_client.return_value.messages.create.side_effect = [
+            _mock_haiku_response(False),   # t1: not sensitive
+            _mock_haiku_response(True),    # t4: sensitive
+        ]
+
+        with patch(self.PATCH_TARGET, return_value=resp), \
+             patch(self.LLM_PATCH, mock_client):
+            result = fireflies_collector.collect(_make_cfg())
+
+        assert len(result["standups"]) == 1
+        assert result["standups"][0]["id"] == "t1"
 
 
 # === Notion collector ===
