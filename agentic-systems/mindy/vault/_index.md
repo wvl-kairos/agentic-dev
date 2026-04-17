@@ -1,9 +1,9 @@
 # Kairos Knowledge Base — Index
 
-*Last updated: 2026-04-15 by mindy[bot]*
+*Last updated: 2026-04-16 by mindy[bot]*
 
 ## Active sprint
-- [[sprints/2026-16]] — Sprint 10 (Week 2026-16)
+- [[sprints/2026-17]] — Sprint 11 (Week 2026-17)
 
 ## Projects
 - [[projects/order-visibility]] — Data pipeline and order management
@@ -36,6 +36,6 @@
 - Data QA process as shared responsibility across agents and engineers
 
 ## Recent standups
+- [[standups/2026-04-16]] — Timeline View design approval and Vercel deployment improvements
 - [[standups/2026-04-15]] — User provisioning and production deployment coordination
 - [[standups/2026-04-14]] — AS400 API integration and deployment infrastructure
-- [[standups/2026-04-11]] — Data QA process and pipeline completion

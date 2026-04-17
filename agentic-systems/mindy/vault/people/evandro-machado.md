@@ -1,21 +1,21 @@
 # Evandro Machado
 
-*Last updated: 2026-04-15*
+*Last updated: 2026-04-16*
 
 ## Role
 Full-Stack Engineer
 
 ## Recent work
-- Sprint 10: exceptional velocity with 24+ completed issues including Release 1 bug fixes (PDEV-757), SCR approval processes (PDEV-627), database model improvements (PDEV-746), and extensive UI polish
-- Implemented Clerk authentication user provisioning with metadata for roles and departments
-- Led email notification infrastructure development for SCR approvals
-- Working on production deployment fixes and auto-approval timeframes
-- 6 merged PRs spanning UI improvements, email systems, and database changes
+- Sprint 11: completed production deployment fixes (PDEV-810), order terminology updates (PDEV-816), Orders Table implementation (PDEV-364), and SCR email notifications (PDEV-485, PDEV-356, PDEV-357)
+- Delivered critical production stability fixes including null guards, server-side filtering, and schema updates
+- Working on staging email fixes and order filtering improvements
+- Continued high velocity with multiple SCR approval features and UI enhancements
+- 4 merged PRs including major production deployment fixes
 
 ## Patterns
-High-output developer handling both frontend and backend work. Strong focus on production readiness and user experience polish. Frequently tackles batch fixes and system integration work. Leads user onboarding technical implementation.
+Maintains exceptional velocity with production-critical fixes and feature development. Strong focus on both frontend polish and backend infrastructure. Consistently handles urgent production issues while advancing feature development. Expert in SCR workflow implementation and email notification systems.
 
 ## Backlinks
-- [[sprints/2026-16]]
+- [[sprints/2026-17]]
 - [[projects/schedule-change-request]]
 - [[projects/order-visibility]]

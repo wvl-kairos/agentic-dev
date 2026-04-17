@@ -1,20 +1,20 @@
 # Tomas Palomo
 
-*Last updated: 2026-04-15*
+*Last updated: 2026-04-16*
 
 ## Role
 Systems Architect
 
 ## Recent work
-- Sprint 10: completed Phase 1 documentation for Schedule Manager (PDEV-720), working on architecture diagram (PDEV-745) and metrics collection infrastructure (PDEV-808)
-- Following trunk-based development workflow for monorepo commits
-- Preparing visual presentations on schedule change approvals
-- Finalizing scheduler manager system diagrams and documentation
+- Sprint 11: working on Production Health Metrics implementation (PDEV-809), Schedule Reversal Metrics (PDEV-811), metrics collection infrastructure (PDEV-808), and Schedule Manager architecture diagram (PDEV-745)
+- Expanding metrics infrastructure across multiple production health components
+- Developing comprehensive monitoring for nervousness, stability, lead time, and OTD metrics
+- Continuing Schedule Manager system documentation and architectural planning
 
 ## Patterns
-Focused on system design and documentation. Handles architectural planning and technical specifications. Strong emphasis on visual communication and system diagrams. Adapts workflow practices to team standards.
+Focused on production metrics and system monitoring architecture. Handles comprehensive system design and documentation. Strong emphasis on production health visibility and performance measurement. Drives architectural planning for scheduling systems.
 
 ## Backlinks
-- [[sprints/2026-16]]
+- [[sprints/2026-17]]
 - [[projects/schedule-manager]]
 - [[projects/production-health-metrics]]

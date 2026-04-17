@@ -1,21 +1,22 @@
 # Luis Suarez
 
-*Last updated: 2026-04-15*
+*Last updated: 2026-04-16*
 
 ## Role
 Software Engineer
 
 ## Recent work
-- Sprint 10: working on QA agent authentication research (PDEV-752) and Timeline View system design approval (PDEV-777)
-- Increased participation in daily standups and team coordination
-- Collaborating with Evandro on AS400 integration testing and knowledge transfer
-- Scheduled engineering syncs with team members for technical and product discussions
-- Contributing to data QA ticket creation and ownership assignment
+- Sprint 11: completed Timeline View system design approval (PDEV-777), improved Vercel deployment workflows (#98), working on production deployment pipeline (PDEV-820)
+- Enhanced Vercel deployment workflows with stable URLs and controllable preview deploys
+- Continuing AS400 integration change control process and QA agent authentication research
+- Contributing to production deployment infrastructure and environment management
+- 1 merged PR focusing on deployment workflow improvements
 
 ## Patterns
-Focuses on authentication systems and QA processes. Active in cross-team collaboration and knowledge sharing. Handles system design validation and technical research. Growing involvement in infrastructure and integration work.
+Focuses on deployment infrastructure and system design validation. Active in CI/CD improvements and authentication systems. Strong collaboration on production deployment processes. Growing expertise in Vercel deployment management and workflow optimization.
 
 ## Backlinks
-- [[sprints/2026-16]]
+- [[sprints/2026-17]]
 - [[projects/application-infrastructure]]
 - [[projects/timeline-view]]
+- [[projects/schedule-change-request]]
