@@ -5,7 +5,7 @@ import requests
 
 logger = logging.getLogger("mindy.slack")
 
-SLACK_MAX_CHARS = 1900
+SLACK_MAX_CHARS = 3000
 MAX_CHUNKS = 20
 MAX_RETRIES = 3
 
