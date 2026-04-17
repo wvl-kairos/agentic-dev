@@ -2,7 +2,7 @@
 
 import json
 from unittest.mock import MagicMock, patch
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -47,6 +47,9 @@ def _mock_resp(json_data):
 class TestLinearCollector:
     PATCH_TARGET = "collectors.linear_collector.retry_request"
 
+    # Use a recent date so the 7-day window filter always passes
+    RECENT_DATE = (datetime.now(timezone.utc) - timedelta(days=2)).strftime("%Y-%m-%d")
+
     def _gql_resp(self, data):
         return _mock_resp({"data": data})
 
@@ -56,7 +59,7 @@ class TestLinearCollector:
         })
         issues_resp = self._gql_resp({
             "team": {"issues": {"nodes": [
-                {"id": "i1", "identifier": "PDEV-100", "title": "Test issue", "completedAt": "2026-04-10", "assignee": {"name": "Rob Patrick"}, "project": {"name": "C1"}}
+                {"id": "i1", "identifier": "PDEV-100", "title": "Test issue", "completedAt": self.RECENT_DATE, "assignee": {"name": "Rob Patrick"}, "project": {"name": "C1"}}
             ]}}
         })
         in_progress_resp = self._gql_resp({"team": {"issues": {"nodes": []}}})
@@ -76,7 +79,7 @@ class TestLinearCollector:
         cycle_resp = self._gql_resp({"team": {"activeCycle": None}})
         issues_resp = self._gql_resp({
             "team": {"issues": {"nodes": [
-                {"id": "i2", "identifier": "PDEV-200", "title": "No assignee", "completedAt": "2026-04-10", "assignee": None, "project": None}
+                {"id": "i2", "identifier": "PDEV-200", "title": "No assignee", "completedAt": self.RECENT_DATE, "assignee": None, "project": None}
             ]}}
         })
         empty_resp = self._gql_resp({"team": {"issues": {"nodes": []}}})
