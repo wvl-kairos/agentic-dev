@@ -13,7 +13,7 @@ CTPO
 - Leading autonomous agent development for data engineering workflows
 
 ## Patterns
-Balances strategic AI/data platform development with hands-on implementation. Drives innovation in autonomous data exploration and knowledge graph construction. Focus on infrastructure for AI-assisted development workflows. Strong technical leadership in agent-based systems. Delivers breakthrough capabilities in autonomous data engineering and ERP exploration.
+Balances strategic AI/data platform development with hands-on implementation. Drives innovation in autonomous data exploration and knowledge graph construction. Focus on infrastructure for AI-assisted development workflows. Strong technical leadership in agent-based systems. Delivers breakthrough capabilities in autonomous data engineering and ERP exploration. Major milestone with Databricks-native Data Engineer Agent.
 
 ## Backlinks
 - [[sprints/2026-17]]

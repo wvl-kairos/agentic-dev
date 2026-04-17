@@ -13,7 +13,7 @@ Systems Architect
 - Focus on production monitoring and system architecture
 
 ## Patterns
-Focused on production metrics and system monitoring architecture. Handles comprehensive system design and documentation. Strong emphasis on production health visibility and performance measurement. Drives architectural planning for scheduling systems. Expanding expertise in metrics infrastructure and monitoring systems.
+Focused on production metrics and system monitoring architecture. Handles comprehensive system design and documentation. Strong emphasis on production health visibility and performance measurement. Drives architectural planning for scheduling systems. Expanding expertise in metrics infrastructure and monitoring systems with comprehensive production health metrics work.
 
 ## Backlinks
 - [[sprints/2026-17]]
