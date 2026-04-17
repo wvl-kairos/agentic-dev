@@ -1,6 +1,6 @@
 # Kairos Knowledge Base — Index
 
-*Last updated: 2026-04-16 by mindy[bot]*
+*Last updated: 2026-04-17 by mindy[bot]*
 
 ## Active sprint
 - [[sprints/2026-17]] — Sprint 11 (Week 2026-17)
@@ -25,8 +25,6 @@
 - [[people/tomas-palomo]] — Systems Architect
 - [[people/armando-lopez]] — Head of Agentic Development
 - [[people/amanda-cunha]] — Design Systems Engineer
-- [[people/rob-patrick]] — Engineering Manager
-- [[people/sunny-chalam]] — Product Operations Lead
 - [[people/luis-suarez]] — Software Engineer
 
 ## Recent decisions
@@ -36,6 +34,4 @@
 - Data QA process as shared responsibility across agents and engineers
 
 ## Recent standups
-- [[standups/2026-04-16]] — Timeline View design approval and Vercel deployment improvements
-- [[standups/2026-04-15]] — User provisioning and production deployment coordination
-- [[standups/2026-04-14]] — AS400 API integration and deployment infrastructure
+- [[standups/2026-04-17]] — Databricks Data Engineer Agent delivery and production metrics expansion
