@@ -1,9 +1,9 @@
 # Kairos Knowledge Base — Index
 
-*Last updated: 2026-04-17 by mindy[bot]*
+*Last updated: 2026-04-18 by mindy[bot]*
 
 ## Active sprint
-- [[sprints/2026-17]] — Sprint 11 (Week 2026-17)
+- [[sprints/2026-18]] — Sprint 12 (Week 2026-18)
 
 ## Projects
 - [[projects/order-visibility]] — Data pipeline and order management
@@ -34,4 +34,4 @@
 - Data QA process as shared responsibility across agents and engineers
 
 ## Recent standups
-- [[standups/2026-04-17]] — Databricks Data Engineer Agent delivery and production metrics expansion
+- [[standups/2026-04-18]] — Databricks Data Engineer Agent milestone and meeting intelligence advancement
