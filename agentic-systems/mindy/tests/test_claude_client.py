@@ -30,6 +30,7 @@ class TestCompileVaultUpdates:
         vault_updates = {
             "sprint_file": "# Sprint 16",
             "people_updates": {"rob-patrick": "# Rob"},
+            "projects_updates": {"Order Visibility": "# Order Visibility"},
             "index_update": "# Index",
             "standup_notes": "# Standups",
             "new_decisions": [],
@@ -47,6 +48,7 @@ class TestCompileVaultUpdates:
         vault_updates = {
             "sprint_file": "# Sprint",
             "people_updates": {},
+            "projects_updates": {},
             "index_update": "",
             "standup_notes": "",
             "new_decisions": [],
@@ -70,7 +72,7 @@ class TestCompileVaultUpdates:
 
     def test_passes_correct_model(self):
         vault_updates = {
-            "sprint_file": "", "people_updates": {},
+            "sprint_file": "", "people_updates": {}, "projects_updates": {},
             "index_update": "", "standup_notes": "", "new_decisions": [],
         }
         response = _mock_anthropic_response(json.dumps(vault_updates))

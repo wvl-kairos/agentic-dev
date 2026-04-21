@@ -41,6 +41,13 @@ def write_person_file(vault_path: str, name: str, content: str) -> str:
     return _write_file(path, content)
 
 
+def write_project_file(vault_path: str, name: str, content: str) -> str:
+    """Write a project file. Name is the Linear project name, e.g. 'Order Visibility'."""
+    slug = _slugify(name)
+    path = Path(vault_path) / "projects" / f"{slug}.md"
+    return _write_file(path, content)
+
+
 def update_index(vault_path: str, content: str) -> str:
     """Update the vault index."""
     path = Path(vault_path) / "_index.md"
@@ -79,6 +86,7 @@ def write_all(vault_updates: dict, cfg) -> list[str]:
     Expected vault_updates keys:
     - sprint_file: str (full .md content)
     - people_updates: dict {name: str_content}
+    - projects_updates: dict {project_name: str_content}
     - index_update: str
     - standup_notes: str
     - new_decisions: list of {title, content}
@@ -99,8 +107,15 @@ def write_all(vault_updates: dict, cfg) -> list[str]:
 
     # People updates
     for name, content in (vault_updates.get("people_updates") or {}).items():
-        path = write_person_file(vault_path, name, content)
-        written.append(path)
+        if content:
+            path = write_person_file(vault_path, name, content)
+            written.append(path)
+
+    # Project updates
+    for name, content in (vault_updates.get("projects_updates") or {}).items():
+        if content:
+            path = write_project_file(vault_path, name, content)
+            written.append(path)
 
     # Index
     if vault_updates.get("index_update"):
