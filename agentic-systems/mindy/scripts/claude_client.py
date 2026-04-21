@@ -21,6 +21,9 @@ Return a JSON object with exactly these keys:
   "people_updates": {
     "person-name": "full markdown content for this person's profile"
   },
+  "projects_updates": {
+    "Linear Project Name": "full markdown content for this project's file"
+  },
   "index_update": "full markdown content for _index.md",
   "standup_notes": "markdown digest of standup content",
   "new_decisions": [
@@ -71,10 +74,36 @@ For people files, use this template:
 - [[sprints/YYYY-WW]]
 - [[projects/...]]
 
+For project files, use this template:
+# Project Name
+
+*Last updated: YYYY-MM-DD*
+
+## Overview
+(brief description inferred from activity, issues, and prior content)
+
+## Active work
+- PDEV-XXX: title (Owner) — State
+
+## Recently completed
+- PDEV-XXX: title (Owner, Sprint N)
+
+## Contributors
+- FirstName — role/focus on this project
+
+## Notes
+(observations about trajectory, blockers, key milestones)
+
+## Backlinks
+- [[sprints/YYYY-WW]]
+- [[people/first-last]]
+
+Project keys in projects_updates MUST match the Linear project name exactly (e.g. "Order Visibility", "Schedule Change Request") — the writer slugifies them to filenames.
+
 For the index, follow the existing _index.md structure exactly, updating the active sprint, projects list, team list with roles, recent decisions, and recent standups.
 
 If there are no architectural decisions to report, return an empty list for new_decisions.
-Only include people who appear in this week's data."""
+Only include people and projects that appear in this week's data — do not emit placeholders for inactive projects. When updating an existing project or person file, merge the new sprint's activity into the existing content, preserving prior history."""
 
 MINDY_SYSTEM = """You are Mindy, the Kairos team's weekly intelligence anchor at UP Labs.
 
@@ -161,8 +190,8 @@ One-liner sign-off"""
 def compile_vault_updates(raw_data: dict, vault_context: str, cfg) -> dict:
     """Call Claude to compile vault updates from collected data.
 
-    Returns dict with keys: sprint_file, people_updates, index_update,
-    standup_notes, new_decisions.
+    Returns dict with keys: sprint_file, people_updates, projects_updates,
+    index_update, standup_notes, new_decisions.
     """
     client = anthropic.Anthropic(api_key=cfg.anthropic_api_key)
 
@@ -207,7 +236,7 @@ Please compile the vault updates. Return ONLY the JSON object, no prose."""
         raise RuntimeError(f"Claude returned invalid JSON for vault updates: {e}")
 
     # Validate expected keys
-    expected_keys = {"sprint_file", "people_updates", "index_update", "standup_notes", "new_decisions"}
+    expected_keys = {"sprint_file", "people_updates", "projects_updates", "index_update", "standup_notes", "new_decisions"}
     missing = expected_keys - set(vault_updates.keys())
     if missing:
         logger.warning("Vault updates missing keys: %s", missing)

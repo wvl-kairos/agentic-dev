@@ -134,6 +134,11 @@ class TestVaultWriter:
         assert Path(path).exists()
         assert "decisions/use-axon-framework.md" in path
 
+    def test_write_project_file(self, tmp_path):
+        path = vault_writer.write_project_file(str(tmp_path), "Order Visibility", "# Order Visibility\nContent")
+        assert Path(path).exists()
+        assert "projects/order-visibility.md" in path
+
     def test_write_all(self, tmp_path):
         class FakeCfg:
             vault_path = str(tmp_path)
@@ -144,6 +149,10 @@ class TestVaultWriter:
                 "Rob Patrick": "# Rob\nEngineer",
                 "Alex Maramaldo": "# Alex\nData",
             },
+            "projects_updates": {
+                "Order Visibility": "# Order Visibility\nContent",
+                "Schedule Change Request": "# SCR\nContent",
+            },
             "index_update": "# Updated Index",
             "standup_notes": "# Standup digest",
             "new_decisions": [
@@ -152,7 +161,7 @@ class TestVaultWriter:
         }
         written = vault_writer.write_all(vault_updates, FakeCfg())
 
-        assert len(written) == 6  # sprint + 2 people + index + standup + 1 decision
+        assert len(written) == 8  # sprint + 2 people + 2 projects + index + standup + 1 decision
         for path in written:
             assert Path(path).exists()
 
