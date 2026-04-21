@@ -11,16 +11,15 @@ SLACK_API = "https://slack.com/api"
 REQUEST_TIMEOUT = 30
 
 
-def _get_channel_history(token: str, channel_id: str, since: datetime) -> list:
-    """Get recent messages from a Slack channel."""
-    oldest = str(since.timestamp())
-
+def _get_channel_history(token: str, channel_id: str, since: datetime, until: datetime) -> list:
+    """Get messages from a Slack channel within the window."""
     resp = retry_request(
         "GET", f"{SLACK_API}/conversations.history",
         headers={"Authorization": f"Bearer {token}"},
         params={
             "channel": channel_id,
-            "oldest": oldest,
+            "oldest": str(since.timestamp()),
+            "latest": str(until.timestamp()),
             "limit": 200,
         },
         timeout=REQUEST_TIMEOUT,
@@ -48,12 +47,13 @@ def _get_channel_history(token: str, channel_id: str, since: datetime) -> list:
 
 def collect(cfg) -> dict:
     """Collect recent messages from multiple read channels."""
-    since = datetime.now(timezone.utc) - timedelta(days=7)
+    since = cfg.window_since()
+    until = cfg.window_end()
     all_messages = []
 
     for channel_id in cfg.slack_read_channels:
         try:
-            msgs = _get_channel_history(cfg.slack_bot_token, channel_id, since)
+            msgs = _get_channel_history(cfg.slack_bot_token, channel_id, since, until)
             all_messages.extend(msgs)
         except Exception as exc:
             logger.warning("Failed to read channel %s: %s", channel_id, exc)

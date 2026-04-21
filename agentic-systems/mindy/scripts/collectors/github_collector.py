@@ -19,11 +19,11 @@ def _get_headers(token: str) -> dict:
     }
 
 
-def _get_merged_prs(token: str, repo: str, since: datetime) -> list:
-    """Get PRs merged to main since the given date."""
-    # Search for merged PRs using the search API
+def _get_merged_prs(token: str, repo: str, since: datetime, until: datetime) -> list:
+    """Get PRs merged to main within the given date window."""
     since_str = since.strftime("%Y-%m-%d")
-    query = f"repo:{repo} is:pr is:merged base:main merged:>={since_str}"
+    until_str = until.strftime("%Y-%m-%d")
+    query = f"repo:{repo} is:pr is:merged base:main merged:{since_str}..{until_str}"
 
     resp = retry_request("GET",
         f"{GITHUB_API}/search/issues",
@@ -48,14 +48,12 @@ def _get_merged_prs(token: str, repo: str, since: datetime) -> list:
     return prs
 
 
-def _get_commit_authors(token: str, repo: str, since: datetime) -> dict:
-    """Get commit author counts for the past week."""
-    since_str = since.isoformat()
-
+def _get_commit_authors(token: str, repo: str, since: datetime, until: datetime) -> dict:
+    """Get commit author counts for the given window."""
     resp = retry_request("GET",
         f"{GITHUB_API}/repos/{repo}/commits",
         headers=_get_headers(token),
-        params={"since": since_str, "per_page": 100},
+        params={"since": since.isoformat(), "until": until.isoformat(), "per_page": 100},
         timeout=REQUEST_TIMEOUT,
     )
     resp.raise_for_status()
@@ -74,11 +72,12 @@ def _get_commit_authors(token: str, repo: str, since: datetime) -> dict:
 
 def collect(cfg) -> dict:
     """Collect GitHub data: merged PRs and commit authors."""
-    since = datetime.now(timezone.utc) - timedelta(days=7)
+    since = cfg.window_since()
+    until = cfg.window_end()
     repo = f"{cfg.github_org}/{cfg.github_repo}"
 
-    merged_prs = _get_merged_prs(cfg.github_token, repo, since)
-    authors_by_count = _get_commit_authors(cfg.github_token, repo, since)
+    merged_prs = _get_merged_prs(cfg.github_token, repo, since, until)
+    authors_by_count = _get_commit_authors(cfg.github_token, repo, since, until)
 
     return {
         "merged_prs": merged_prs,

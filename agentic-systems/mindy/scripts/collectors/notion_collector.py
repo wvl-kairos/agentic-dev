@@ -29,9 +29,10 @@ def _extract_title(page: dict) -> str:
     return ""
 
 
-def _search_recent_pages(token: str, since: datetime) -> list:
-    """Search entire workspace for pages created or edited in the last N days."""
+def _search_recent_pages(token: str, since: datetime, until: datetime) -> list:
+    """Search entire workspace for pages created or edited within the window."""
     since_str = since.isoformat()
+    until_str = until.isoformat()
 
     resp = retry_request(
         "POST", f"{NOTION_API}/search",
@@ -50,8 +51,10 @@ def _search_recent_pages(token: str, since: datetime) -> list:
     for page in results:
         edited = page.get("last_edited_time", "")
         created = page.get("created_time", "")
-        # Only include pages edited since our cutoff
-        if edited < since_str and created < since_str:
+        # Only include pages active within the window (edited or created between since..until)
+        edited_in_window = since_str <= edited <= until_str
+        created_in_window = since_str <= created <= until_str
+        if not (edited_in_window or created_in_window):
             continue
 
         title = _extract_title(page)
@@ -64,24 +67,27 @@ def _search_recent_pages(token: str, since: datetime) -> list:
             "url": page.get("url", ""),
             "created_time": created,
             "last_edited_time": edited,
-            "is_new": created >= since_str,
+            "is_new": created_in_window,
         })
 
-    logger.info("Notion workspace pages (updated since %s): %d", since_str[:10], len(pages))
+    logger.info("Notion workspace pages (updated %s..%s): %d", since_str[:10], until_str[:10], len(pages))
     return pages
 
 
-def _get_merge_docs(token: str, database_id: str, since: datetime) -> list:
-    """Query the Merges database for recent merge docs."""
+def _get_merge_docs(token: str, database_id: str, since: datetime, until: datetime) -> list:
+    """Query the Merges database for merge docs created within the window."""
     since_str = since.isoformat()
+    until_str = until.isoformat()
 
     resp = retry_request(
         "POST", f"{NOTION_API}/databases/{database_id}/query",
         headers=_get_headers(token),
         json={
             "filter": {
-                "timestamp": "created_time",
-                "created_time": {"on_or_after": since_str},
+                "and": [
+                    {"timestamp": "created_time", "created_time": {"on_or_after": since_str}},
+                    {"timestamp": "created_time", "created_time": {"on_or_before": until_str}},
+                ],
             },
             "sorts": [
                 {"timestamp": "created_time", "direction": "descending"}
@@ -103,21 +109,22 @@ def _get_merge_docs(token: str, database_id: str, since: datetime) -> list:
             "created_time": page.get("created_time", ""),
         })
 
-    logger.info("Notion merge docs since %s: %d", since_str[:10], len(pages))
+    logger.info("Notion merge docs %s..%s: %d", since_str[:10], until_str[:10], len(pages))
     return pages
 
 
 def collect(cfg) -> dict:
     """Collect recent Notion activity: workspace pages + merge docs."""
-    since = datetime.now(timezone.utc) - timedelta(days=7)
+    since = cfg.window_since()
+    until = cfg.window_end()
 
     # 1. Search entire workspace for recent activity
-    recent_pages = _search_recent_pages(cfg.notion_token, since)
+    recent_pages = _search_recent_pages(cfg.notion_token, since, until)
 
     # 2. Query merge docs database (may fail if not shared with integration)
     merge_docs = []
     try:
-        merge_docs = _get_merge_docs(cfg.notion_token, cfg.notion_merges_db, since)
+        merge_docs = _get_merge_docs(cfg.notion_token, cfg.notion_merges_db, since, until)
     except Exception as exc:
         logger.warning("Merge docs query failed (non-fatal): %s", exc)
 

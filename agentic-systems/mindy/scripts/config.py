@@ -1,6 +1,8 @@
 import os
 import logging
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 logger = logging.getLogger("mindy.config")
 
@@ -40,7 +42,7 @@ class Config:
     slack_read_channels: list = field(default_factory=lambda: [
         "C0A0JHS0LSE",   # #engineering
         "C0A0MUSMHFE",   # #all-kairos
-        "C0AB0GUBX3K",   # #meeting-summaries
+        "C0A0N5E52JG",   # #data-team
     ])
     notion_merge_docs_url: str = (
         "https://www.notion.so/30a4f5abefac80f39bd7d2c67a970383"
@@ -49,7 +51,20 @@ class Config:
     vault_path: str = "vault"
     claude_model: str = "claude-sonnet-4-20250514"
 
+    # Time window for collectors. end_date=None means "now".
+    # lookback_days controls how many days before end_date to pull data from.
+    end_date: Optional[datetime] = None
+    lookback_days: int = 7
+
     team_members: list = field(default_factory=list)
+
+    def window_end(self) -> datetime:
+        """End of the collection window — end_date if set, else now (UTC)."""
+        return self.end_date or datetime.now(timezone.utc)
+
+    def window_since(self) -> datetime:
+        """Start of the collection window — window_end minus lookback_days."""
+        return self.window_end() - timedelta(days=self.lookback_days)
 
     def __post_init__(self):
         if self.report_type not in VALID_REPORT_TYPES:

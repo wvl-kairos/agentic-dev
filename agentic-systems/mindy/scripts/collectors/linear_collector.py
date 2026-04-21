@@ -99,7 +99,7 @@ def _format_issue(issue: dict) -> dict:
 
 def collect(cfg) -> dict:
     """Collect all Linear data for the current sprint."""
-    since = (datetime.now(timezone.utc) - timedelta(days=7)).isoformat()
+    since = cfg.window_since().isoformat()
 
     cycle = _get_active_cycle(cfg.linear_api_key, cfg.linear_team_id)
 
