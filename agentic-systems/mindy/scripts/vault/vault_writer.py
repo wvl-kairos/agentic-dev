@@ -55,8 +55,12 @@ def update_index(vault_path: str, content: str) -> str:
 
 
 def write_report_archive(report_type: str, content: str, cfg) -> str:
-    """Archive a report to vault/reports/YYYY-MM-DD-{type}.md."""
-    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    """Archive a report to vault/reports/YYYY-MM-DD-{type}.md.
+
+    Uses cfg.window_end() so backfill runs archive to the simulated date.
+    """
+    ref_date = cfg.window_end() if hasattr(cfg, "window_end") else datetime.now(timezone.utc)
+    today = ref_date.strftime("%Y-%m-%d")
     path = Path(cfg.vault_path) / "reports" / f"{today}-{report_type}.md"
     return _write_file(path, content)
 
@@ -74,10 +78,11 @@ def write_decision(vault_path: str, title: str, content: str) -> str:
     return _write_file(path, content)
 
 
-def _get_current_sprint_id() -> str:
-    """Get current sprint ID in YYYY-WW format."""
-    now = datetime.now(timezone.utc)
-    return f"{now.year}-{now.isocalendar()[1]:02d}"
+def _get_current_sprint_id(ref_date: datetime = None) -> str:
+    """Get sprint ID in YYYY-WW format for the given date (defaults to now UTC)."""
+    ref = ref_date or datetime.now(timezone.utc)
+    iso_year, iso_week, _ = ref.isocalendar()
+    return f"{iso_year}-{iso_week:02d}"
 
 
 def write_all(vault_updates: dict, cfg) -> list[str]:
@@ -97,7 +102,8 @@ def write_all(vault_updates: dict, cfg) -> list[str]:
         return []
 
     vault_path = cfg.vault_path
-    sprint_id = _get_current_sprint_id()
+    ref_date = cfg.window_end() if hasattr(cfg, "window_end") else None
+    sprint_id = _get_current_sprint_id(ref_date)
     written = []
 
     # Sprint file

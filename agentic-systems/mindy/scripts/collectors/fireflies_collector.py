@@ -69,8 +69,8 @@ def _query(api_key: str, query: str, variables: dict = None) -> dict:
     return data.get("data", {})
 
 
-def _get_transcripts(api_key: str, organizer_email: str, since: datetime) -> list:
-    """Get standup transcripts from the past week."""
+def _get_transcripts(api_key: str, organizer_email: str, since: datetime, until: datetime) -> list:
+    """Get standup transcripts within the given date window."""
     result = _query(api_key, """
         query($fromDate: DateTime, $toDate: DateTime) {
             transcripts(fromDate: $fromDate, toDate: $toDate) {
@@ -88,7 +88,7 @@ def _get_transcripts(api_key: str, organizer_email: str, since: datetime) -> lis
         }
     """, {
         "fromDate": since.isoformat(),
-        "toDate": datetime.now(timezone.utc).isoformat(),
+        "toDate": until.isoformat(),
     })
 
     transcripts = result.get("transcripts") or []
@@ -147,6 +147,9 @@ def _llm_sensitivity_check(api_key: str, title: str, overview: str) -> bool:
             }],
         )
         raw = message.content[0].text.strip()
+        if raw.startswith("```"):
+            lines = [l for l in raw.split("\n") if not l.strip().startswith("```")]
+            raw = "\n".join(lines)
         result = json.loads(raw)
         return result["sensitive"]
     except Exception as exc:
@@ -179,8 +182,9 @@ def _is_safe_for_sharing(transcript: dict, api_key: str) -> bool:
 
 def collect(cfg) -> dict:
     """Collect standup data from Fireflies."""
-    since = datetime.now(timezone.utc) - timedelta(days=7)
-    standups = _get_transcripts(cfg.fireflies_api_key, cfg.fireflies_organizer, since)
+    since = cfg.window_since()
+    until = cfg.window_end()
+    standups = _get_transcripts(cfg.fireflies_api_key, cfg.fireflies_organizer, since, until)
 
     before = len(standups)
     standups = [s for s in standups if _is_safe_for_sharing(s, cfg.anthropic_api_key)]
