@@ -30,6 +30,10 @@ def _make_cfg():
     cfg.slack_bot_token = "xoxb-test"
     cfg.slack_channel_id = "C-test"
     cfg.slack_read_channels = ["C-eng", "C-kairos", "C-meetings"]
+    # Window defaults: last 7 days ending now
+    now = datetime.now(timezone.utc)
+    cfg.window_end.return_value = now
+    cfg.window_since.return_value = now - timedelta(days=7)
     return cfg
 
 

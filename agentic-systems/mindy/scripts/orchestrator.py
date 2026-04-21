@@ -62,11 +62,8 @@ def run_collectors(cfg):
     return results
 
 
-def main():
-    logger.info("=== Mindy Orchestrator ===")
-
-    # 1. Load config
-    cfg = load_config()
+def orchestrate(cfg):
+    """Run one full Mindy cycle against the provided config."""
     logger.info("Report type: %s | Dry run: %s", cfg.report_type, cfg.dry_run)
 
     # 2. Run all collectors
@@ -127,6 +124,11 @@ def main():
         logger.info("Posted to Slack (ts=%s)", ts)
 
     logger.info("=== Done ===")
+
+
+def main():
+    logger.info("=== Mindy Orchestrator ===")
+    orchestrate(load_config())
 
 
 if __name__ == "__main__":
