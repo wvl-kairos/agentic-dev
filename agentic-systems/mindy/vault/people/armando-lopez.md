@@ -1,22 +1,22 @@
 # Armando Lopez
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-24*
 
 ## Role
 Head of Agentic Development
 
 ## Recent work
-- Sprint 13 Week 17: delivered major meeting intelligence breakthrough with comprehensive 4-ticket milestone completion including auto-post per-meeting summary to venture Slack channel (PDEV-813), venture auto-tagging via Fireflies API (PDEV-814), venture-scoped post-meeting Q&A via Mindy (PDEV-812), and sensitivity filter for Fireflies meeting transcripts (PDEV-829)
-- Current focus: backend connection debugging with Postgres, pipeline testing for interview evaluation with selective audio/video content processing, automated documentation enhancements, Cerebro Intelligence Fabric platform development (PDEV-682)
-- Working on TalentLens interview intelligence platform with multiple features in Ready for Dev state
-- Advancing weekly reporting using APIs and agentic systems with dynamic memory and knowledge graph in Obsidian
-- Completed agentic E2E QA reviews implementation and meeting classification system within Fireflies
+- Sprint 14 Week 18: completed adversarial research on state-of-the-art agent evaluation frameworks (PDEV-873), advanced QA automation with Mindy integration for app testing, working on agent framework harness development, completed transcript analysis filters for sensitive data protection
+- Previous major achievement: delivered comprehensive meeting intelligence platform with 4-ticket milestone completion
+- Current focus: agent evaluation framework development, QA automation implementation, Cerebro Intelligence Fabric platform development (PDEV-682)
+- Working on TalentLens interview intelligence platform features and automated documentation systems
+- Advancing transcript analysis tools and quality assurance ticket preparation
 
 ## Patterns
-Specializes in AI/ML platform development and agentic systems architecture. Demonstrates exceptional capability in end-to-end workflow automation and productivity enhancement with major milestone achievements. Leading meeting intelligence automation and comprehensive team productivity tools. Shows consistent innovation in automated systems and workflow optimization. Expert in automated documentation systems, merge tracking workflows, and meeting summarization capabilities. Strong focus on interview intelligence platform development and evaluation framework coordination.
+Specializes in AI/ML platform development and agentic systems architecture with strong focus on evaluation frameworks and quality assurance automation. Demonstrates exceptional capability in research-driven development and comprehensive platform integration. Leading innovation in automated testing and QA systems with agent-driven approaches. Shows consistent advancement in meeting intelligence automation and workflow optimization. Expert in transcript analysis, sensitive data filtering, and automated documentation systems. Strong coordination with team on agent evaluation and quality frameworks.
 
 ## Backlinks
-- [[sprints/2026-17]]
-- [[projects/cerebro]]
+- [[sprints/2026-18]]
 - [[projects/investigating-gen-ai-tooling]]
+- [[projects/cerebro]]
 - [[projects/talentlens]]

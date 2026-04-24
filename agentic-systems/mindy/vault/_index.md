@@ -1,22 +1,23 @@
 # Kairos Knowledge Base — Index
 
-*Last updated: 2026-04-21 by mindy[bot]*
+*Last updated: 2026-04-24 by mindy[bot]*
 
 ## Active sprint
-- [[sprints/2026-17]] — Sprint 13 Week 2026-17
+- [[sprints/2026-18]] — Sprint 14 Week 2026-18
 
 ## Projects
-- [[projects/application-infrastructure]] — CI/CD, testing, deployment automation with production deployment pipeline milestone and fixed staging URLs implementation
-- [[projects/order-visibility]] — Data pipeline and order management with exceptional Orders Table delivery and comprehensive backend-frontend alignment
-- [[projects/schedule-change-request]] — SCR approval workflows and email notifications with comprehensive automation and exceptional multi-department coordination
-- [[projects/investigating-gen-ai-tooling]] — Meeting intelligence platform with breakthrough 4-ticket milestone achievement and automated productivity enhancement
+- [[projects/application-infrastructure]] — CI/CD, testing, deployment automation with production URL finalization and comprehensive security improvements
+- [[projects/order-visibility]] — Data pipeline and order management with ISA-95 entity alignment and build complexity integration
+- [[projects/schedule-change-request]] — SCR approval workflows and email notifications with approval group management and deletion capabilities
+- [[projects/investigating-gen-ai-tooling]] — Meeting intelligence platform with agent evaluation framework development and QA automation implementation
 - [[projects/timeline-view]] — Timeline visualization system with approved design and phased development approach for schedule canvas implementation
-- [[projects/schedule-manager]] — Production scheduling system with comprehensive documentation and architecture diagram development
-- [[projects/production-health-metrics-dashboard]] — Metrics collection infrastructure with nervousness, stability, and production health monitoring
+- [[projects/schedule-manager]] — Production scheduling system with architecture diagram completion and schedule implication calculation development
+- [[projects/production-health-metrics-dashboard]] — Metrics collection infrastructure with comprehensive production health monitoring and schedule reversal analysis
 - [[projects/cerebro]] — Intelligence fabric platform with ongoing development and agentic systems architecture
 - [[projects/talentlens]] — Interview intelligence platform with multiple features in development pipeline
 - [[projects/strategic-buffer-positioning]] — Lead time estimation and buffer management development
 - [[projects/data-tools]] — Data profiling and ontology development with quality validation capabilities
+- [[projects/agent-harness-foundation]] — Agent evaluation framework with state-of-the-art research integration and quality assurance automation
 
 ## Team
 - [[people/luis-suarez]] — Engineering Tech Lead
@@ -30,17 +31,15 @@
 - [[people/sunny-chalam]] — Product Operations Lead
 
 ## Recent decisions
-- Engineering Tech Lead establishment for Luis Suarez with production infrastructure leadership and team coordination
-- Meeting Intelligence Platform 4-ticket milestone implementation with comprehensive automation breakthrough
-- Fixed staging URLs implementation for deployment stability and customer communication enhancement
-- Trunk-based development adoption with main branch as primary integration point
-- Project-based standup methodology transition for improved team coordination and visibility
-- Spec-driven engineering process documentation for consistent development approach
-- Technical decision filtering framework establishment with Alex and Luis as designated leads
-- QA process establishment as shared responsibility across development stages
+- Agent evaluation framework development with state-of-the-art research integration and comprehensive quality assurance automation
+- Cloud Design migration implementation with collaboration improvements and team coordination enhancement
+- ISA-95 entity alignment completion with production jobs silver table implementation for enhanced data architecture
+- Schedule Manager architecture diagram completion with comprehensive technical specifications and implementation planning
+- Silver-aligned PostgreSQL tables development for enhanced database architecture and system integration
+- Production health metrics infrastructure implementation with nervousness, stability, and schedule reversal analysis
+- Branch protection enforcement establishment for improved security posture and development workflow protection
+- Product feedback prioritization system implementation for rapid iteration and pilot phase coordination
 
 ## Recent standups
-- [[standups/2026-04-21]] — Major infrastructure milestones and meeting intelligence breakthrough with fixed staging URLs implementation
-- [[standups/2026-04-20]] — Production deployment pipeline advancement and staging environment stability focus
-- [[standups/2026-04-19]] — Team coordination improvements and workflow optimization implementation
-- [[standups/2026-04-18]] — Comprehensive feature delivery and infrastructure development progress
+- [[standups/2026-04-24]] — Cloud Design migration progress, QA automation implementation, and architecture documentation advancement
+

@@ -1,40 +1,36 @@
 # Schedule Change Request
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-24*
 
 ## Overview
-SCR approval workflows, department routing, email notifications, and change control processes for production schedule modifications with comprehensive automation capabilities, multi-department coordination, and exceptional delivery progress.
+SCR approval workflows, department routing, email notifications, and change control processes for production schedule modifications with comprehensive automation capabilities and enhanced approval group management.
 
 ## Active work
+- PDEV-822: Create Penske and Ryder approval groups (Evandro Machado) — In Progress
+- PDEV-825: Allow submitter to delete their SCR while under review (Evandro Machado) — In Progress
 - PDEV-680: Complete Wabash Change Control Process for AS400 Boomi Writeback (luis.suarez@uplabs.us) — In Progress
-- PDEV-486: SCR Modifications Only Permitted Within 8 Weeks of Offline Date (Evandro Machado) — PR Review
-- AS400 integration advancement for BOOMI API writeback capabilities
-- Multi-department approval workflow testing and validation
-- Change control process coordination with Wabash stakeholders
+- UI placement coordination for schedule change request deletion icons
+- Software deletes functionality investigation and database refactor alignment
 
 ## Recently completed
+- PDEV-486: SCR Modifications Only Permitted Within 8 Weeks of Offline Date (Evandro Machado, Sprint 14)
 - PDEV-505: Auto-Approval Timeframe for Department SCR Reviews (Evandro Machado, Sprint 13)
 - PDEV-485: SCR Approval Requires Sign-Off from All Necessary Departments (Evandro Machado, Sprint 13)
 - PDEV-356: Email Notification to Approval Group (Evandro Machado, Sprint 13)
 - PDEV-357: Email Notification Confirming Status (Evandro Machado, Sprint 13)
-- PDEV-627: SCR Group Approval Process — Moreno Valley (Evandro Machado, Sprint 13)
-- Comprehensive SCR approval workflow automation with exceptional delivery
-- Email notification infrastructure for approval requests and status confirmations
-- Department routing and approval workflow implementation with multi-department coordination
+- Comprehensive SCR timeframe restrictions and approval workflow automation
 
 ## Contributors
-- Evandro — comprehensive SCR workflow implementation with exceptional productivity, email systems development, approval automation, department routing coordination
-- Luis — AS400 integration and change control processes as Engineering Tech Lead, multi-department approval implementation coordination
-- Amanda — UI/UX improvements and design coordination
-- Alex — backend support and data integration
-- Rob — stakeholder coordination and change control oversight
-- Sunny — customer coordination and requirements gathering
+- Evandro — comprehensive SCR functionality development including approval groups, timeframe restrictions, deletion capabilities, UI coordination with design team
+- Luis — AS400 integration advancement and Boomi API coordination as Engineering Tech Lead
+- Amanda — UI design coordination for deletion icons and user experience optimization
+- Alex — backend support and data integration coordination
 
 ## Notes
-Exceptional progress in Sprint 13 with comprehensive SCR functionality delivered including all major approval workflows, email notifications, and department routing. Auto-approval timeframe implemented with comprehensive automation capabilities. AS400 integration advancement progressing with Luis leading change control process for BOOMI API writeback. Email notification infrastructure provides complete automation of approval request and status confirmation processes. Multi-department approval coordination advancing with production readiness focus. Outstanding delivery velocity from Evandro across multiple complex workflow features.
+Continued advancement in SCR functionality with Penske and Ryder approval groups development and deletion capabilities implementation. Timeframe restrictions completed ensuring schedule modifications within appropriate windows. AS400 integration coordination progressing with comprehensive Boomi API planning. UI placement coordination with Amanda enhancing user experience for deletion workflows. Software deletes functionality investigation supporting enhanced user control over submitted requests.
 
 ## Backlinks
-- [[sprints/2026-17]]
+- [[sprints/2026-18]]
 - [[people/evandro-machado]]
 - [[people/luis-suarez]]
 - [[people/amanda-cunha]]

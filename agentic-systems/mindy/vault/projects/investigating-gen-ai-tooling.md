@@ -1,33 +1,31 @@
 # Investigating Gen AI Tooling
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-24*
 
 ## Overview
-Meeting intelligence, AI tooling research, and generative AI platform development for enhanced productivity and automation with breakthrough 4-ticket meeting intelligence platform milestone achievement.
+Meeting intelligence, AI tooling research, agent evaluation frameworks, and generative AI platform development for enhanced productivity, quality assurance automation, and comprehensive evaluation capabilities.
 
 ## Active work
+- PDEV-847: Mindy: per-project vault files + 12-week historical backfill (Armando Lopez) — Ready for QA
 - PDEV-682: [Epic] Cerebro Intelligence Fabric — Platform Overview (Armando Lopez) — In Progress
-- Pipeline testing for interview evaluation with selective audio and video content processing
-- Backend connection debugging and deployment environment optimization
-- Weekly reporting enhancements using APIs and agentic systems with dynamic memory
-- Knowledge graph development in Obsidian with automated posting capabilities
-- Evaluation framework coordination for agents to monitor impact and manage development risks
+- Agent evaluation framework development and QA automation implementation
+- Transcript analysis tools documentation and quality assurance coordination
+- Agent framework harness development with comprehensive evaluation capabilities
 
 ## Recently completed
+- PDEV-873: [Spike] Adversarial research on state-of-the-art agent eval frameworks (Armando Lopez, Sprint 14)
 - PDEV-813: Meeting Intelligence: Auto-post per-meeting summary to venture Slack channel (Armando Lopez, Sprint 13)
 - PDEV-814: Meeting Intelligence: Venture auto-tagging via Fireflies API (Armando Lopez, Sprint 13)
 - PDEV-812: Meeting Intelligence: Venture-scoped post-meeting Q&A via Mindy (Armando Lopez, Sprint 13)
 - PDEV-829: Sensitivity filter for Fireflies meeting transcripts in Mindy reports (Armando Lopez, Sprint 13)
-- Comprehensive meeting intelligence platform milestone with exceptional 4-ticket completion
-- Meeting classification system within Fireflies for enhanced organization
-- Automated documentation system for monorepo merges with Notion integration
+- State-of-the-art agent evaluation frameworks research and comprehensive platform capabilities
 
 ## Contributors
-- Armando — meeting intelligence platform development, AI tooling leadership, breakthrough 4-ticket milestone completion, pipeline testing, backend debugging coordination, weekly reporting automation, evaluation framework development
+- Armando — agent evaluation framework leadership, meeting intelligence platform development, QA automation implementation, transcript analysis tools development, Cerebro Intelligence Fabric platform coordination
 
 ## Notes
-Major breakthrough in Sprint 13 with comprehensive meeting intelligence platform delivery representing exceptional 4-ticket milestone completion. Fireflies API integration enables automated meeting capture, processing, and distribution with venture-scoped organization. Sensitivity filtering protects confidential information while enabling automated content organization. Enhanced weekly reporting capabilities using APIs and agentic systems with dynamic memory and knowledge graph in Obsidian. Pipeline testing advancing for interview evaluation with selective content processing approach. Platform provides foundation for enhanced team productivity through automated meeting intelligence and workflow optimization.
+Major advancement in agent evaluation capabilities with comprehensive research on state-of-the-art frameworks completed. QA automation implementation with Mindy integration enhances testing capabilities and quality assurance processes. Transcript analysis tools documentation advancing with sensitivity filtering and quality coordination. Agent framework harness development supporting comprehensive evaluation and testing workflows. Platform provides foundation for enhanced AI-driven productivity and automated quality assurance systems.
 
 ## Backlinks
-- [[sprints/2026-17]]
+- [[sprints/2026-18]]
 - [[people/armando-lopez]]

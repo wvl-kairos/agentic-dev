@@ -1,38 +1,37 @@
 # Order Visibility
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-24*
 
 ## Overview
-Data pipeline and order management system providing comprehensive order visibility with full-stack implementation, enhanced backend-frontend alignment, and exceptional delivery progress.
+Data pipeline and order management system providing comprehensive order visibility with ISA-95 entity alignment, build complexity integration, and enhanced data quality improvements.
 
 ## Active work
-- PDEV-819: Filter out orders with commit date before an year from now (Evandro Machado) — Ready for QA
 - PDEV-776: Estimate lead times for all parts (Alex Maramaldo) — Ready for Dev
-- Order filtering improvements with commit date validation
-- Data infrastructure alignment coordination between ontology framework and backend specifications
-- Backend-data team alignment for form submission and schema consistency
+- PDEV-698: feat(bronze): implement M2P pipeline — work center assignment per production order (Alex Maramaldo) — Ready for Dev
+- PDEV-699: feat(bronze): investigate and implement PVTP pipeline — historical schedule change source (Alex Maramaldo) — Ready for Dev
+- Silver table refactoring coordination for enhanced schedule change request integration
+- Data infrastructure alignment initiatives and backend-data team coordination
 
 ## Recently completed
-- PDEV-827: Trim .001 from order's Serial Number (Alex Maramaldo, Sprint 13)
+- PDEV-860: feat(silver): add production_jobs ISA-95 entity from SBF (Alex Maramaldo, Sprint 14)
+- PDEV-817: Show build complexity in order data tables (Alex Maramaldo, Sprint 14)
+- PDEV-819: Filter out orders with commit date before an year from now (Evandro Machado, Sprint 14)
 - PDEV-818: Change the order_number(column) to load from Sales table(OHP) (Alex Maramaldo, Sprint 13)
-- PDEV-816: Order List View Terminology Changes (Evandro Machado, Sprint 13)
-- PDEV-364: Orders Table (Evandro Machado, Sprint 13)
-- PDEV-747: Create data pipeline to ingest data from Databricks to Lakebase (Alex Maramaldo, Sprint 13)
-- PDEV-746: Improve database models to fit the domain model for Orders (Evandro Machado, Sprint 13)
-- Comprehensive Orders Table full-stack implementation with exceptional delivery
-- Data pipeline from Databricks to Lakebase integration for enhanced processing
+- PDEV-827: Trim .001 from order's Serial Number (Alex Maramaldo, Sprint 13)
+- ISA-95 entity alignment with production jobs silver table implementation
 
 ## Contributors
-- Evandro — comprehensive full-stack implementation, Orders Table delivery with exceptional productivity, order terminology standardization, database model improvements, order filtering development
-- Alex — data pipeline architecture, order table development, serial number processing, lead time estimation planning, data quality validation
-- Antwoine — coordination and alignment across data and application teams, ontology framework integration
-- Tomas — data model support and analytics integration
+- Alex — ISA-95 entity alignment leadership, production jobs silver table development, build complexity implementation, infrastructure coordination, data mismatch resolution planning
+- Evandro — order filtering improvements, commit date validation, comprehensive backend development support
+- Antwoine — strategic coordination and data infrastructure alignment oversight
+- Sunny — product feedback coordination and user experience optimization
 
 ## Notes
-Exceptional progress with comprehensive Orders Table implementation completed and order filtering development advancing. Data pipeline from Databricks to Lakebase enables enhanced data integration and processing capabilities. Strong backend-frontend alignment coordination through data infrastructure initiatives. Order-related improvements including serial number trimming and terminology standardization support production deployment readiness. Team collaboration excellence on data model alignment ensuring consistent system architecture across applications.
+Significant progress with ISA-95 entity alignment through production jobs silver table implementation. Build complexity display integration enhances order data visibility and operational insights. Order filtering improvements with commit date validation support data quality standards. Silver table refactoring coordination advancing for schedule change request and timeline feature integration. Strong focus on data infrastructure alignment and backend-data team coordination for comprehensive system architecture development.
 
 ## Backlinks
-- [[sprints/2026-17]]
-- [[people/evandro-machado]]
+- [[sprints/2026-18]]
 - [[people/alex-maramaldo]]
+- [[people/evandro-machado]]
 - [[people/antwoine-flowers]]
+- [[people/sunny-chalam]]

@@ -1,21 +1,22 @@
 # Evandro Machado
 
-*Last updated: 2026-04-21*
+*Last updated: 2026-04-24*
 
 ## Role
 Full-Stack Engineer
 
 ## Recent work
-- Sprint 13 Week 17: completed comprehensive full-stack development including Orders Table implementation (PDEV-364), production deployment fixes (PDEV-810), order terminology changes (PDEV-816), multiple SCR approval features, auto-approval timeframe implementation (PDEV-505), email notification systems (PDEV-356, PDEV-357), and comprehensive department approval workflow (PDEV-485, PDEV-627)
-- Current focus: staging environment email fixes with multiple tickets in Ready for QA state (PDEV-821, PDEV-828), order filtering with commit date validation (PDEV-819), SCR modifications timeframe restrictions (PDEV-486)
-- Exceptional productivity delivering 13+ major tickets across multiple project areas including email infrastructure, approval workflows, and database improvements
-- Working on comprehensive frontend and backend development with authentication flows and layout structure
+- Sprint 14 Week 18: completed SCR modifications timeframe restrictions (PDEV-486), staging environment email fixes (PDEV-821, PDEV-828), order filtering improvements (PDEV-819), working on Penske and Ryder approval groups creation (PDEV-822), silver-aligned PostgreSQL tables development (PDEV-862)
+- Current focus: software deletes functionality investigation, database refactor coordination, schedule change request deletion UI development, branch protection enforcement for security improvements
+- Exceptional productivity across multiple project areas with comprehensive feature delivery
+- Working on UI placement coordination with Amanda for schedule change request deletion icons
+- Advancing comprehensive frontend and backend development with authentication flows
 
 ## Patterns
-Demonstrates exceptional productivity with comprehensive feature delivery across multiple project areas. Expert in full-stack development with strong capabilities in SCR workflow implementation, email notification systems, and authentication flows. Successfully integrated into team workflows with rapid contribution to critical features. Leading frontend layout development and authentication system integration. Strong focus on staging environment stability and production deployment readiness. Consistent delivery across SCR, order visibility, and infrastructure improvements with outstanding velocity.
+Demonstrates exceptional productivity with comprehensive feature delivery across multiple project areas including SCR workflows, infrastructure improvements, and database architecture alignment. Expert in full-stack development with strong capabilities in email notification systems, staging environment stability, and production deployment support. Shows consistent delivery across order visibility, application infrastructure, and schedule change request improvements with outstanding velocity. Leading silver table alignment and database refactoring efforts for enhanced system architecture.
 
 ## Backlinks
-- [[sprints/2026-17]]
-- [[projects/order-visibility]]
-- [[projects/application-infrastructure]]
+- [[sprints/2026-18]]
 - [[projects/schedule-change-request]]
+- [[projects/application-infrastructure]]
+- [[projects/order-visibility]]
