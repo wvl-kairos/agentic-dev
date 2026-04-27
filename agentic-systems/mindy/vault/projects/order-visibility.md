@@ -1,6 +1,6 @@
 # Order Visibility
 
-*Last updated: 2026-04-24*
+*Last updated: 2026-04-30*
 
 ## Overview
 Data pipeline and order management system providing comprehensive order visibility with ISA-95 entity alignment, build complexity integration, and enhanced data quality improvements.
@@ -13,12 +13,12 @@ Data pipeline and order management system providing comprehensive order visibili
 - Data infrastructure alignment initiatives and backend-data team coordination
 
 ## Recently completed
-- PDEV-860: feat(silver): add production_jobs ISA-95 entity from SBF (Alex Maramaldo, Sprint 14)
-- PDEV-817: Show build complexity in order data tables (Alex Maramaldo, Sprint 14)
-- PDEV-819: Filter out orders with commit date before an year from now (Evandro Machado, Sprint 14)
-- PDEV-818: Change the order_number(column) to load from Sales table(OHP) (Alex Maramaldo, Sprint 13)
-- PDEV-827: Trim .001 from order's Serial Number (Alex Maramaldo, Sprint 13)
+- PDEV-817: Show build complexity in order data tables (Alex Maramaldo, Sprint 15)
+- PDEV-860: feat(silver): add production_jobs ISA-95 entity from SBF (Alex Maramaldo, Sprint 15)
+- PDEV-819: Filter out orders with commit date before an year from now (Evandro Machado, Sprint 15)
+- PDEV-827: Trim .001 from order's Serial Number (Alex Maramaldo, Sprint 15)
 - ISA-95 entity alignment with production jobs silver table implementation
+- Build complexity display integration and order filtering improvements
 
 ## Contributors
 - Alex — ISA-95 entity alignment leadership, production jobs silver table development, build complexity implementation, infrastructure coordination, data mismatch resolution planning
@@ -27,10 +27,10 @@ Data pipeline and order management system providing comprehensive order visibili
 - Sunny — product feedback coordination and user experience optimization
 
 ## Notes
-Significant progress with ISA-95 entity alignment through production jobs silver table implementation. Build complexity display integration enhances order data visibility and operational insights. Order filtering improvements with commit date validation support data quality standards. Silver table refactoring coordination advancing for schedule change request and timeline feature integration. Strong focus on data infrastructure alignment and backend-data team coordination for comprehensive system architecture development.
+Significant progress with ISA-95 entity alignment through production jobs silver table implementation and build complexity display integration. Order filtering improvements with commit date validation support data quality standards. Silver table refactoring coordination advancing for schedule change request and timeline feature integration. Strong focus on data infrastructure alignment and backend-data team coordination for comprehensive system architecture development.
 
 ## Backlinks
-- [[sprints/2026-18]]
+- [[sprints/2026-28]]
 - [[people/alex-maramaldo]]
 - [[people/evandro-machado]]
 - [[people/antwoine-flowers]]
